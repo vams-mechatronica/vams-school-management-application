@@ -14,16 +14,16 @@ class Student(models.Model):
     current_status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="active"
     )
-    registration_number = models.CharField(max_length=200, unique=True)
+    registration_number = models.CharField(max_length=200, unique=True,default=f"Vedika/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}")
     surname = models.CharField(max_length=200)
     firstname = models.CharField(max_length=200)
     other_name = models.CharField(max_length=200, blank=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default="male")
     date_of_birth = models.DateField(default=timezone.now)
+    date_of_admission = models.DateField(default=timezone.now)
     current_class = models.ForeignKey(
         StudentClass, on_delete=models.SET_NULL, blank=True, null=True
     )
-    date_of_admission = models.DateField(default=timezone.now)
 
     mobile_num_regex = RegexValidator(
         regex="^[0-9]{10,15}$", message="Entered mobile number isn't in a right format!"
@@ -34,7 +34,7 @@ class Student(models.Model):
 
     address = models.TextField(blank=True)
     others = models.TextField(blank=True)
-    passport = models.ImageField(blank=True, upload_to="students/passports/")
+    adharcard = models.ImageField(blank=True, upload_to="students/adharcard/")
 
     class Meta:
         ordering = ["surname", "firstname", "other_name"]
