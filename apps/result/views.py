@@ -2,14 +2,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, render
+from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView, View
 
 from apps.students.models import Student
 
 from .forms import CreateResults, EditResults
 from .models import Result
+from .utils import has_permission
 
-
+@has_permission('result.result.can_add_result')
 @login_required
 def create_result(request):
     students = Student.objects.all()
@@ -68,7 +70,7 @@ def create_result(request):
             messages.warning(request, "You didnt select any student.")
     return render(request, "result/create_result.html", {"students": students})
 
-
+@has_permission('result.result.can_update_result')
 @login_required
 def edit_results(request):
     if request.method == "POST":
@@ -89,6 +91,7 @@ from .models import Result, AcademicTerm
 
 class ResultListView(LoginRequiredMixin, View):
 
+    # @method_decorator(has_permission('result.result.can_view_result'),name='dispatch')
     def get(self, request, *args, **kwargs):
         session = request.current_session
         selected_term = request.GET.get("term")
