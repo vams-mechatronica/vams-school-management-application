@@ -24,6 +24,11 @@ class AcademicSession(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if self.current:
+            AcademicSession.objects.filter(current=True).update(current=False)
+        super().save(*args, **kwargs)
 
 
 class AcademicTerm(models.Model):
@@ -37,6 +42,13 @@ class AcademicTerm(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if self.current:
+            AcademicTerm.objects.filter(current=True).update(current=False)
+        super().save(*args, **kwargs)
+    
+
 
 
 class Subject(models.Model):

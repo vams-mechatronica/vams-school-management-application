@@ -44,6 +44,7 @@ Add new invoice
         <div class="col"><strong>Fee Type</strong></div>
         <div class="col"><strong>Amount</strong></div>
       </div>
+      <div id="items-group">
       {% for item in items %}
       <div class="form-group row items-group">
         {{ item.id}}
@@ -51,6 +52,7 @@ Add new invoice
         <div class="col">{{ item.amount | add_class:"form-control"}}</div>
       </div>
       {% endfor %}
+      </div>
     </div>
   </div>
 
@@ -97,12 +99,66 @@ Add new invoice
 
 {% block morejs %}
 <script>
-  $(".items-group").formset(
-    {
-      prefix: '{{ items.prefix }}',
-      deleteText: "<div class='btn btn-danger btn-circle'><i class='fas fa-trash'></i></div>",
-      addText: "<div class='btn btn-success btn-circle'><i class='fas fa-plus'></i></div>"
-    }
-  )
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const studentSelect = document.getElementById('id_student');
+
+    studentSelect.addEventListener('change', function () {
+        const studentId = this.value;
+
+        if (studentId) {
+            fetch(`api/get-student-data/?student_id=${studentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error(data.error);
+                    } else {
+                        // Update form fields with student data
+                        document.getElementById('id_class_for').value = data.class_for || '';
+                        document.getElementById('id_previous_balance').value = data.balance_from_previous_term || '';
+
+                        // Clear existing invoice items
+                        const itemsContainer = document.getElementById('items-group');
+                        itemsContainer.innerHTML = '';
+
+                        // Add new invoice items
+                        data.items.forEach((item, index) => {
+                            const itemHtml = `
+                                <div class="form-group row items-group dynamic-form">
+                                    <input type="hidden" name="invoiceitem_set-${index}-id" id="id_invoiceitem_set-${index}-id">
+                                    <div class="col">
+                                        <input type="text" name="invoiceitem_set-${index}-description" maxlength="255" class="form-control" id="id_invoiceitem_set-${index}-description" value="${item.description}" readonly>
+                                    </div>
+                                    <div class="col">
+                                        <input type="number" name="invoiceitem_set-${index}-amount" step="0.01" class="form-control" id="id_invoiceitem_set-${index}-amount" value="${item.amount}">
+                                    </div>
+                                </div>
+                            `;
+                            itemsContainer.innerHTML += itemHtml;
+                        });
+
+                        // Update the management form total forms count
+                        document.getElementById('id_invoiceitem_set-TOTAL_FORMS').value = data.items.length;
+
+                        // Re-initialize formset to bind the delete/add functionality to new elements
+                        initializeFormset();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+
+    // Initialize formset on page load
+    initializeFormset();
+});
+
+function initializeFormset() {
+    $(".items-group").formset({
+        prefix: '{{ items.prefix }}',
+        deleteText: "<div class='btn btn-danger btn-circle'><i class='fas fa-trash'></i></div>",
+        addText: "<div class='btn btn-success btn-circle'><i class='fas fa-plus'></i></div>"
+    });
+}
+
 </script>
 {% endblock morejs %}

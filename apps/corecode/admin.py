@@ -5,3 +5,14 @@ from .models import *
 class SiteConfigAdmin(admin.ModelAdmin):
     pass
     
+@admin.register(AcademicTerm)
+class AcademicTermAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(AcademicSession)
+class AcademicSessionAdmin(admin.ModelAdmin):
+    pass
+    
+
+    
+

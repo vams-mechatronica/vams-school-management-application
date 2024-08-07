@@ -98,7 +98,7 @@
         <tbody>
           {% for payment in payments %}
             <tr class='clickable-row' data-href="{% url 'invoice-detail' payment.id %}">
-              <td>{{payment.session}} - {{payment.term}} - {{ payment.class_for}}</td>
+              <td>{{payment.session}} - {{payment.term}}/{{payment.month}} - {{ payment.class_for}}</td>
               <td>{{payment.total_amount_payable}}</td>
               <td>{{payment.total_amount_paid}}</td>
               <td>{{payment.balance}}</td>

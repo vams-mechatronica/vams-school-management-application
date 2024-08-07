@@ -9,6 +9,7 @@ from .views import (
     ReceiptCreateView,
     ReceiptUpdateView,
     bulk_invoice,
+    get_student_data
 )
 
 urlpatterns = [
@@ -22,4 +23,5 @@ urlpatterns = [
         "receipt/<int:pk>/update/", ReceiptUpdateView.as_view(), name="receipt-update"
     ),
     path("bulk-invoice/", bulk_invoice, name="bulk-invoice"),
+    path('create/api/get-student-data/', get_student_data, name='get-student-data'),
 ]
