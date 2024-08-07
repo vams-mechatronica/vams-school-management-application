@@ -48,7 +48,7 @@ class StudentClassForm(ModelForm):
 
     class Meta:
         model = StudentClass
-        fields = ["name"]
+        fields = '__all__'
 
 
 class CurrentSessionForm(forms.Form):

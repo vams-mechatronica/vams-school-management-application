@@ -184,7 +184,7 @@ class ClassCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
 class ClassUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = StudentClass
-    fields = ["name"]
+    fields = '__all__'
     success_url = reverse_lazy("classes")
     success_message = "class successfully updated."
     template_name = "corecode/mgt_form.html"

@@ -53,6 +53,11 @@ class Subject(models.Model):
 
 class StudentClass(models.Model):
     name = models.CharField(max_length=200, unique=True)
+    tuition_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    computer_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    admission_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    exam_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    miscellaneous = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
 
     class Meta:
         verbose_name = "Class"
