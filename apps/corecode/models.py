@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
 
@@ -55,6 +55,8 @@ class Subject(models.Model):
     """Subject"""
 
     name = models.CharField(max_length=200, unique=True)
+    test_max_marks = models.IntegerField(_("Test Maximum Marks"),default=50)
+    exam_max_marks = models.IntegerField(_("Exam Maximum Marks"),default=100)
 
     class Meta:
         ordering = ["name"]

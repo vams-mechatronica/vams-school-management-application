@@ -86,6 +86,34 @@ def edit_results(request):
 
 
 class ResultListView(LoginRequiredMixin, View):
+    def calc_grade(self, ts_max, es_max, ts_ob, es_ob ):
+        t_max = ts_max + es_max
+        t_ob = ts_ob + es_ob
+        perc = (float(t_ob) / float(t_max)) * 100
+        if perc == 100:
+            grade = 'A+'
+        elif perc <100 and perc >= 90:
+            grade = 'A'
+        elif perc < 90 and perc >= 80:
+            grade = 'B+'
+        elif perc < 80 and perc >= 70:
+            grade = 'B'
+        
+        elif perc < 70 and perc >= 60:
+            grade = 'C+'
+        
+        elif perc < 60 and perc >= 50:
+            grade = 'C'
+        
+        elif perc < 50 and perc >= 40:
+            grade = 'D+'
+        elif perc < 40 and perc >= 33:
+            grade = 'D'
+        else:
+            grade = 'F'
+        return grade
+
+
     def get(self, request, *args, **kwargs):
         results = Result.objects.filter(
             session=request.current_session, term=request.current_term
@@ -95,12 +123,14 @@ class ResultListView(LoginRequiredMixin, View):
         for result in results:
             test_total = 0
             exam_total = 0
+            grade = ""
             subjects = []
             for subject in results:
                 if subject.student == result.student:
                     subjects.append(subject)
                     test_total += subject.test_score
                     exam_total += subject.exam_score
+                    grade = self.calc_grade(result.subject.test_max_marks,result.subject.exam_max_marks, subject.test_score, subject.exam_score)
 
             bulk[result.student.id] = {
                 "student": result.student,

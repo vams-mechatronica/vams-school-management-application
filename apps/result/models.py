@@ -32,3 +32,30 @@ class Result(models.Model):
 
     def grade(self):
         return score_grade(self.total_score())
+    
+    def calc_grade(self):
+        t_max = self.subject.test_max_marks + self.subject.exam_max_marks
+        t_ob = self.total_score()
+        perc = (float(t_ob) / float(t_max)) * 100
+        if perc == 100:
+            grade = 'A+'
+        elif perc <100 and perc >= 90:
+            grade = 'A'
+        elif perc < 90 and perc >= 80:
+            grade = 'B+'
+        elif perc < 80 and perc >= 70:
+            grade = 'B'
+        
+        elif perc < 70 and perc >= 60:
+            grade = 'C+'
+        
+        elif perc < 60 and perc >= 50:
+            grade = 'C'
+        
+        elif perc < 50 and perc >= 40:
+            grade = 'D+'
+        elif perc < 40 and perc >= 33:
+            grade = 'D'
+        else:
+            grade = 'F'
+        return grade

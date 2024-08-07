@@ -12,6 +12,12 @@ class AcademicTermAdmin(admin.ModelAdmin):
 @admin.register(AcademicSession)
 class AcademicSessionAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    pass
+    
+
     
 
     
