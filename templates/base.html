@@ -22,6 +22,28 @@
   <link
     href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700"
     rel="stylesheet">
+  <style>
+        /* General styles */
+        .print-area {
+            padding: 20px;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 1in 0.5in 0.5in 0.5in; /* top, right, bottom, left margins */
+            }
+
+            body {
+                margin: 1in 0.5in 0.5in 0.5in; /* Adjust body margin to match the @page margin */
+            }
+
+            .print-area {
+                /* Additional styling if needed */
+            }
+        }
+    </style>
 </head>
 
 <body
@@ -230,7 +252,7 @@
                 {% block content-header %}{% endblock content-header %}
                 <div class="card-body">
                   <div class="row">
-                    <div class="col">
+                    <div class="col print-area">
                       {% block content %}
 
                       {% endblock content %}
@@ -301,6 +323,20 @@
     })(jQuery)
 
   </script>
+  
+<script>
+function printarea() {
+    var printContents = document.querySelector('.print-area').innerHTML;
+    var originalContents = document.body.innerHTML;
+
+    //document.body.innerHTML = printContents;
+
+    window.print();
+
+    //document.body.innerHTML = originalContents;
+}
+</script>
+
 
   {% block morejs %}
 

@@ -4,7 +4,7 @@
 {% block content-header %}
 <div class="card-header">
   <div class="card-tools">
-    <a href="#" class="btn btn-tool">Print</a>
+    <a href="#" role="button" class="btn btn-tool" onclick="printarea();">Print</a>
     <a href="{% url 'invoice-update' object.id %}" class="btn btn-tool">
       <i class="fas fa-edit"></i>
     </a>
@@ -19,7 +19,7 @@
 
 {% block content %}
 
-<div class="row">
+<div class="row printable-area">
   <div class="col-sm-4">
     <h3>{{ object }} </h3>
     <h5>{{ object.session }} </h5>
@@ -34,7 +34,7 @@
   </div>
   <div class="col-sm-8">
     <table class="table table-sm table-bordered">
-      Invoice Breakdown</br>
+      <div style="text-align:center;">Invoice Breakdown</div></br>
       <thead class="thead-light">
         <tr>
           <th>S/N</th>
@@ -104,3 +104,5 @@
 
 
 {% endblock content %}
+
+
