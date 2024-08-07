@@ -9,9 +9,9 @@ from apps.students.models import Student
 
 from .forms import CreateResults, EditResults
 from .models import Result
-from .utils import has_permission
+from .utils import has_permission,PermissionRequiredMessageMixin
 
-@has_permission('result.result.can_add_result')
+@has_permission('result.result.add_result')
 @login_required
 def create_result(request):
     students = Student.objects.all()
@@ -70,7 +70,7 @@ def create_result(request):
             messages.warning(request, "You didnt select any student.")
     return render(request, "result/create_result.html", {"students": students})
 
-@has_permission('result.result.can_update_result')
+@has_permission('result.result.update_result')
 @login_required
 def edit_results(request):
     if request.method == "POST":
@@ -89,9 +89,10 @@ def edit_results(request):
 
 from .models import Result, AcademicTerm
 
-class ResultListView(LoginRequiredMixin, View):
+class ResultListView(LoginRequiredMixin,PermissionRequiredMessageMixin, View):
+    permission_required = 'result.view_result'
 
-    # @method_decorator(has_permission('result.result.can_view_result'),name='dispatch')
+    
     def get(self, request, *args, **kwargs):
         session = request.current_session
         selected_term = request.GET.get("term")

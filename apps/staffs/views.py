@@ -4,22 +4,25 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-
+from apps.result.utils import PermissionRequiredMessageMixin
 from .models import Staff
 
 
-class StaffListView(ListView):
+class StaffListView(ListView,PermissionRequiredMessageMixin):
     model = Staff
+    permission_required = 'staffs.view_staff'
 
 
-class StaffDetailView(DetailView):
+class StaffDetailView(DetailView,PermissionRequiredMessageMixin):
     model = Staff
+    permission_required = 'staffs.view_staff'
     template_name = "staffs/staff_detail.html"
 
 
-class StaffCreateView(SuccessMessageMixin, CreateView):
+class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin,CreateView):
     model = Staff
     fields = "__all__"
+    permission_required = "staffs.create_staff"
     success_message = "New staff successfully added"
 
     def get_form(self):
@@ -34,9 +37,10 @@ class StaffCreateView(SuccessMessageMixin, CreateView):
         return form
 
 
-class StaffUpdateView(SuccessMessageMixin, UpdateView):
+class StaffUpdateView(SuccessMessageMixin,PermissionRequiredMessageMixin, UpdateView):
     model = Staff
     fields = "__all__"
+    permission_required = "staffs.update_staff"
     success_message = "Record successfully updated."
 
     def get_form(self):
@@ -51,6 +55,7 @@ class StaffUpdateView(SuccessMessageMixin, UpdateView):
         return form
 
 
-class StaffDeleteView(DeleteView):
+class StaffDeleteView(PermissionRequiredMessageMixin,DeleteView):
     model = Staff
+    permission_required = "staffs.delete_staff"
     success_url = reverse_lazy("staff-list")

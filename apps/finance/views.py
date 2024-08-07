@@ -17,13 +17,16 @@ from apps.corecode.models import StudentClass
 from apps.students.models import Student
 from .forms import InvoiceItemFormset, InvoiceReceiptFormSet, Invoices
 from .models import Invoice, InvoiceItem, Receipt
+from apps.result.utils import PermissionRequiredMessageMixin, has_permission
 
-class InvoiceListView(LoginRequiredMixin, ListView):
+class InvoiceListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
     model = Invoice
+    permission_required = "finance.view_invoice"
 
-class InvoiceCreateView(LoginRequiredMixin, CreateView):
+class InvoiceCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, CreateView):
     model = Invoice
     fields = "__all__"
+    permission_required = "finance.add_invoice"
     success_url = "/finance/list"
 
     def get_context_data(self, **kwargs):
@@ -46,6 +49,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                 formset.save()
         return super().form_valid(form)
 
+@has_permission('finance.add_invoice')
 @login_required
 def generate_monthly_invoices(request):
     current_month = timezone.now().month
@@ -61,8 +65,9 @@ def generate_monthly_invoices(request):
             invoice.add_monthly_tuition_fee()
     return redirect('invoice-list')
 
-class InvoiceDetailView(LoginRequiredMixin, DetailView):
+class InvoiceDetailView(LoginRequiredMixin, PermissionRequiredMessageMixin,DetailView):
     model = Invoice
+    permission_required = "finance.view_invoice"
     fields = "__all__"
 
     def get_context_data(self, **kwargs):
@@ -72,8 +77,9 @@ class InvoiceDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
+class InvoiceUpdateView(LoginRequiredMixin,PermissionRequiredMessageMixin, UpdateView):
     model = Invoice
+    permission_required = "finance.update_invoice"
     fields = ["student", "session", "term","month", "class_for", "previous_balance"]
 
     def get_context_data(self, **kwargs):
@@ -101,13 +107,15 @@ class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
+class InvoiceDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
     model = Invoice
+    permission_required = "finance.delete_invoice"
     success_url = reverse_lazy("invoice-list")
 
 
-class ReceiptCreateView(LoginRequiredMixin, CreateView):
+class ReceiptCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, CreateView):
     model = Receipt
+    permission_required = "finance.add_receipt"
     fields = ["amount_paid", "date_paid", "comment"]
     success_url = reverse_lazy("invoice-list")
     def get_form(self):
@@ -130,14 +138,16 @@ class ReceiptCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class ReceiptUpdateView(LoginRequiredMixin, UpdateView):
+class ReceiptUpdateView(LoginRequiredMixin,PermissionRequiredMessageMixin,UpdateView):
     model = Receipt
+    permission_required = "finance.update_receipt"
     fields = ["amount_paid", "date_paid", "comment"]
     success_url = reverse_lazy("invoice-list")
 
 
-class ReceiptDeleteView(LoginRequiredMixin, DeleteView):
+class ReceiptDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
     model = Receipt
+    permission_required = "finance.delete_receipt"
     success_url = reverse_lazy("invoice-list")
 
 
@@ -146,7 +156,7 @@ def bulk_invoice(request):
     return render(request, "finance/bulk_invoice.html")
 
 
-
+@has_permission('finance.add_invoice')
 @require_GET
 def get_student_data(request):
     student_id = request.GET.get('student_id')
