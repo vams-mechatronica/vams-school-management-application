@@ -6,7 +6,7 @@ from django.shortcuts import HttpResponseRedirect, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-
+from apps.result.utils import PermissionRequiredMessageMixin
 from .forms import (
     AcademicSessionForm,
     AcademicTermForm,
@@ -28,10 +28,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "index.html"
 
 
-class SiteConfigView(LoginRequiredMixin, View):
+class SiteConfigView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
     """Site Config View"""
 
     form_class = SiteConfigForm
+    permission_required = "corecode.add_siteconfig"
     template_name = "corecode/siteconfig.html"
 
     def get(self, request, *args, **kwargs):
@@ -51,8 +52,9 @@ class SiteConfigView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
-class SessionListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
+class SessionListView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, ListView):
     model = AcademicSession
+    permission_required = "corecode.view_academicsession"
     template_name = "corecode/session_list.html"
 
     def get_context_data(self, **kwargs):
@@ -61,9 +63,10 @@ class SessionListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
         return context
 
 
-class SessionCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class SessionCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = AcademicSession
     form_class = AcademicSessionForm
+    permission_required = "corecode.add_academicsession"
     template_name = "corecode/mgt_form.html"
     success_url = reverse_lazy("sessions")
     success_message = "New session successfully added"
@@ -74,9 +77,10 @@ class SessionCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
 
-class SessionUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class SessionUpdateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, UpdateView):
     model = AcademicSession
     form_class = AcademicSessionForm
+    permission_required = "corecode.update_academicsession"
     success_url = reverse_lazy("sessions")
     success_message = "Session successfully updated."
     template_name = "corecode/mgt_form.html"
@@ -95,8 +99,9 @@ class SessionUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return super().form_valid(form)
 
 
-class SessionDeleteView(LoginRequiredMixin, DeleteView):
+class SessionDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
     model = AcademicSession
+    permission_required ="corecode.delete_academicsession"
     success_url = reverse_lazy("sessions")
     template_name = "corecode/core_confirm_delete.html"
     success_message = "The session {} has been deleted with all its attached content"
@@ -110,8 +115,9 @@ class SessionDeleteView(LoginRequiredMixin, DeleteView):
         return super(SessionDeleteView, self).delete(request, *args, **kwargs)
 
 
-class TermListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
+class TermListView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, ListView):
     model = AcademicTerm
+    permission_required = "corecode.view_academicterm"
     template_name = "corecode/term_list.html"
 
     def get_context_data(self, **kwargs):
@@ -120,17 +126,19 @@ class TermListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
         return context
 
 
-class TermCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class TermCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = AcademicTerm
     form_class = AcademicTermForm
+    permission_required = "corecode.add_academicterm"
     template_name = "corecode/mgt_form.html"
     success_url = reverse_lazy("terms")
     success_message = "New term successfully added"
 
 
-class TermUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class TermUpdateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, UpdateView):
     model = AcademicTerm
     form_class = AcademicTermForm
+    permission_required = "corecode.update_academicterm"
     success_url = reverse_lazy("terms")
     success_message = "Term successfully updated."
     template_name = "corecode/mgt_form.html"
@@ -149,8 +157,9 @@ class TermUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return super().form_valid(form)
 
 
-class TermDeleteView(LoginRequiredMixin, DeleteView):
+class TermDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
     model = AcademicTerm
+    permission_required = "corecode.delete_academicterm"
     success_url = reverse_lazy("terms")
     template_name = "corecode/core_confirm_delete.html"
     success_message = "The term {} has been deleted with all its attached content"
@@ -164,8 +173,9 @@ class TermDeleteView(LoginRequiredMixin, DeleteView):
         return super(TermDeleteView, self).delete(request, *args, **kwargs)
 
 
-class ClassListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
+class ClassListView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, ListView):
     model = StudentClass
+    permission_required = "corecode.view_studentclass"
     template_name = "corecode/class_list.html"
 
     def get_context_data(self, **kwargs):
@@ -174,24 +184,27 @@ class ClassListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
         return context
 
 
-class ClassCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class ClassCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = StudentClass
     form_class = StudentClassForm
+    permission_required = "corecode.add_studentclass"
     template_name = "corecode/mgt_form.html"
     success_url = reverse_lazy("classes")
     success_message = "New class successfully added"
 
 
-class ClassUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class ClassUpdateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, UpdateView):
     model = StudentClass
     fields = '__all__'
+    permission_required = "corecode.update_studentclass"
     success_url = reverse_lazy("classes")
     success_message = "class successfully updated."
     template_name = "corecode/mgt_form.html"
 
 
-class ClassDeleteView(LoginRequiredMixin, DeleteView):
+class ClassDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
     model = StudentClass
+    permission_required = "corecode.delete_studentclass"
     success_url = reverse_lazy("classes")
     template_name = "corecode/core_confirm_delete.html"
     success_message = "The class {} has been deleted with all its attached content"
@@ -203,8 +216,9 @@ class ClassDeleteView(LoginRequiredMixin, DeleteView):
         return super(ClassDeleteView, self).delete(request, *args, **kwargs)
 
 
-class SubjectListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
+class SubjectListView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, ListView):
     model = Subject
+    permission_required = "corecode.view_subject"
     template_name = "corecode/subject_list.html"
 
     def get_context_data(self, **kwargs):
@@ -213,24 +227,30 @@ class SubjectListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
         return context
 
 
-class SubjectCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class SubjectCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = Subject
     form_class = SubjectForm
+    permission_required = "corecode.add_subject"
+
     template_name = "corecode/mgt_form.html"
     success_url = reverse_lazy("subjects")
     success_message = "New subject successfully added"
 
 
-class SubjectUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class SubjectUpdateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, UpdateView):
     model = Subject
     fields = '__all__'
+    permission_required = "corecode.update_subject"
+
     success_url = reverse_lazy("subjects")
     success_message = "Subject successfully updated."
     template_name = "corecode/mgt_form.html"
 
 
-class SubjectDeleteView(LoginRequiredMixin, DeleteView):
+class SubjectDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
     model = Subject
+    permission_required = "corecode.delete_subject"
+
     success_url = reverse_lazy("subjects")
     template_name = "corecode/core_confirm_delete.html"
     success_message = "The subject {} has been deleted with all its attached content"

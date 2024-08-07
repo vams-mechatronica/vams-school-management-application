@@ -5,12 +5,16 @@
 <div class="card-header">
   <div class="card-tools">
     <a href="#" class="btn btn-tool">Print</a>
+    {% if request.user.is_staff %}
     <a href="{% url 'student-update' object.id %}" class="btn btn-tool">
       <i class="fas fa-edit"></i>
     </a>
+    {% endif %}
+    {% comment %} {% if request.user.is_superuser %} {% endcomment %}
     <a href="{% url 'student-delete' object.id %}" class="btn btn-tool">
       <i class="fas fa-times"></i>
     </a>
+    {% comment %} {% endif %} {% endcomment %}
   </div>
 </div>
 {% endblock content-header %}

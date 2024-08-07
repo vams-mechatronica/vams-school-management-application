@@ -69,10 +69,10 @@ class StudentUpdateView(LoginRequiredMixin, SuccessMessageMixin,PermissionRequir
         return form
 
 
-class StudentDeleteView(LoginRequiredMixin, DeleteView,PermissionRequiredMessageMixin):
+class StudentDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
+    permission_required = 'students.delete_student' 
     model = Student
     success_url = reverse_lazy("student-list")
-    permission_required = 'students.delete_student' 
 
 
 
