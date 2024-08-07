@@ -3,10 +3,12 @@
 {% block title %}Students{% endblock title %}
 
 {% block breadcrumb %}
+{% if request.user.is_staff %}
 <a class="btn btn-primary" href="{% url 'student-create' %}"><i
     class="fas fa-plus"></i> New student</a>
 <a class="btn btn-primary" href="{% url 'student-upload' %}"><i
     class="fas fa-upload"></i> Upload students</a>
+{% endif %}
 {% endblock breadcrumb %}
 
 {% block content %}

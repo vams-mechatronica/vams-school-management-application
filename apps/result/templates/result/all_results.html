@@ -1,52 +1,83 @@
 {% extends 'base.html' %}
 
 {% block fullcard %}
+<div class="container">
+  <!-- Term Selection Form -->
+  <form method="GET" action="{% url 'view-results' %}">
+    <div class="form-group">
+      <label for="term-select">Select Term:</label>
+      <select id="term-select" name="term" class="form-control">
+        <option value="">All Terms</option>
+        {% for term in terms %}
+          <option value="{{ term.id }}" {% if term.id|stringformat:"s" == selected_term|stringformat:"s" %}selected{% endif %}>
+            {{ term.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <button type="button" class="btn btn-secondary" onclick="printResult();">Print</button>
+  </form>
 
-  {% for key, result in results.items %}
-    <div class="card">
+  {% for student_id, student_data in results.items %}
+    <div class="card mt-4">
       <div class="card-header">
-        {{result.student}}
+        {{ student_data.student }}
       </div>
-      <div class="card-body">
-        <table class="table table-bordered table-sm">
-          <thead class="thead-light">
-            <tr>
-              <th></th>
-              <th>Subject</th>
-              <th>Test Score</th>
-              <th>Exam Score</th>
-              <th>Total Score</th>
-              <th>Grade</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for subject in result.subjects %}
+      <div class="card-body printable-area">
+        {% for term_id, term_data in student_data.terms.items %}
+          <h5 style="margin: 21px; text-align: center;">{{ term_data.term.name }}</h5>
+          <table class="table table-bordered table-sm">
+            <thead class="thead-light">
               <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ subject.subject }}</td>
-                <td>{{ subject.test_score }}</td>
-                <td>{{ subject.exam_score }}</td>
-                <td>{{ subject.total_score }}</td>
-                <td>{{ subject.calc_grade }}</td>
+                <th>#</th>
+                <th>Subject</th>
+                <th>Test Score</th>
+                <th>Exam Score</th>
+                <th>Total Score</th>
+                <th>Grade</th>
               </tr>
-            {% endfor %}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2"></td>
-              <td>{{ result.test_total }}</td>
-              <td>{{ result.exam_total }}</td>
-              <td>{{ result.total_total }}</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-
-
-
-
+            </thead>
+            <tbody>
+              {% for subject in term_data.subjects %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ subject.subject }}</td>
+                  <td>{{ subject.test_score }}</td>
+                  <td>{{ subject.exam_score }}</td>
+                  <td>{{ subject.test_score|add:subject.exam_score }}</td>
+                  <td>{{ subject.calc_grade }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>Totals</strong></td>
+                <td>{{ term_data.test_total }}</td>
+                <td>{{ term_data.exam_total }}</td>
+                <td>{{ term_data.total_total }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        {% endfor %}
       </div>
     </div>
   {% endfor %}
-
+</div>
 {% endblock fullcard %}
+{% block morejs %}
+<script>
+function printResult() {
+    var printContents = document.querySelector('.printable-area').innerHTML;
+    var originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+}
+</script>
+
+{% endblock morejs %}

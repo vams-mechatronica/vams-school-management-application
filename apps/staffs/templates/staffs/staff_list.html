@@ -3,8 +3,10 @@
 {% block title %}staffs{% endblock title %}
 
 {% block breadcrumb %}
+{% if request.user.is_staff %}
 <a class="btn btn-primary" href="{% url 'staff-create' %}"><i
     class="fas fa-plus"></i> New staff</a>
+{% endif %}
 {% endblock breadcrumb %}
 
 {% block content %}

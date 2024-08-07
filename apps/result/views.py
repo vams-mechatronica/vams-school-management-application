@@ -85,60 +85,45 @@ def edit_results(request):
     return render(request, "result/edit_results.html", {"formset": form})
 
 
-class ResultListView(LoginRequiredMixin, View):
-    def calc_grade(self, ts_max, es_max, ts_ob, es_ob ):
-        t_max = ts_max + es_max
-        t_ob = ts_ob + es_ob
-        perc = (float(t_ob) / float(t_max)) * 100
-        if perc == 100:
-            grade = 'A+'
-        elif perc <100 and perc >= 90:
-            grade = 'A'
-        elif perc < 90 and perc >= 80:
-            grade = 'B+'
-        elif perc < 80 and perc >= 70:
-            grade = 'B'
-        
-        elif perc < 70 and perc >= 60:
-            grade = 'C+'
-        
-        elif perc < 60 and perc >= 50:
-            grade = 'C'
-        
-        elif perc < 50 and perc >= 40:
-            grade = 'D+'
-        elif perc < 40 and perc >= 33:
-            grade = 'D'
-        else:
-            grade = 'F'
-        return grade
+from .models import Result, AcademicTerm
 
+class ResultListView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
-        results = Result.objects.filter(
-            session=request.current_session, term=request.current_term
-        )
+        session = request.current_session
+        selected_term = request.GET.get("term")
+
+        # Filter results based on the selected term, or get results for all terms if no term is selected
+        if selected_term:
+            results = Result.objects.filter(session=session, term=selected_term)
+        else:
+            results = Result.objects.filter(session=session)
+
+        # Organize results by student and term
         bulk = {}
-
         for result in results:
-            test_total = 0
-            exam_total = 0
-            grade = ""
-            subjects = []
-            for subject in results:
-                if subject.student == result.student:
-                    subjects.append(subject)
-                    test_total += subject.test_score
-                    exam_total += subject.exam_score
-                    grade = self.calc_grade(result.subject.test_max_marks,result.subject.exam_max_marks, subject.test_score, subject.exam_score)
+            student_id = result.student.id
+            if student_id not in bulk:
+                bulk[student_id] = {"student": result.student, "terms": {}}
+            
+            if result.term.id not in bulk[student_id]["terms"]:
+                bulk[student_id]["terms"][result.term.id] = {
+                    "term": result.term,
+                    "subjects": [],
+                    "test_total": 0,
+                    "exam_total": 0,
+                    "total_total": 0,
+                }
 
-            bulk[result.student.id] = {
-                "student": result.student,
-                "subjects": subjects,
-                "test_total": test_total,
-                "exam_total": exam_total,
-                "total_total": test_total + exam_total,
-            }
+            term_data = bulk[student_id]["terms"][result.term.id]
+            term_data["subjects"].append(result)
+            term_data["test_total"] += result.test_score
+            term_data["exam_total"] += result.exam_score
+            term_data["total_total"] += result.test_score + result.exam_score
 
-        context = {"results": bulk}
+        context = {
+            "results": bulk,
+            "terms": AcademicTerm.objects.all(),
+            "selected_term": selected_term,
+        }
         return render(request, "result/all_results.html", context)

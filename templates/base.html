@@ -93,6 +93,7 @@
                 </p>
               </a>
             </li>
+            {% if request.user.is_staff %}
             <li class="nav-item">
               <a href="{% url 'staff-list' %}" class="nav-link">
                 <i class="nav-icon fas fa-users"></i>
@@ -101,6 +102,7 @@
                 </p>
               </a>
             </li>
+            {% endif %}
 
             <li class="nav-header">Finance</li>
             <li class="nav-item">
@@ -112,6 +114,7 @@
               </a>
             </li>
             <li class="nav-header">Results</li>
+            {% if request.user.is_staff %}
             <li class="nav-item">
               <a href="{% url 'create-result' %}" class="nav-link">
                 <i class="nav-icon fas fa-money-bill-alt"></i>
@@ -128,6 +131,7 @@
                 </p>
               </a>
             </li>
+            {% endif %}
             <li class="nav-item">
               <a href="{% url 'view-results' %}" class="nav-link">
                 <i class="nav-icon fas fa-money-bill-alt"></i>
@@ -136,7 +140,7 @@
                 </p>
               </a>
             </li>
-
+            {% if request.user.is_staff %}
             <li class="nav-header">Others</li>
             <li class="nav-item has-treeview">
               <a href="#" class="nav-link">
@@ -190,6 +194,7 @@
                 </p>
               </a>
             </li>
+            {% endif %}
 
 
           </ul>
