@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Student's Attendance</h2>
+    <form method="post" id="attendance-form">
+        {% csrf_token %}
+        
+        <!-- Filter Section -->
+        <div class="form-group row">
+            <div class="col-md-4">
+                <label for="date-select">Date:</label>
+                <input type="date" id="date" name="date-select" class="form-control" required>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="class">Class:</label>
+                <select id="class" name="class" class="form-control" required onchange="loadStudents()">
+                    <option value="" disabled selected>Select a class</option>
+                    {% for class in classes %}
+                        <option value="{{ class.id }}">{{ class.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="period">Period:</label>
+                <select id="period" name="period" class="form-control" required>
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Student Attendance Section -->
+        <div id="student-attendance-section">
+            <table class="table table-bordered table-sm">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Student</th>
+                        <th>Attendance Status</th>
+                        <th>Comments</th>
+                    </tr>
+                </thead>
+                <tbody id="student-list">
+                    <!-- Students will be dynamically loaded here -->
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation" id="pagination-controls">
+                <!-- Pagination controls will be dynamically added here -->
+            </nav>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Attendance</button>
+    </form>
+
+    <script>
+    function loadStudents(page = 1) {
+        const classId = document.getElementById('class').value;
+        const date = document.getElementById('date').value;
+        const period = document.getElementById('period').value;
+        const url = `/attendance/get_students/${classId}/?page=${page}&date=${date}&period=${period}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const studentList = document.getElementById('student-list');
+                studentList.innerHTML = '';
+
+                data.students.forEach(student => {
+                    studentList.innerHTML += `
+                        <tr>
+                            <td>${student.fullname}</td>
+                            <td>
+                                {% for status in attendance_choices %}
+                                    <label style="margin-right: 20px; font-weight:400">
+                                        <input type="radio" name="status_${student.id}" value="{{ status.0 }}"
+                                            ${student.status === "{{ status.0 }}" ? 'checked' : ''} required>
+                                        {{ status.1 }}
+                                    </label>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <input type="text" name="remarks_${student.id}" placeholder="Add remarks..."
+                                    class="form-control" value="${student.remarks}">
+                            </td>
+                        </tr>`;
+                });
+
+                const paginationControls = document.getElementById('pagination-controls');
+                paginationControls.innerHTML = `
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item ${data.page === 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="#" ${data.page > 1 ? `onclick="loadStudents(${data.page - 1})"` : ''}>Previous</a>
+                        </li>
+                        ${Array.from({length: data.pages}, (_, i) => `
+                            <li class="page-item ${data.page === i + 1 ? 'active' : ''}">
+                                <a class="page-link" href="#" onclick="loadStudents(${i + 1})">${i + 1}</a>
+                            </li>`).join('')}
+                        <li class="page-item ${data.page === data.pages ? 'disabled' : ''}">
+                            <a class="page-link" href="#" ${data.page < data.pages ? `onclick="loadStudents(${data.page + 1})"` : ''}>Next</a>
+                        </li>
+                    </ul>`;
+            });
+    }
+</script>
+
+
+{% endblock %}

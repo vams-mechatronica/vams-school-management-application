@@ -162,6 +162,26 @@
                 </p>
               </a>
             </li>
+            <li class="nav-header">Attendance</li>
+            {% if request.user.is_staff %}
+            <li class="nav-item">
+              <a href="{% url 'students-attendance' %}" class="nav-link">
+                <i class="nav-icon fas fa-money-bill-alt"></i>
+                <p>
+                  Student's Attendance
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'edit-results' %}" class="nav-link">
+                <i class="nav-icon fas fa-money-bill-alt"></i>
+                <p>
+                  Staff's Attendance
+                </p>
+              </a>
+            </li>
+            {% endif %}
+            
             {% if request.user.is_staff %}
             <li class="nav-header">Others</li>
             <li class="nav-item has-treeview">
