@@ -48,9 +48,8 @@ def get_students(request, class_id):
     date = parse_date(date_str) if date_str else None
     
     students = Student.objects.filter(current_class=class_id)
-    print(students,"asdfghjkqwertt")
+
     if students.exists():
-        print("asdfg")
         paginator = Paginator(students, 10)  # Show 10 students per page
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -63,13 +62,10 @@ def get_students(request, class_id):
             date=date
         ).values('student_id', 'status', 'remarks')
     
-    print(attendance_data)
-    
     attendance_dict = {
         item['student_id']: {'status': item['status'], 'remarks': item['remarks']}
         for item in attendance_data
     }
-    print(attendance_dict)
     
     students_list = [
         {'id': student.id, 'fullname': student.get_fullname(), **attendance_dict.get(student.id, {'status': None, 'remarks': ''})}
