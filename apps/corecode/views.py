@@ -22,7 +22,14 @@ from .models import (
     StudentClass,
     Subject,
 )
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils.timezone import now
+from apps.attendance.models import Student, Staff, StudentAttendance, StaffAttendance
+from apps.finance.models import Invoice, Receipt
+from datetime import timedelta
+from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "index.html"
@@ -286,3 +293,57 @@ class CurrentSessionAndTermView(LoginRequiredMixin, View):
             AcademicTerm.objects.filter(name=term).update(current=True)
 
         return render(request, self.template_name, {"form": form})
+
+
+class DashboardDataAPIView(APIView):
+
+    def get(self, request):
+        today = now().date()
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = (first_day_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+
+        total_students = Student.objects.count()
+        present_students = StudentAttendance.objects.filter(date=today, status='present').count()
+        absent_students = StudentAttendance.objects.filter(date=today, status='absent').count()
+        total_staff = Staff.objects.count()
+        present_staff = StaffAttendance.objects.filter(time_in__date=today, status='present').count()
+        absent_staff = StaffAttendance.objects.filter(time_in__date=today, status='absent').count()
+        # Subquery to get the latest invoice for each student
+        latest_invoice = Invoice.objects.filter(student=OuterRef('student')).order_by('-created_at')
+
+        # Get the last created invoice for each student
+        invoices = Invoice.objects.annotate(
+            latest_created_at=Subquery(latest_invoice.values('created_at')[:1])
+        ).filter(created_at=F('latest_created_at'))
+        fees_balance = sum(invoice.balance() for invoice in invoices if invoice.balance() > 0)
+        fees_received = Receipt.objects.filter(
+            date_paid__gte=first_day_of_month,
+            date_paid__lte=last_day_of_month
+        ).aggregate(total_amount_paid=Sum('amount_paid'))['total_amount_paid']
+
+        attendance_graph = {
+            'labels': [],  # e.g., ['2023-01-01', '2023-01-02', ...]
+            'present': [],  # e.g., [10, 20, ...]
+            'absent': []    # e.g., [5, 3, ...]
+        }
+
+        # Assuming you have a method to get attendance data for the past week
+        past_week_dates = [today - timedelta(days=i) for i in range(7)]
+        for date in past_week_dates:
+            attendance_graph['labels'].append(date.strftime('%Y-%m-%d'))
+            attendance_graph['present'].append(StudentAttendance.objects.filter(date=date, status='present').count())
+            attendance_graph['absent'].append(StudentAttendance.objects.filter(date=date, status='absent').count())
+
+        data = {
+            'total_students': total_students,
+            'present_students': present_students,
+            'absent_students': absent_students,
+            'total_staff': total_staff,
+            'present_staff': present_staff,
+            'absent_staff': absent_staff,
+            'fees_balance': fees_balance or 0,
+            'fees_received': fees_received or 0,
+            'attendance_graph': attendance_graph
+        }
+
+        return Response(data, status=status.HTTP_200_OK)

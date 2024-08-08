@@ -1,7 +1,131 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-  <p>Dashboard contents and design coming soon.</p>
-  <p> Use the sidebar menu for now!</p>
+<div class="container">
+    <div class="row">
+        <!-- Total Students Card -->
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Total Students</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="total-students">0</h5>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Attendance Status Card -->
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Student's Attendance Today</div>
+                <div class="card-body">
+                    <h5 class="card-title" >Present: <span id="present-students">0</span></h5>
+                    <h5 class="card-title" style="padding-left: 10px;">Absent: <span id="absent-students">0</span></h5>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Total Staff Card -->
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-header">Total Staff</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="total-staff">0</h5>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Staff Attendance Card -->
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Staff's Attendance Today</div>
+                <div class="card-body">
+                    <h5 class="card-title">Present: <span id="present-staff">0</span></h5>
+                    <h5 class="card-title" style="padding-left: 10px;">Absent: <span id="absent-staff">0</span></h5>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fees Balance Card -->
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Total Fees Balance This Month</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="fees-balance">₹0</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Fees Received Card -->
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Total Fees Received This Month</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="fees-received">₹0</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Attendance Graph -->
+        <div class="col-md-12">
+            <div class="card mb-3">
+                <div class="card-header">Attendance Graph</div>
+                <div class="card-body">
+                    <canvas id="attendance-graph"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
+
+{% block morejs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/dashboard-data/')
+            .then(response => response.json())
+            .then(data => {
+                // Update dashboard cards
+                document.getElementById('total-students').innerText = data.total_students;
+                document.getElementById('present-students').innerText = data.present_students;
+                document.getElementById('absent-students').innerText = data.absent_students;
+                document.getElementById('total-staff').innerText = data.total_staff;
+                document.getElementById('present-staff').innerText = data.present_staff;
+                document.getElementById('absent-staff').innerText = data.absent_staff;
+                document.getElementById('fees-balance').innerText = `₹${data.fees_balance}`;
+                document.getElementById('fees-received').innerText = `₹${data.fees_received}`;
+
+                // Update attendance graph
+                const ctx = document.getElementById('attendance-graph').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.attendance_graph.labels,
+                        datasets: [{
+                            label: 'Present Students',
+                            data: data.attendance_graph.present,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: 'Absent Students',
+                            data: data.attendance_graph.absent,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+{% endblock morejs %}
