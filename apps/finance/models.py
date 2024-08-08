@@ -8,11 +8,19 @@ from apps.students.models import Student
 from calendar import month_name
 from datetime import datetime
 
+def get_current_academic_session():
+    return AcademicSession.objects.get(current=True)
+
+def get_current_academic_term():
+    return AcademicTerm.objects.get(current=True)
+
+
+
 class Invoice(models.Model):
     MONTH_CHOICES = tuple((month_name[i], month_name[i]) for i in range(1, 13))
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    session = models.ForeignKey(AcademicSession, on_delete=models.SET_NULL, null=True, blank=True,default=AcademicSession.objects.get(current=True))
-    term = models.ForeignKey(AcademicTerm, on_delete=models.SET_NULL, null=True, blank=True,default=AcademicTerm.objects.get(current=True))
+    session = models.ForeignKey(AcademicSession, on_delete=models.SET_NULL, null=True, blank=True,default=get_current_academic_session)
+    term = models.ForeignKey(AcademicTerm, on_delete=models.SET_NULL, null=True, blank=True,default=get_current_academic_term)
     month = models.CharField(verbose_name="Month", max_length=50, null=True, blank=True, choices=MONTH_CHOICES,default=month_name[datetime.now().month])
     class_for = models.ForeignKey(StudentClass, on_delete=models.SET_NULL, null=True, blank=True)
     previous_balance = models.DecimalField(max_digits=10, decimal_places=2)

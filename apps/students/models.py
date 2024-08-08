@@ -44,6 +44,9 @@ class Student(models.Model):
 
     def get_absolute_url(self):
         return reverse("student-detail", kwargs={"pk": self.pk})
+    
+    def get_fullname(self):
+        return "{firstname} {othername} {surname}".format(firstname=self.firstname,othername=self.other_name, surname=self.surname)
 
 
 class StudentBulkUpload(models.Model):
