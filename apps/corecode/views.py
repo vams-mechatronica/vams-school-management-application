@@ -30,6 +30,7 @@ from apps.attendance.models import Student, Staff, StudentAttendance, StaffAtten
 from apps.finance.models import Invoice, Receipt
 from datetime import timedelta
 from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
+from django.utils import timezone
 
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "index.html"
@@ -299,8 +300,15 @@ class DashboardDataAPIView(APIView):
 
     def get(self, request):
         today = now().date()
-        first_day_of_month = today.replace(day=1)
-        last_day_of_month = (first_day_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+        # Get the current date and time (timezone-aware)
+        nows = timezone.now()
+
+        # Get the first day of the current month
+        first_day_of_month = nows.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        # Calculate the last day of the current month
+        next_month = (first_day_of_month + timezone.timedelta(days=31)).replace(day=1)
+        last_day_of_month = next_month - timezone.timedelta(days=1)
 
         total_students = Student.objects.count()
         present_students = StudentAttendance.objects.filter(date=today, status='present').count()
