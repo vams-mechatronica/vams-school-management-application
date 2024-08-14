@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+
+  {% if object %}
+    Update {{ object }}
+  {% else %}
+    Add New User
+  {% endif %}
+
+{% endblock title %}
+
+
+{% block content %}
+
+<form action="" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  {% include 'corecode/form_snippet.html' %}
+    <script>
+        function updateUserList(selectElement) {
+            var role = selectElement.value;
+            //var domain = window.location.origin;
+            var url = 'get-users-list/';
+
+            fetch(url + '?role=' + role)
+                .then(response => response.json())
+                .then(data => {
+                    var dropdown = document.querySelector('select[name="selected_person"]');
+                    dropdown.innerHTML = '';
+
+                    data.forEach(item => {
+                        var option = document.createElement('option');
+                        option.value = item.id;
+                        option.text = item.name;
+                        dropdown.appendChild(option);
+                    });
+                });
+        }
+
+        document.querySelector('select[name="selected_person"]').addEventListener('change', function() {
+            var selectedId = this.value;
+            var selectedText = this.options[this.selectedIndex].text;
+            var nameParts = selectedText.split(' ');
+
+            document.getElementById('id_first_name').value = nameParts[0];
+            document.getElementById('id_last_name').value = nameParts[1];
+            document.getElementById('id_username').value = nameParts[1].toLowerCase()+"."+nameParts[0].toLowerCase();
+        });
+    </script>
+
+  {% if object %}
+    <input type="submit" class="btn btn-primary" value="Update Record">
+  {% else %}
+    <input type="submit" class="btn btn-primary" value="Create User">
+  {% endif %}
+</form>
+
+
+{% endblock content %}

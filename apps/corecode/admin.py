@@ -16,6 +16,12 @@ class AcademicSessionAdmin(admin.ModelAdmin):
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(EmailMessageImageLink)
+class EmailMessageImageLinkAdmin(admin.ModelAdmin):
+    pass
+    
+
     
 
     
