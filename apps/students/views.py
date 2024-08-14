@@ -20,6 +20,20 @@ class StudentListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListVie
     permission_required = 'students.view_student' 
     template_name = "students/student_list.html"
 
+    def get_queryset(self):
+        user = self.request.user
+
+        # If the user is a superuser or staff, allow viewing all records
+        if user.is_superuser or user.is_staff:
+            return Student.objects.all()
+
+        # If the user is in the 'Students' group, allow viewing only their own record
+        if user.groups.filter(name='Students').exists():
+            return Student.objects.filter(user=user)
+
+        # Default: return an empty queryset if the user doesn't fit the above categories
+        return Student.objects.none()
+
 
 
 class StudentDetailView(LoginRequiredMixin, DetailView ,PermissionRequiredMessageMixin):

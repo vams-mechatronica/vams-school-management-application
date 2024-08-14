@@ -9,7 +9,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from apps.result.utils import PermissionRequiredMessageMixin
 from django.http import JsonResponse
 from django.contrib.auth.models import Group
-
+from django.contrib.auth.hashers import make_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -58,24 +58,36 @@ class UserCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin, Success
     def form_valid(self, form):
         selected_role = form.cleaned_data.get('student_or_staff')
         selected_person_id = form.cleaned_data.get('selected_person')
+        password = form.cleaned_data.get('password')
         
         # Set first_name and last_name based on selected student or staff
         if selected_role == 'student':
             selected_person = Student.objects.get(id=selected_person_id)
             group_name = 'Students'
+            if selected_person.user:
+                form.add_error(None, f"A user account already exists for the student {selected_person.firstname} {selected_person.surname}.")
+                return self.form_invalid(form)
         elif selected_role == 'staff':
             selected_person = Staff.objects.get(id=selected_person_id)
             group_name = 'Staff'
+            if selected_person.user:
+                form.add_error(None, f"A user account already exists for the staff member {selected_person.firstname} {selected_person.surname}.")
+                return self.form_invalid(form)
         else:
             group_name = 'Admin'  # Default or Admin group
 
         form.instance.first_name = selected_person.firstname
         form.instance.last_name = selected_person.surname
+        form.instance.password = make_password(password)
 
         # Assign the user to the appropriate group
         group, _ = Group.objects.get_or_create(name=group_name)
-        form.instance.save()  # Save the user instance first before adding to the group
+        form.instance.save()
         form.instance.groups.add(group)
+
+        # Associate the user with the selected student or staff
+        selected_person.user = form.instance
+        selected_person.save()
 
         return super(UserCreateView, self).form_valid(form)
 

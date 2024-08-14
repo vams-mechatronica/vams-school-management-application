@@ -164,8 +164,8 @@
                 </p>
               </a>
             </li>
-            <li class="nav-header">Attendance</li>
             {% if request.user.is_staff %}
+            <li class="nav-header">Attendance</li>
             <li class="nav-item">
               <a href="{% url 'students-attendance' %}" class="nav-link">
                 <i class="nav-icon fas fa-money-bill-alt"></i>

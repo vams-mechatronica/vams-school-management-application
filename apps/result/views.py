@@ -91,6 +91,22 @@ from .models import Result, AcademicTerm
 
 class ResultListView(LoginRequiredMixin,PermissionRequiredMessageMixin, View):
     permission_required = 'result.view_result'
+    model = Result
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # If the user is a superuser or staff, allow viewing all records
+        if user.is_superuser or user.is_staff:
+            return self.model.objects.all()
+
+        # If the user is in the 'Students' group, allow viewing only their own record
+        if user.groups.filter(name='Students').exists():
+            student = Student.objects.get(user=user)
+            return self.model.objects.filter(student=student)
+
+        # Default: return an empty queryset if the user doesn't fit the above categories
+        return self.model.objects.none()
 
     
     def get(self, request, *args, **kwargs):
@@ -99,9 +115,9 @@ class ResultListView(LoginRequiredMixin,PermissionRequiredMessageMixin, View):
 
         # Filter results based on the selected term, or get results for all terms if no term is selected
         if selected_term:
-            results = Result.objects.filter(session=session, term=selected_term)
+            results = self.get_queryset().filter(session=session, term=selected_term)
         else:
-            results = Result.objects.filter(session=session)
+            results = self.get_queryset().filter(session=session)
 
         # Organize results by student and term
         bulk = {}

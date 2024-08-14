@@ -2,7 +2,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-
+from django.contrib.auth.models import User
 from apps.corecode.models import StudentClass
 
 
@@ -35,6 +35,7 @@ class Student(models.Model):
     address = models.TextField(blank=True)
     others = models.TextField(blank=True)
     adharcard = models.ImageField(blank=True, upload_to="students/adharcard/")
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         ordering = ["surname", "firstname", "other_name"]
