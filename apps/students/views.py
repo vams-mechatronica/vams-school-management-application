@@ -49,7 +49,7 @@ class StudentDetailView(LoginRequiredMixin, DetailView ,PermissionRequiredMessag
 
 class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = Student
-    fields = "__all__"
+    fields = ['current_status','registration_number','surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class','parent_mobile_number','address','others','adharcard_number','adharcard']
     success_message = "New student successfully added."
     permission_required = 'students.add_student' 
 
