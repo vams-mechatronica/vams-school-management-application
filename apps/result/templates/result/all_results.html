@@ -2,19 +2,60 @@
 
 {% block fullcard %}
 <div class="container">
-  <!-- Term Selection Form -->
+  <!-- Filter Form -->
   <form method="GET" action="{% url 'view-results' %}">
-    <div class="form-group">
-      <label for="term-select">Select Term:</label>
-      <select id="term-select" name="term" class="form-control">
-        <option value="">All Terms</option>
-        {% for term in terms %}
-          <option value="{{ term.id }}" {% if term.id|stringformat:"s" == selected_term|stringformat:"s" %}selected{% endif %}>
-            {{ term.name }}
-          </option>
-        {% endfor %}
-      </select>
+    <div class="form-row">
+      <div class="form-group col-md-3">
+        <label for="session-select">Select Session:</label>
+        <select id="session-select" name="session" class="form-control">
+          <option value="">All Sessions</option>
+          {% for session in sessions %}
+            <option value="{{ session.id }}" {% if session.id|stringformat:"s" == selected_session|stringformat:"s" %}selected{% endif %}>
+              {{ session.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group col-md-3">
+        <label for="term-select">Select Term:</label>
+        <select id="term-select" name="term" class="form-control">
+          <option value="">All Terms</option>
+          {% for term in terms %}
+            <option value="{{ term.id }}" {% if term.id|stringformat:"s" == selected_term|stringformat:"s" %}selected{% endif %}>
+              {{ term.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if request.user.is_staff %}
+      <div class="form-group col-md-3">
+        <label for="class-select">Select Class:</label>
+        <select id="class-select" name="class" class="form-control" onchange="filterStudents(this.value);">
+          <option value="">All Classes</option>
+          {% for student_class in classes %}
+            <option value="{{ student_class.id }}" {% if student_class.id|stringformat:"s" == selected_class|stringformat:"s" %}selected{% endif %}>
+              {{ student_class.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group col-md-3">
+        <label for="student-select">Select Student:</label>
+        <select id="student-select" name="student" class="form-control">
+          <option value="">All Students</option>
+          {% for student in students %}
+            <option value="{{ student.id }}" {% if student.id|stringformat:"s" == selected_student|stringformat:"s" %}selected{% endif %}>
+              {{ student.firstname }} {{ student.surname }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      
     </div>
+
     <button type="submit" class="btn btn-primary">Filter</button>
     <button type="button" class="btn btn-secondary" onclick="printResult();">Print</button>
   </form>
@@ -66,18 +107,32 @@
   {% endfor %}
 </div>
 {% endblock fullcard %}
+
 {% block morejs %}
 <script>
+function filterStudents(classId) {
+    if (!classId) {
+        document.getElementById('student-select').innerHTML = '<option value="">All Students</option>';
+        return;
+    }
+    fetch(`/attendance/get_students/${classId}/`)
+    .then(response => response.json())
+    .then(data => {
+        let studentSelect = document.getElementById('student-select');
+        studentSelect.innerHTML = '<option value="">All Students</option>';
+        data.students.forEach(student => {
+            let option = document.createElement('option');
+            option.value = student.id;
+            option.textContent = student.fullname;
+            studentSelect.appendChild(option);
+        });
+    });
+}
+
 function printResult() {
     var printContents = document.querySelector('.printable-area').innerHTML;
     var originalContents = document.body.innerHTML;
-
-    //document.body.innerHTML = printContents;
-
     window.print();
-
-    //document.body.innerHTML = originalContents;
 }
 </script>
-
 {% endblock morejs %}
