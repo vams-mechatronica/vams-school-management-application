@@ -54,7 +54,7 @@ class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMes
     permission_required = 'students.view_student' 
 
     def get_context_data(self, **kwargs):
-        context = super(StudentDetailView, self).get_context_data(**kwargs)
+        context = super(StudentDashboardView, self).get_context_data(**kwargs)
         logger.info(context)
         context["payments"] = Invoice.objects.filter(student=self.object)
         return context
