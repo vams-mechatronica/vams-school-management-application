@@ -12,6 +12,8 @@ from apps.finance.models import Invoice
 
 from .models import Student, StudentBulkUpload
 from apps.result.utils import PermissionRequiredMessageMixin
+import logging
+logger = logging.getLogger()
 
 
 class StudentListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
@@ -46,6 +48,16 @@ class StudentDetailView(LoginRequiredMixin, DetailView ,PermissionRequiredMessag
         context["payments"] = Invoice.objects.filter(student=self.object)
         return context
 
+class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMessageMixin):
+    model = Student
+    template_name = "student_dashboard.html"
+    permission_required = 'students.view_student' 
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentDetailView, self).get_context_data(**kwargs)
+        logger.info(context)
+        context["payments"] = Invoice.objects.filter(student=self.object)
+        return context
 
 class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = Student

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import HttpResponseRedirect, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, TemplateView, View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from apps.result.utils import PermissionRequiredMessageMixin
@@ -31,9 +31,18 @@ from apps.finance.models import Invoice, Receipt
 from datetime import timedelta
 from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 from django.utils import timezone
+import logging
+logger = logging.getLogger()
 
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "index.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.groups.filter(name="Students").exists():
+            pk = request.user.pk
+            student= Student.objects.get(user= pk)
+            return redirect(reverse('student-dashboard', kwargs={'pk': student.pk}))
+        return super().dispatch(request, *args, **kwargs)
 
 
 class SiteConfigView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
