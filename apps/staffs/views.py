@@ -6,6 +6,7 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from apps.result.utils import PermissionRequiredMessageMixin
 from .models import Staff
+from .forms import StaffForm
 
 
 class StaffListView(ListView,PermissionRequiredMessageMixin):
@@ -19,22 +20,12 @@ class StaffDetailView(DetailView,PermissionRequiredMessageMixin):
     template_name = "staffs/staff_detail.html"
 
 
+
 class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin,CreateView):
     model = Staff
-    fields = "__all__"
+    form_class = StaffForm
     permission_required = "staffs.create_staff"
     success_message = "New staff successfully added"
-
-    def get_form(self):
-        """add date picker in forms"""
-        form = super(StaffCreateView, self).get_form()
-        form.fields["date_of_birth"].widget = widgets.DateInput(attrs={"type": "date"})
-        form.fields["date_of_joining"].widget = widgets.DateInput(
-            attrs={"type": "date"}
-        )
-        form.fields["address"].widget = widgets.Textarea(attrs={"rows": 1})
-        form.fields["others"].widget = widgets.Textarea(attrs={"rows": 1})
-        return form
 
 
 class StaffUpdateView(SuccessMessageMixin,PermissionRequiredMessageMixin, UpdateView):
