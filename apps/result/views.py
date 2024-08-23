@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView, View
 
 from apps.students.models import Student
+from apps.corecode.models import AcademicSession, AcademicTerm, StudentClass
 
 from .forms import CreateResults, EditResults
 from .models import Result
@@ -89,23 +90,46 @@ def edit_results(request):
 
 from .models import Result, AcademicTerm
 
-class ResultListView(LoginRequiredMixin,PermissionRequiredMessageMixin, View):
+class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
     permission_required = 'result.view_result'
+    model = Result
 
-    
+    def get_queryset(self):
+        user = self.request.user
+
+        # If the user is a superuser or staff, allow viewing all records
+        if user.is_superuser or user.is_staff:
+            return self.model.objects.all()
+
+        # If the user is in the 'Students' group, allow viewing only their own record
+        if user.groups.filter(name='Students').exists():
+            student = Student.objects.get(user=user)
+            return self.model.objects.filter(student=student)
+
+        # Default: return an empty queryset if the user doesn't fit the above categories
+        return self.model.objects.none()
+
     def get(self, request, *args, **kwargs):
-        session = request.current_session
+        session = request.GET.get("session")
         selected_term = request.GET.get("term")
+        selected_class = request.GET.get("class")
+        selected_student = request.GET.get("student")
 
-        # Filter results based on the selected term, or get results for all terms if no term is selected
+        queryset = self.get_queryset()
+
+        # Apply filters based on the selected options
+        if session:
+            queryset = queryset.filter(session_id=session)
         if selected_term:
-            results = Result.objects.filter(session=session, term=selected_term)
-        else:
-            results = Result.objects.filter(session=session)
+            queryset = queryset.filter(term_id=selected_term)
+        if selected_class:
+            queryset = queryset.filter(current_class_id=selected_class)
+        if selected_student:
+            queryset = queryset.filter(student_id=selected_student)
 
         # Organize results by student and term
         bulk = {}
-        for result in results:
+        for result in queryset:
             student_id = result.student.id
             if student_id not in bulk:
                 bulk[student_id] = {"student": result.student, "terms": {}}
@@ -128,6 +152,12 @@ class ResultListView(LoginRequiredMixin,PermissionRequiredMessageMixin, View):
         context = {
             "results": bulk,
             "terms": AcademicTerm.objects.all(),
+            "sessions": AcademicSession.objects.all(),
+            "classes": StudentClass.objects.all(),
+            "students": Student.objects.all(),
             "selected_term": selected_term,
+            "selected_session": session,
+            "selected_class": selected_class,
+            "selected_student": selected_student,
         }
         return render(request, "result/all_results.html", context)

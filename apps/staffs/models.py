@@ -2,6 +2,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class Staff(models.Model):
@@ -26,6 +27,7 @@ class Staff(models.Model):
 
     address = models.TextField(blank=True)
     others = models.TextField(blank=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return f"{self.surname} {self.firstname} {self.other_name}"

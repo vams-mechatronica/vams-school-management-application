@@ -2,7 +2,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-
+from django.contrib.auth.models import User
 from apps.corecode.models import StudentClass
 
 
@@ -15,9 +15,11 @@ class Student(models.Model):
         max_length=10, choices=STATUS_CHOICES, default="active"
     )
     registration_number = models.CharField(max_length=200, unique=True,default=f"Vedika/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}")
-    surname = models.CharField(max_length=200)
+    surname = models.CharField(max_length=200, blank=True,null=True)
     firstname = models.CharField(max_length=200)
     other_name = models.CharField(max_length=200, blank=True)
+    father_name = models.CharField(max_length=500, blank=True,null=True)
+    mother_name = models.CharField(max_length=500, blank=True,null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default="male")
     date_of_birth = models.DateField(default=timezone.now)
     date_of_admission = models.DateField(default=timezone.now)
@@ -28,13 +30,20 @@ class Student(models.Model):
     mobile_num_regex = RegexValidator(
         regex="^[0-9]{10,15}$", message="Entered mobile number isn't in a right format!"
     )
+    adhar_num_validator = RegexValidator(
+        regex="^[0-9]{12,12}$", message="Entered Adhar number isn't valid!"
+    )
     parent_mobile_number = models.CharField(
         validators=[mobile_num_regex], max_length=13, blank=True
     )
 
     address = models.TextField(blank=True)
     others = models.TextField(blank=True)
+    adharcard_number = models.CharField(
+        validators=[adhar_num_validator], max_length=12, blank=True
+    )
     adharcard = models.ImageField(blank=True, upload_to="students/adharcard/")
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         ordering = ["surname", "firstname", "other_name"]

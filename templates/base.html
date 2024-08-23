@@ -22,6 +22,8 @@
   <link
     href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700"
     rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
   <style>
         /* General styles */
         .print-area {
@@ -82,7 +84,7 @@
               <i class="fas fa-user mr-2"></i> Profile
             </a>
             <div class="dropdown-divider"></div>
-            <a href="{% url 'logout' %}" class="dropdown-item">
+            <a href="{% url 'logout' %}" class="dropdown-item" id="logout-link">
               <i class="fas fa-sign-out"></i> Sign out
             </a>
           </div>
@@ -162,8 +164,8 @@
                 </p>
               </a>
             </li>
-            <li class="nav-header">Attendance</li>
             {% if request.user.is_staff %}
+            <li class="nav-header">Attendance</li>
             <li class="nav-item">
               <a href="{% url 'students-attendance' %}" class="nav-link">
                 <i class="nav-icon fas fa-money-bill-alt"></i>
@@ -223,6 +225,14 @@
                     <i class="nav-icon fas fa-bars"></i>
                     <p>
                       Classes
+                    </p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'users-list' %}" class="nav-link">
+                    <i class="nav-icon fas fa-bars"></i>
+                    <p>
+                      Users
                     </p>
                   </a>
                 </li>
@@ -355,6 +365,21 @@ function printarea() {
 
     //document.body.innerHTML = originalContents;
 }
+</script>
+<script>
+document.getElementById('logout-link').addEventListener('click', function(event) {
+    event.preventDefault();
+    fetch('{% url "logout" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    }).then(response => {
+        if (response.ok) {
+            window.location.href = '/';
+        }
+    });
+});
 </script>
 
 

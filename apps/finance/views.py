@@ -23,6 +23,21 @@ class InvoiceListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListVie
     model = Invoice
     permission_required = "finance.view_invoice"
 
+    def get_queryset(self):
+        user = self.request.user
+
+        # If the user is a superuser or staff, allow viewing all records
+        if user.is_superuser or user.is_staff:
+            return self.model.objects.all()
+
+        # If the user is in the 'Students' group, allow viewing only their own record
+        if user.groups.filter(name='Students').exists():
+            student = Student.objects.get(user=user)
+            return self.model.objects.filter(student=student)
+
+        # Default: return an empty queryset if the user doesn't fit the above categories
+        return self.model.objects.none()
+
 class InvoiceCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, CreateView):
     model = Invoice
     fields = "__all__"

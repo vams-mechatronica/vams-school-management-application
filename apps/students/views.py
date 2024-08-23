@@ -12,6 +12,8 @@ from apps.finance.models import Invoice
 
 from .models import Student, StudentBulkUpload
 from apps.result.utils import PermissionRequiredMessageMixin
+import logging
+logger = logging.getLogger()
 
 
 class StudentListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
@@ -19,6 +21,20 @@ class StudentListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListVie
     context_object_name = "students"
     permission_required = 'students.view_student' 
     template_name = "students/student_list.html"
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # If the user is a superuser or staff, allow viewing all records
+        if user.is_superuser or user.is_staff:
+            return Student.objects.all()
+
+        # If the user is in the 'Students' group, allow viewing only their own record
+        if user.groups.filter(name='Students').exists():
+            return Student.objects.filter(user=user)
+
+        # Default: return an empty queryset if the user doesn't fit the above categories
+        return Student.objects.none()
 
 
 
@@ -32,10 +48,20 @@ class StudentDetailView(LoginRequiredMixin, DetailView ,PermissionRequiredMessag
         context["payments"] = Invoice.objects.filter(student=self.object)
         return context
 
+class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMessageMixin):
+    model = Student
+    template_name = "student_dashboard.html"
+    permission_required = 'students.view_student' 
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentDashboardView, self).get_context_data(**kwargs)
+        logger.info(context)
+        context["payments"] = Invoice.objects.filter(student=self.object)
+        return context
 
 class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = Student
-    fields = "__all__"
+    fields = ['current_status','registration_number','surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class','parent_mobile_number','address','others','adharcard_number','adharcard']
     success_message = "New student successfully added."
     permission_required = 'students.add_student' 
 

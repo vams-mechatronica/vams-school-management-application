@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-sm-4">
+          <div class="row mb-2">
+  
+            {% if object.adharcard %}
+              <img
+                src="{{ object.adharcard.url }}"
+                class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+            {% else %}
+              {% if object.get_gender_display == Male %}
+              <img
+                src="{% static 'dist/img/boy.png' %}"
+                class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+              {% else %}
+              <img
+                src="{% static 'dist/img/student.png' %}"
+                class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+              
+              {% endif %}
+              
+            {% endif %}
+  
+  
+            <div class="float-right">
+              <h4 style="font-size: 1rem;">{{ object.get_fullname }} </h4>
+              {% comment %} <h4 style="font-size: 1rem;"> </h4> {% endcomment %}
+              <h4 style="font-size: 1rem;">Class: {{ object.current_class }}</h4>
+            </div>
+          </div>
+          <h4 style="font-size: 1rem;">{{ object.get_gender_display }} | {{ object.get_current_status_display }}</h5>
+  
+        </div>
+        <div class="col-sm-8">
+          <div>
+            <div class="form-group border-bottom row">
+              <label class="col" style="text-align: right;">
+                Registration No.
+              </label>
+              <div class="col">
+                {{ object.registration_number }}
+              </div>
+            </div>
+            <div class="form-group border-bottom row">
+              <label class="col" style="text-align: right;">
+                Date of Birth
+              </label>
+              <div class="col">
+                {{ object.date_of_birth }}
+              </div>
+            </div>
+  
+            <div class="form-group border-bottom row">
+              <label class="col" style="text-align: right;">
+                Parent Mobile Number
+              </label>
+              <div class="col">
+                {{ object.parent_mobile_number}}
+              </div>
+            </div>
+  
+            <div class="form-group border-bottom row">
+              <label class="col" style="text-align: right;">
+                Address
+              </label>
+              <div class="col">
+                {{ object.address }}
+              </div>
+            </div>
+            <div class="form-group border-bottom row">
+              <label class="col" style="text-align: right;">
+                Comments
+              </label>
+              <div class="col">
+                {{ object.others }}
+              </div>
+            </div>
+  
+          </div>
+  
+        </div>
+      </div>
+  
+      {% if payments %}
+      <h4>Invoice/Payment History</h4>
+        <table class="table table-sm table-bordered table-hover">
+          <thead class="thead-light">
+            <tr>
+              <th>For</th>
+              <th>Amount Payable</th>
+              <th>Amount Paid</th>
+              <th>balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for payment in payments %}
+              <tr class='clickable-row' data-href="{% url 'invoice-detail' payment.id %}">
+                <td>{{payment.session}} - {{payment.term}}/{{payment.month}} - {{ payment.class_for}}</td>
+                <td>{{payment.total_amount_payable}}</td>
+                <td>{{payment.total_amount_paid}}</td>
+                <td>{{payment.balance}}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+          <p>There are no payment history for {{object}}</p>
+      {% endif %}
+  
+</div>
+{% endblock content %}
+
+{% block morejs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/dashboard-data/')
+            .then(response => response.json())
+            .then(data => {
+                // Update dashboard cards
+                document.getElementById('total-students').innerText = data.total_students;
+                document.getElementById('present-students').innerText = data.present_students;
+                document.getElementById('absent-students').innerText = data.absent_students;
+                document.getElementById('total-staff').innerText = data.total_staff;
+                document.getElementById('present-staff').innerText = data.present_staff;
+                document.getElementById('absent-staff').innerText = data.absent_staff;
+                document.getElementById('fees-balance').innerText = `₹${data.fees_balance}`;
+                document.getElementById('fees-received').innerText = `₹${data.fees_received}`;
+
+                // Update attendance graph
+                const ctx = document.getElementById('attendance-graph').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.attendance_graph.labels,
+                        datasets: [{
+                            label: 'Present Students',
+                            data: data.attendance_graph.present,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: 'Absent Students',
+                            data: data.attendance_graph.absent,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+{% endblock morejs %}
