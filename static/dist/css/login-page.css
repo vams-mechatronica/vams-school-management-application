@@ -19,12 +19,12 @@
 
 body, html {
 	height: 100%;
-	font-family: Poppins-Regular, sans-serif;
+	font-family: sans-serif;
 }
 
 /*---------------------------------------------*/
 a {
-	font-family: Poppins-Regular;
+	font-family: sans-serif;
 	font-size: 14px;
 	line-height: 1.7;
 	color: #666666;
@@ -117,14 +117,14 @@ iframe {
 /*//////////////////////////////////////////////////////////////////
 [ Utility ]*/
 .txt1 {
-  font-family: Poppins-Regular;
+  font-family: sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: #999999;
 }
 
 .txt2 {
-  font-family: Poppins-Regular;
+  font-family: sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: #666666;
@@ -139,6 +139,21 @@ iframe {
   margin: 0 auto;
 }
 
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("../img/main-background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0.6; /* Set desired opacity level */
+  z-index: -1; /* Ensure the background is behind the content */
+}
+
+
 .container-login100 {
   width: 100%;
   min-height: 100vh;
@@ -151,18 +166,25 @@ iframe {
   justify-content: center;
   align-items: center;
   padding: 15px;
-  background: #514858;
+  /* background-image: url("../img/login.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0.6;
+  z-index: -1; */
+  /* background: #514858;
   background: -webkit-linear-gradient(-135deg, #968f8e, #241d20);
   background: -o-linear-gradient(-135deg, #968f8e, #241d20);
   background: -moz-linear-gradient(-135deg, #968f8e, #241d20);
-  background: linear-gradient(-135deg,#968f8e, #241d20 );
+  background: linear-gradient(-135deg,#968f8e, #241d20 ); */
  
 }
 
 .wrap-login100 {
-  width: 960px;
+  position: relative;
+  width: 515px;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 40px;
   overflow: hidden;
 
   display: -webkit-box;
@@ -171,8 +193,10 @@ iframe {
   display: -ms-flexbox;
   display: flex;
   flex-wrap: wrap;
+  opacity: 1;
+  z-index: 1;
   justify-content: space-between;
-  padding: 177px 130px 33px 95px;
+  padding: 40px 100px 40px 100px;
 }
 
 /*------------------------------------------------------------------
@@ -188,11 +212,11 @@ iframe {
 /*------------------------------------------------------------------
 [  ]*/
 .login100-form {
-  width: 290px;
+  width: 315px;
 }
 
 .login100-form-title {
-  font-family: Poppins-Bold;
+  font-family: sans-serif;
   font-size: 24px;
   color: #333333;
   line-height: 1.2;
@@ -214,7 +238,7 @@ iframe {
 }
 
 .input100 {
-  font-family: Poppins-Medium;
+  font-family: sans-serif;
   font-size: 15px;
   line-height: 1.5;
 
@@ -305,7 +329,7 @@ iframe {
 }
 
 .login100-form-btn {
-  font-family: Montserrat-Bold;
+  font-family: sans-serif;
   font-size: 15px;
   line-height: 1.5;
   color: #fff;
@@ -331,7 +355,7 @@ iframe {
 }
 
 .login100-form-btn:hover {
-  background: #333333;
+  background: #be2323;
 }
 
 
@@ -407,7 +431,7 @@ iframe {
   right: 8px;
   pointer-events: none;
 
-  font-family: Poppins-Medium;
+  font-family: sans-serif;
   color: #c80000;
   font-size: 13px;
   line-height: 1.4;
@@ -421,10 +445,13 @@ iframe {
   -moz-transition: opacity 0.4s;
   transition: opacity 0.4s;
 }
+p{
+  font-family: sans-serif;
+}
 
 .alert-validate::after {
   content: "\f06a";
-  font-family: FontAwesome;
+  font-family: sans-serif;
   display: block;
   position: absolute;
   color: #c80000;
