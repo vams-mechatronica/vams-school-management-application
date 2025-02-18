@@ -32,20 +32,25 @@
 
         {% for invoice in object_list %}
           <tr class='clickable-row' data-href="{% if request.user.is_superuser %}{% url 'invoice-detail' invoice.id %}{% else %}#{% endif %}">
-            <td>{{ forloop.counter}}</td>
-            <td>{{ invoice}}</td>
-            <td>{{ invoice.session}}-{{ invoice.term}}</td>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ invoice }}</td>
+            <td>{{ invoice.session }} - {{ invoice.term }}</td>
             <td>{{ invoice.total_amount_payable | intcomma }}</td>
             <td>{{ invoice.total_amount_paid | intcomma }}</td>
             <td>{{ invoice.balance | intcomma }}</td>
+            
             {% if request.user.is_superuser %}
-            <td><a class="btn btn-success btn-sm"
-                href="{% url 'receipt-create' %}?invoice={{ invoice.id }}">Add new
-                receipt</a></td>
-          {% endif %}
-
+              <td>
+                <a class="btn btn-success btn-sm {% if not invoice.is_editable %}disabled{% endif %}"
+                  href="{% url 'receipt-create' %}?invoice={{ invoice.id }}" 
+                  >
+                  Add new receipt
+                </a>
+              </td>
+            {% endif %}
           </tr>
         {% endfor %}
+
 
       </tbody>
     </table>

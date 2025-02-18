@@ -28,12 +28,12 @@ class InvoiceListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListVie
 
         # If the user is a superuser or staff, allow viewing all records
         if user.is_superuser or user.is_staff:
-            return self.model.objects.all()
+            return self.model.objects.filter(status = "active")
 
         # If the user is in the 'Students' group, allow viewing only their own record
         if user.groups.filter(name='Students').exists():
             student = Student.objects.get(user=user)
-            return self.model.objects.filter(student=student)
+            return self.model.objects.filter(student=student,status="active")
 
         # Default: return an empty queryset if the user doesn't fit the above categories
         return self.model.objects.none()
@@ -95,7 +95,7 @@ class InvoiceDetailView(LoginRequiredMixin, PermissionRequiredMessageMixin,Detai
 class InvoiceUpdateView(LoginRequiredMixin,PermissionRequiredMessageMixin, UpdateView):
     model = Invoice
     permission_required = "finance.update_invoice"
-    fields = ["student", "session", "term","month", "class_for", "previous_balance"]
+    fields = ["student", "session", "term","month", "class_for", "previous_balance","is_editable"]
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceUpdateView, self).get_context_data(**kwargs)
@@ -131,7 +131,7 @@ class InvoiceDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, Delet
 class ReceiptCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, CreateView):
     model = Receipt
     permission_required = "finance.add_receipt"
-    fields = ["amount_paid", "date_paid", "comment"]
+    fields = ["amount_paid","payment_mode","date_paid", "comment"]
     success_url = reverse_lazy("invoice-list")
     def get_form(self):
         """add date picker in forms"""

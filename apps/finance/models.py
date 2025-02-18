@@ -3,6 +3,8 @@
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from datetime import timedelta, datetime
+from django.utils.timezone import now
 from apps.corecode.models import AcademicSession, AcademicTerm, StudentClass
 from apps.students.models import Student
 from calendar import month_name
@@ -29,12 +31,16 @@ class Invoice(models.Model):
         choices=[("active", "Active"), ("closed", "Closed")],
         default="active"
     )
+    # New field to control editing
+    is_editable = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
     class Meta:
         get_latest_by = 'created_at'
+    
     def __str__(self):
-        return f"{self.student.firstname} {self.student.surname} - {self.session} /{self.month}"
+        return f"{self.student.firstname} {self.student.surname}"
 
     def get_absolute_url(self):
         return reverse('invoice-detail', kwargs={'pk': self.pk})
@@ -60,6 +66,25 @@ class Invoice(models.Model):
         for receipt in receipts:
             amount += receipt.amount_paid
         return amount
+    
+    def disable_editing(self):
+        """Disable editing if payments have been made or the invoice is older than 30 days"""
+        if self.total_amount_paid() > 0 or (now() - self.created_at) > timedelta(days=30):
+            self.is_editable = False
+            self.save()
+    
+    def save(self, *args, **kwargs):
+        """
+        When a new invoice is created, mark the previous invoice for the same student as non-editable.
+        """
+        if self.pk is None:  # Only execute this check for new invoices
+            previous_invoice = Invoice.objects.filter(student=self.student).order_by('-updated_at')
+            for inv in previous_invoice:
+                if inv:
+                    inv.is_editable = False
+                    inv.save(update_fields=['is_editable'])
+
+        super().save(*args, **kwargs)
 
 
 class InvoiceItem(models.Model):
@@ -77,6 +102,7 @@ class InvoiceItem(models.Model):
 class Receipt(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_mode = models.CharField(max_length=50,choices=(('upi','UPI'),('cash','Cash'),('debit-card','Debit Card'),('credit-card','Credit Card'),('net-banking','Net Banking'),('select','Select')),default="select")
     date_paid = models.DateTimeField()
     comment = models.TextField(blank=True, null=True)
 

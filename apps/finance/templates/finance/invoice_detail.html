@@ -5,10 +5,10 @@
 <div class="card-header">
   <div class="card-tools">
     <a href="#" role="button" class="btn btn-tool" onclick="printarea();">Print</a>
-    <a href="{% url 'invoice-update' object.id %}" class="btn btn-tool">
+    <a href="{% url 'invoice-update' object.id %}" class="btn btn-tool {% if not object.is_editable %}disabled{% endif %}">
       <i class="fas fa-edit"></i>
     </a>
-    <a href="{% url 'invoice-delete' object.id %}" class="btn btn-tool">
+    <a href="{% url 'invoice-delete' object.id %}" class="btn btn-tool {% if not object.is_editable %}disabled{% endif %}">
       <i class="fas fa-times"></i>
     </a>
   </div>
@@ -22,10 +22,10 @@
 <div class="row printable-area">
   <div class="col-sm-4">
     <h3>{{ object }} </h3>
-    <h5>{{ object.session }} </h5>
-    <h5>{{ object.term }} </h5>
-    <h5>{{ object.month  }} </h5>
-    <h5>{{ object.class_for }} </h5>
+    <h5>Session: {{ object.session }} </h5>
+    <h5>Term  : {{ object.term }} </h5>
+    <h5>Month : {{ object.month  }} </h5>
+    <h5>Class : {{ object.class_for }} </h5>
     <h6>Status: {{ object.get_status_display }} </h6>
     <hr>
     <div>
@@ -54,12 +54,12 @@
       <tfoot>
         <tr>
           <td></td>
-          <td>Total Amount this term</td>
+          <td>Total Amount this month</td>
           <td>{{ object.amount_payable | intcomma}}</td>
         </tr>
         <tr>
           <td></td>
-          <td>Balance from previous term</td>
+          <td>Balance from previous month</td>
           <td>{{ object.previous_balance | intcomma }}</td>
         </tr>
         <tr>
