@@ -4,14 +4,6 @@ from .models import Invoice, InvoiceItem, Receipt, Student
 from django_select2.forms import ModelSelect2Widget
 
 class InvoiceForm(ModelForm):
-    student = ModelChoiceField(
-        queryset=Student.objects.all(),
-        widget=ModelSelect2Widget(
-            model=Student,
-            search_fields=['firstname__icontains'],  # Enables search by student name
-            attrs={'data-placeholder': 'Search for a student...'}
-        )
-    )
     class Meta:
         model = Invoice
         fields = "__all__"
