@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load django_select2 %}
 
 
 {% block title %}
@@ -88,7 +89,7 @@ Add new invoice
   {% if object %}
   <input type="submit" class="btn btn-primary" value="Update Record">
   {% else %}
-  <input type="submit" class="btn btn-primary" value="Add new invoice">
+  <input type="submit" class="btn btn-primary" value="Save">
   {% endif %}
 </form>
 
