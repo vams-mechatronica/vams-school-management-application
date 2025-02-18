@@ -39,9 +39,8 @@
 
         <form class="login100-form validate-form" method="post" action="{% url 'login' %}">
           {% csrf_token %}
-          <span class="login100-form-title">
-            {{ school_name }}
-          </span>
+          <span class="login100-form-title">{{ school_name }}</span>
+          <span class="login100-form-subtitle">{{school_address}}</span>
           <span class="error-msg">
             {% if form.errors %}
             <p class="error-msg">Your username and password didn't match. Please try again.</p>
