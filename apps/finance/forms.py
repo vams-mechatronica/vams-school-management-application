@@ -1,7 +1,6 @@
 
 from django.forms import inlineformset_factory, modelformset_factory,ModelForm,ModelChoiceField
 from .models import Invoice, InvoiceItem, Receipt, Student
-from django_select2.forms import ModelSelect2Widget
 
 class InvoiceForm(ModelForm):
     class Meta:
