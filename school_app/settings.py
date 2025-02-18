@@ -45,8 +45,7 @@ INSTALLED_APPS = [
     "apps.finance",
     "apps.result",
     "apps.attendance",
-    "apps.user",
-    "django_select2",
+    "apps.user"
 ]
 
 MIDDLEWARE = [
