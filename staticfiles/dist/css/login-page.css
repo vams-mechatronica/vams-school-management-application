@@ -12,61 +12,68 @@
 [ RESTYLE TAG ]*/
 
 * {
-	margin: 0px; 
-	padding: 0px; 
-	box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
 }
 
-body, html {
-	height: 100%;
-	font-family: Poppins-Regular, sans-serif;
+body,
+html {
+  height: 100%;
+  font-family: sans-serif;
 }
 
 /*---------------------------------------------*/
 a {
-	font-family: Poppins-Regular;
-	font-size: 14px;
-	line-height: 1.7;
-	color: #666666;
-	margin: 0px;
-	transition: all 0.4s;
-	-webkit-transition: all 0.4s;
+  font-family: sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #666666;
+  margin: 0px;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
   -o-transition: all 0.4s;
   -moz-transition: all 0.4s;
 }
 
 a:focus {
-	outline: none !important;
+  outline: none !important;
 }
 
 a:hover {
-	text-decoration: none;
+  text-decoration: none;
   color: #6862d5;
 }
 
 /*---------------------------------------------*/
-h1,h2,h3,h4,h5,h6 {
-	margin: 0px;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0px;
 }
 
 p {
-	font-family: Poppins-Regular;
-	font-size: 14px;
-	line-height: 1.7;
-	color: #666666;
-	margin: 0px;
+  font-family: Poppins-Regular;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #666666;
+  margin: 0px;
 }
 
-ul, li {
-	margin: 0px;
-	list-style-type: none;
+ul,
+li {
+  margin: 0px;
+  list-style-type: none;
 }
 
 
 /*---------------------------------------------*/
 input {
-	outline: none;
-	border: none;
+  outline: none;
+  border: none;
 }
 
 textarea {
@@ -74,57 +81,102 @@ textarea {
   border: none;
 }
 
-textarea:focus, input:focus {
+textarea:focus,
+input:focus {
   border-color: transparent !important;
 }
 
-input:focus::-webkit-input-placeholder { color:transparent; }
-input:focus:-moz-placeholder { color:transparent; }
-input:focus::-moz-placeholder { color:transparent; }
-input:focus:-ms-input-placeholder { color:transparent; }
+input:focus::-webkit-input-placeholder {
+  color: transparent;
+}
 
-textarea:focus::-webkit-input-placeholder { color:transparent; }
-textarea:focus:-moz-placeholder { color:transparent; }
-textarea:focus::-moz-placeholder { color:transparent; }
-textarea:focus:-ms-input-placeholder { color:transparent; }
+input:focus:-moz-placeholder {
+  color: transparent;
+}
 
-input::-webkit-input-placeholder { color: #999999; }
-input:-moz-placeholder { color: #999999; }
-input::-moz-placeholder { color: #999999; }
-input:-ms-input-placeholder { color: #999999; }
+input:focus::-moz-placeholder {
+  color: transparent;
+}
 
-textarea::-webkit-input-placeholder { color: #999999; }
-textarea:-moz-placeholder { color: #999999; }
-textarea::-moz-placeholder { color: #999999; }
-textarea:-ms-input-placeholder { color: #999999; }
+input:focus:-ms-input-placeholder {
+  color: transparent;
+}
+
+textarea:focus::-webkit-input-placeholder {
+  color: transparent;
+}
+
+textarea:focus:-moz-placeholder {
+  color: transparent;
+}
+
+textarea:focus::-moz-placeholder {
+  color: transparent;
+}
+
+textarea:focus:-ms-input-placeholder {
+  color: transparent;
+}
+
+input::-webkit-input-placeholder {
+  color: #999999;
+}
+
+input:-moz-placeholder {
+  color: #999999;
+}
+
+input::-moz-placeholder {
+  color: #999999;
+}
+
+input:-ms-input-placeholder {
+  color: #999999;
+}
+
+textarea::-webkit-input-placeholder {
+  color: #999999;
+}
+
+textarea:-moz-placeholder {
+  color: #999999;
+}
+
+textarea::-moz-placeholder {
+  color: #999999;
+}
+
+textarea:-ms-input-placeholder {
+  color: #999999;
+}
 
 /*---------------------------------------------*/
 button {
-	outline: none !important;
-	border: none;
-	background: transparent;
+  outline: none !important;
+  border: none;
+  background: transparent;
 }
 
 button:hover {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 iframe {
-	border: none !important;
+  border: none !important;
 }
 
 
 /*//////////////////////////////////////////////////////////////////
 [ Utility ]*/
 .txt1 {
-  font-family: Poppins-Regular;
+  font-family: sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: #999999;
 }
 
 .txt2 {
-  font-family: Poppins-Regular;
+  font-family: sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: #666666;
@@ -139,6 +191,23 @@ iframe {
   margin: 0 auto;
 }
 
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("../img/main-background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0.6;
+  /* Set desired opacity level */
+  z-index: -1;
+  /* Ensure the background is behind the content */
+}
+
+
 .container-login100 {
   width: 100%;
   min-height: 100vh;
@@ -151,18 +220,25 @@ iframe {
   justify-content: center;
   align-items: center;
   padding: 15px;
-  background: #514858;
+  /* background-image: url("../img/login.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0.6;
+  z-index: -1; */
+  /* background: #514858;
   background: -webkit-linear-gradient(-135deg, #968f8e, #241d20);
   background: -o-linear-gradient(-135deg, #968f8e, #241d20);
   background: -moz-linear-gradient(-135deg, #968f8e, #241d20);
-  background: linear-gradient(-135deg,#968f8e, #241d20 );
- 
+  background: linear-gradient(-135deg,#968f8e, #241d20 ); */
+
 }
 
 .wrap-login100 {
-  width: 960px;
+  position: relative;
+  width: 515px;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 40px;
   overflow: hidden;
 
   display: -webkit-box;
@@ -171,8 +247,10 @@ iframe {
   display: -ms-flexbox;
   display: flex;
   flex-wrap: wrap;
+  opacity: 1;
+  z-index: 1;
   justify-content: space-between;
-  padding: 177px 130px 33px 95px;
+  padding: 40px 100px 40px 100px;
 }
 
 /*------------------------------------------------------------------
@@ -188,19 +266,33 @@ iframe {
 /*------------------------------------------------------------------
 [  ]*/
 .login100-form {
-  width: 290px;
+  width: 315px;
 }
 
 .login100-form-title {
-  font-family: Poppins-Bold;
+  font-family: sans-serif;
   font-size: 24px;
+  font-weight: 600;
+  color: #333333;
+  line-height: 1.2;
+  text-align: center;
+  
+
+  width: 100%;
+  display: block;
+  padding-bottom: 10px;
+}
+
+.login100-form-subtitle {
+  font-family: sans-serif;
+  font-size: 16px;
   color: #333333;
   line-height: 1.2;
   text-align: center;
 
   width: 100%;
   display: block;
-  padding-bottom: 54px;
+  padding-bottom: 35px;
 }
 
 
@@ -214,7 +306,7 @@ iframe {
 }
 
 .input100 {
-  font-family: Poppins-Medium;
+  font-family: sans-serif;
   font-size: 15px;
   line-height: 1.5;
 
@@ -241,7 +333,7 @@ iframe {
   color: rgba(#6862d5);
 }
 
-.input100:focus + .focus-input100 {
+.input100:focus+.focus-input100 {
   -webkit-animation: anim-shadow 0.5s ease-in-out forwards;
   animation: anim-shadow 0.5s ease-in-out forwards;
 }
@@ -285,7 +377,7 @@ iframe {
   transition: all 0.4s;
 }
 
-.input100:focus + .focus-input100 + .symbol-input100 {
+.input100:focus+.focus-input100+.symbol-input100 {
   color: #6862d5;
   padding-left: 28px;
 }
@@ -305,7 +397,7 @@ iframe {
 }
 
 .login100-form-btn {
-  font-family: Montserrat-Bold;
+  font-family: sans-serif;
   font-size: 15px;
   line-height: 1.5;
   color: #fff;
@@ -331,7 +423,7 @@ iframe {
 }
 
 .login100-form-btn:hover {
-  background: #333333;
+  background: #be2323;
 }
 
 
@@ -374,15 +466,32 @@ iframe {
     padding: 100px 15px 33px 15px;
   }
 }
+
 .p-t-136 {
-    padding-top: 80px;
+  padding-top: 80px;
 }
-.p-t-12 {padding-top: 12px;}
+
+.p-t-12 {
+  padding-top: 12px;
+}
+
 /* ------------------------------------ */
-.text-center {text-align: center;}
-.text-left {text-align: left;}
-.text-right {text-align: right;}
-.text-middle {vertical-align: middle;}
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-middle {
+  vertical-align: middle;
+}
+
 /*------------------------------------------------------------------
 [ Alert validate ]*/
 
@@ -407,7 +516,7 @@ iframe {
   right: 8px;
   pointer-events: none;
 
-  font-family: Poppins-Medium;
+  font-family: sans-serif;
   color: #c80000;
   font-size: 13px;
   line-height: 1.4;
@@ -422,9 +531,13 @@ iframe {
   transition: opacity 0.4s;
 }
 
+p {
+  font-family: sans-serif;
+}
+
 .alert-validate::after {
   content: "\f06a";
-  font-family: FontAwesome;
+  font-family: sans-serif;
   display: block;
   position: absolute;
   color: #c80000;
@@ -450,6 +563,6 @@ iframe {
   }
 }
 
-.error-msg{
-  color:red;
+.error-msg {
+  color: red;
 }

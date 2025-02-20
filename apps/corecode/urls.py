@@ -22,9 +22,12 @@ from .views import (
     TermUpdateView,
     DashboardDataAPIView
 )
+from django_select2.views import AutoResponseView
 
 urlpatterns = [
     path("", IndexView.as_view(), name="home"),
+    path("select2/", AutoResponseView.as_view(), name="django_select2"),
+
     path("site-config", SiteConfigView.as_view(), name="configs"),
     path(
         "current-session/", CurrentSessionAndTermView.as_view(), name="current-session"

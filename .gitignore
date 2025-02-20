@@ -160,3 +160,4 @@ cython_debug/
 
 # python
 school_app/settings.py
+staticfiles/

@@ -105,7 +105,7 @@ body {
 /* LINKS */
 
 a:link, a:visited {
-    color: var(--link-fg);
+    /* color: var(--link-fg); */
     text-decoration: none;
     transition: color 0.15s, background 0.15s;
 }
@@ -1177,3 +1177,21 @@ a.deletelink:focus, a.deletelink:hover {
     color: var(--body-fg);
     background-color: var(--body-bg);
 }
+
+/* Set the height of the Select2 selection box */
+.select2-container--default .select2-selection--single {
+    height: 38px !important;  /* Adjust as needed */
+    line-height: 38px !important;
+}
+
+/* Align text inside the Select2 box */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px !important;
+}
+
+/* Set the height of the dropdown */
+/* .select2-dropdown {
+    max-height: 300px !important; 
+    overflow-y: auto !important;
+}
+*/

@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "apps.finance",
     "apps.result",
     "apps.attendance",
-    "apps.user"
+    "apps.user",
+    "django_select2"
 ]
 
 MIDDLEWARE = [
@@ -193,3 +194,6 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Site Default values
+
+SELECT2_JS = "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
+SELECT2_CSS = "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"

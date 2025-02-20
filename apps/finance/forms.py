@@ -1,11 +1,20 @@
 
 from django.forms import inlineformset_factory, modelformset_factory,ModelForm,ModelChoiceField
+from django_select2.forms import Select2Widget,ModelSelect2Widget
 from .models import Invoice, InvoiceItem, Receipt, Student
+
+class StudentSelect2Widget(ModelSelect2Widget):
+    model = Student
+    search_fields = ["firstname__icontains", "surname__icontains", "admission_number__icontains"]   
+
 
 class InvoiceForm(ModelForm):
     class Meta:
         model = Invoice
         fields = "__all__"
+        widgets = {
+            'student': StudentSelect2Widget
+        }
 
     def __init__(self, *args, **kwargs):
         student = kwargs.pop('student', None)
