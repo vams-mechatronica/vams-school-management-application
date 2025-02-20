@@ -88,13 +88,9 @@ WSGI_APPLICATION = "school_app.wsgi.application"
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'ashekhar$vams-sms',
-            'USER': 'ashekhar',
-            'PASSWORD': '1@V@MSots1#',
-            'HOST': 'ashekhar.mysql.pythonanywhere-services.com',
-            # 'PORT': '3306',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3")
         }
     }
 
