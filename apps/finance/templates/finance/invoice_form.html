@@ -104,8 +104,13 @@ Add new invoice
   document.addEventListener('DOMContentLoaded', function () {
     const studentSelect = document.getElementById('id_student');
 
-    studentSelect.addEventListener('change', function () {
-        const studentId = this.value;
+    $('#id_student').select2();
+
+    //studentSelect.addEventListener('change', function () {
+      //  const studentId = this.value;
+    $('#id_student').on('change', function () {
+        const studentId = $(this).val();
+        console.log(studentId);
 
         if (studentId) {
             fetch(`api/get-student-data/?student_id=${studentId}`)
