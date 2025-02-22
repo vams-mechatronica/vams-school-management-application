@@ -46,7 +46,16 @@ INSTALLED_APPS = [
     "apps.result",
     "apps.attendance",
     "apps.user",
-    "django_select2"
+    "apps.api",
+    "django_select2",
+    "rest_framework",
+    'rest_framework.authtoken',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +67,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.corecode.middleware.SiteWideConfigs",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "school_app.urls"
@@ -87,12 +97,23 @@ WSGI_APPLICATION = "school_app.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+# DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": os.path.join(BASE_DIR, "db.sqlite3")
+#         }
+#     }
+
 DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3")
-        }
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'ashekhar$vams-sms',
+            'USER': 'ashekhar',
+            'PASSWORD': '1@V@MSots1#',
+            'HOST': 'ashekhar.mysql.pythonanywhere-services.com',
+            # 'PORT': '3306',
     }
+}
 
 
 # Password validation
@@ -185,6 +206,12 @@ LOGGING = {
             "propagate": True,
         },
     },
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

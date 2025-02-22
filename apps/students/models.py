@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from apps.corecode.models import StudentClass
 
 
+
 class Student(models.Model):
     STATUS_CHOICES = [("active", "Active"), ("inactive", "Inactive")]
 
@@ -44,6 +45,8 @@ class Student(models.Model):
     )
     adharcard = models.ImageField(blank=True, upload_to="students/adharcard/")
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
 
     class Meta:
         ordering = ["surname", "firstname", "other_name"]
