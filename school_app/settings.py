@@ -67,7 +67,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.corecode.middleware.SiteWideConfigs",
-    "allauth.account.middleware.AccountMiddleware",
+    # "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "school_app.urls"
@@ -169,7 +169,7 @@ MEDIA_URL = "/media/"
 LOGIN_REDIRECT_URL = "/"
 
 LOGOUT_REDIRECT_URL = "/"
-
+SITE_ID = 1
 
 SESSION_SAVE_EVERY_REQUEST = True
 
