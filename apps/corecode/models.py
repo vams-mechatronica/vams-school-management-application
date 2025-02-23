@@ -27,8 +27,8 @@ ALLOWED_EXTENSIONS = ("jpg", "jpeg", "png")
 FAVICON_ICON_ALLOWED_EXTENSION = ("ico",)
 
 class SchoolDetail(models.Model):
-    name = models.CharField(max_length=255, unique=True, verbose_name="School Name")
-    short_name = models.CharField(max_length=50, unique=True, verbose_name="School Short Name")
+    name = models.CharField(max_length=255, unique=True, verbose_name="School Name",default="My School")
+    short_name = models.CharField(max_length=50, unique=True, verbose_name="School Short Name",default="VAMS")
     slogan = models.CharField(max_length=255, blank=True, null=True, verbose_name="School Slogan")
     address = models.TextField(verbose_name="School Address")
 
