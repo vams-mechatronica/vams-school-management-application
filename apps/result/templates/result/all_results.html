@@ -60,51 +60,61 @@
     <button type="button" class="btn btn-secondary" onclick="printResult();">Print</button>
   </form>
 
+  <div class="printable-area" style="margin:2% 5%;">
+  <div id="print-header" style="text-align: center; margin-bottom: 20px;">
+    <img src="{{letterheader_image}}" alt="School LetterHead" style="max-width: 100%; height: 100%;">
+    <h3>{{ school_name }}</h3>
+    <p>{{ school_address }}</p>
+  </div>
   {% for student_id, student_data in results.items %}
     <div class="card mt-4">
-      <div class="card-header">
-        {{ student_data.student }}
-      </div>
-      <div class="card-body printable-area">
-        {% for term_id, term_data in student_data.terms.items %}
-          <h5 style="margin: 21px; text-align: center;">{{ term_data.term.name }}</h5>
-          <table class="table table-bordered table-sm">
-            <thead class="thead-light">
-              <tr>
-                <th>#</th>
-                <th>Subject</th>
-                <th>Test Score</th>
-                <th>Exam Score</th>
-                <th>Total Score</th>
-                <th>Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for subject in term_data.subjects %}
+      <div class="card-body">
+        <div class="card-header">
+          {{ student_data.student }} - {{student_data.current_class}} 
+        </div>
+        
+          {% for term_id, term_data in student_data.terms.items %}
+            <h5 style="margin: 21px; text-align: center;">{{ term_data.term.name }}</h5>
+            <table class="table table-bordered table-sm">
+              <thead class="thead-light">
                 <tr>
-                  <td>{{ forloop.counter }}</td>
-                  <td>{{ subject.subject }}</td>
-                  <td>{{ subject.test_score }}</td>
-                  <td>{{ subject.exam_score }}</td>
-                  <td>{{ subject.test_score|add:subject.exam_score }}</td>
-                  <td>{{ subject.calc_grade }}</td>
+                  <th>#</th>
+                  <th>Subject</th>
+                  <th>Test Score</th>
+                  <th>Exam Score</th>
+                  <th>Total Score</th>
+                  <th>Grade</th>
                 </tr>
-              {% endfor %}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="2"><strong>Totals</strong></td>
-                <td>{{ term_data.test_total }}</td>
-                <td>{{ term_data.exam_total }}</td>
-                <td>{{ term_data.total_total }}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        {% endfor %}
+              </thead>
+              <tbody>
+                {% for subject in term_data.subjects %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ subject.subject }}</td>
+                    <td>{{ subject.test_score }}</td>
+                    <td>{{ subject.exam_score }}</td>
+                    <td>{{ subject.test_score|add:subject.exam_score }}</td>
+                    <td>{{ subject.calc_grade }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2"><strong>Totals</strong></td>
+                  <td>{{ term_data.test_total }}</td>
+                  <td>{{ term_data.exam_total }}</td>
+                  <td>{{ term_data.total_total }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          {% endfor %}
+        
+        
       </div>
     </div>
   {% endfor %}
+  </div>
 </div>
 {% endblock fullcard %}
 
@@ -129,10 +139,31 @@ function filterStudents(classId) {
     });
 }
 
-function printResult() {
-    var printContents = document.querySelector('.printable-area').innerHTML;
-    var originalContents = document.body.innerHTML;
-    window.print();
-}
+
+  function printResult() {
+      var printContents = document.querySelector('.printable-area').innerHTML;
+      var originalContents = document.body.innerHTML;
+  
+      // Get current date and time
+      var now = new Date();
+      var formattedDate = now.toLocaleString(); // Format: MM/DD/YYYY, HH:MM:SS
+  
+      // Add date to the printable content
+      printContents += `<div style="position: fixed; bottom: 20px; right: 20px; font-size: 12px; color: gray;">
+                          Printed on: ${formattedDate}
+                        </div>`;
+  
+      // Replace body content with only the result section
+      document.body.innerHTML = printContents;
+      
+      window.print();
+  
+      // Restore original content after printing
+      document.body.innerHTML = originalContents;
+      location.reload(); // Reload the page to restore JS functionality
+  }
+  
+  
+  
 </script>
 {% endblock morejs %}
