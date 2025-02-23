@@ -12,4 +12,46 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = '__all__'
 
+class AttendanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentAttendance
+        fields = '__all__'
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+    
+class StaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Staff
+        fields = '__all__'
+
+class AcademicSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AcademicSession
+        fields = '__all__'
+
+class AcademicTermSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AcademicTerm
+        fields = '__all__'
+
+class StudentClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentClass
+        fields = '__all__'
+
+class ReceiptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Receipt
+        fields = '__all__'
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+
+
+
 
