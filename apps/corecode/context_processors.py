@@ -12,6 +12,6 @@ def site_defaults(request):
         "school_short_name":site_config.short_name if site_config else "My School",
         "slogan":site_config.slogan if site_config else "My School",
         "address":site_config.address if site_config else "My School",
-        "letterheader_image":site_config.letterhead.url if site_config.letterhead else "#",
+        "letterheader_image":site_config.letterhead.url if site_config else "#",
     }
     return contexts
