@@ -1195,3 +1195,7 @@ a.deletelink:focus, a.deletelink:hover {
     overflow-y: auto !important;
 }
 */
+.card-title {
+    color: white;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}

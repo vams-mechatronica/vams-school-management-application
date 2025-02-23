@@ -108,7 +108,11 @@
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <!-- Brand Logo -->
-      <a href="{% url 'home' %}" class="brand-link">{{ school_name | default:"MySchool" }}</a>
+      <a href="{% url 'home' %}" class="brand-link">
+        <span class="brand-text font-weight-light d-none d-md-inline">{{ school_name | default:"MySchool" }}</span>
+        <span class="brand-text font-weight-light d-md-none">{{ school_short_name | default:"MS" }}</span>
+      </a>
+      
 
       <!-- Sidebar -->
       <div class="sidebar">
@@ -377,6 +381,63 @@ function printarea() {
     //document.body.innerHTML = originalContents;
 }
 </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      console.log("Script loaded!");  // Debugging line to check if script runs
+
+      let sidebarTitle = document.getElementById("sidebar-title");
+
+      // Ensure the element exists before running the script
+      if (!sidebarTitle) {
+          console.error("Sidebar title element not found!");
+          return;
+      }
+
+      let fullName = "{{ school_name | default:'MySchool' }}";
+      let shortName = "{{ short_name | default:'MS' }}";
+
+      function updateSidebarTitle() {
+          console.log("Updating sidebar title..."); // Debugging line
+
+          let body = document.body;
+
+          // Check if sidebar is collapsed
+          if (body.classList.contains("sidebar-collapse")) {
+              sidebarTitle.textContent = shortName;
+          } else {
+              sidebarTitle.textContent = fullName;
+          }
+      }
+
+      // Run on page load
+      updateSidebarTitle();
+
+      // Run when sidebar is toggled
+      let toggleButton = document.querySelector("[data-widget='pushmenu']");
+      if (toggleButton) {
+          toggleButton.addEventListener("click", function() {
+              console.log("Sidebar toggle clicked"); // Debugging line
+              setTimeout(updateSidebarTitle, 300); // Wait for animation to complete
+          });
+      } else {
+          console.error("Sidebar toggle button not found!");
+      }
+
+      // Detect sidebar collapse dynamically
+      let observer = new MutationObserver(function(mutationsList) {
+          for (let mutation of mutationsList) {
+              if (mutation.attributeName === "class") {
+                  console.log("Sidebar class changed"); // Debugging line
+                  updateSidebarTitle();
+              }
+          }
+      });
+
+      observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  });
+</script>
+
 <script>
 document.getElementById('logout-link').addEventListener('click', function(event) {
     event.preventDefault();
