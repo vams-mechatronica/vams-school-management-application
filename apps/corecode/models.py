@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 # Create your models here.
 
 
@@ -11,6 +13,79 @@ class SiteConfig(models.Model):
 
     def __str__(self):
         return self.key
+
+
+
+# Custom validator for file size
+def validate_file_size(value):
+    max_size = 5 * 1024 * 1024  # 5MB
+    if value.size > max_size:
+        raise ValidationError(_("File size must not exceed 5MB."))
+
+# Allowed file extensions
+ALLOWED_EXTENSIONS = ("jpg", "jpeg", "png")
+FAVICON_ICON_ALLOWED_EXTENSION = ("ico",)
+
+class SchoolDetail(models.Model):
+    name = models.CharField(max_length=255, unique=True, verbose_name="School Name")
+    short_name = models.CharField(max_length=50, unique=True, verbose_name="School Short Name")
+    slogan = models.CharField(max_length=255, blank=True, null=True, verbose_name="School Slogan")
+    address = models.TextField(verbose_name="School Address")
+
+    # Image fields with validation
+    logo_vertical = models.ImageField(
+        upload_to="school/logos/", blank=True, null=True, verbose_name="Vertical Logo",
+        validators=[FileExtensionValidator(ALLOWED_EXTENSIONS), validate_file_size]
+    )
+    logo_horizontal = models.ImageField(
+        upload_to="school/logos/", blank=True, null=True, verbose_name="Horizontal Logo",
+        validators=[FileExtensionValidator(ALLOWED_EXTENSIONS), validate_file_size]
+    )
+    favicon = models.ImageField(
+        upload_to="school/favicon/", blank=True, null=True, verbose_name="Favicon Icon",
+        validators=[FileExtensionValidator(FAVICON_ICON_ALLOWED_EXTENSION), validate_file_size]
+    )
+    letterhead = models.ImageField(
+        upload_to="school/letterhead/", blank=True, null=True, verbose_name="Letterhead Image",
+        validators=[FileExtensionValidator(ALLOWED_EXTENSIONS), validate_file_size]
+    )
+    signature = models.ImageField(
+        upload_to="school/signatures/", blank=True, null=True, verbose_name="Signature Image",
+        validators=[FileExtensionValidator(ALLOWED_EXTENSIONS), validate_file_size]
+    )
+    background_image = models.ImageField(
+        upload_to="school/backgrounds/", blank=True, null=True, verbose_name="First Page Background",
+        validators=[FileExtensionValidator(ALLOWED_EXTENSIONS), validate_file_size]
+    )
+
+    # Other details
+    authorized_signatory = models.CharField(max_length=100, blank=True, null=True, verbose_name="Authorized Signatory")
+    school_strength = models.PositiveIntegerField(default=0, verbose_name="School Strength")
+    
+    medium_choices = [
+        ('English', 'English'),
+        ('Hindi', 'Hindi'),
+    ]
+    medium = models.CharField(max_length=10, choices=medium_choices, verbose_name="Medium of Instruction")
+
+    # Subdomain for multi-school support
+    subdomain = models.CharField(max_length=100, unique=True, verbose_name="School Subdomain")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("SchoolDetail")
+        verbose_name_plural = _("SchoolDetails")
+    
+    def save(self, *args, **kwargs):
+        """Ensure only one instance of SchoolDetail exists."""
+        if not self.pk and SchoolDetail.objects.exists():
+            raise ValidationError("Only one SchoolDetail instance is allowed.")
+        return super().save(*args, **kwargs)
 
 
 class AcademicSession(models.Model):

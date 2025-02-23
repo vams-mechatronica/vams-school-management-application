@@ -14,13 +14,14 @@ from .forms import (
     SiteConfigForm,
     StudentClassForm,
     SubjectForm,
+    SchoolDetailForm
 )
 from .models import (
     AcademicSession,
     AcademicTerm,
     SiteConfig,
     StudentClass,
-    Subject,
+    Subject,SchoolDetail
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -67,6 +68,28 @@ class SiteConfigView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
         
         context = {"formset": formset, "title": "Configuration"}
         return render(request, self.template_name, context)
+
+class SchoolDetailView(LoginRequiredMixin, SuccessMessageMixin, View):
+    """Create or Update School Configuration"""
+
+    template_name = "corecode/school_detail.html"
+    success_message = "Configuration successfully updated"
+
+    def get(self, request):
+        school_detail = SchoolDetail.objects.first()
+        form = SchoolDetailForm(instance=school_detail)  # Prefill form if data exists
+        edit_mode = request.GET.get("edit", False)  # Check if edit mode is requested
+        return render(request, self.template_name, {"form": form, "school_detail": school_detail, "edit_mode": edit_mode})
+
+    def post(self, request):
+        school_detail = SchoolDetail.objects.first()
+        form = SchoolDetailForm(request.POST, request.FILES, instance=school_detail)
+
+        if form.is_valid():
+            form.save()
+            return redirect("school-configs")  # Redirect after save
+
+        return render(request, self.template_name, {"form": form, "school_detail": school_detail, "edit_mode": True})
 
 
 class SessionListView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, ListView):

@@ -52,6 +52,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = '__all__'
 
+class SchoolDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SchoolDetail
+        fields = '__all__'
 
 
 

@@ -31,3 +31,14 @@ class IsInvoiceOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Students can only view their own invoices
         return obj.student.user == request.user
+
+class CanDeleteSchool(permissions.BasePermission):
+    """
+    Custom permission to allow only users with delete permission to delete a school.
+    """
+
+    def has_permission(self, request, view):
+        # Only allow DELETE if the user has delete permissions
+        if view.action == "destroy":
+            return request.user.has_perm('app_name.delete_school')
+        return True
