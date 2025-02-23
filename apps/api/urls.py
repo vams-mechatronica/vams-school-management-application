@@ -34,4 +34,10 @@ urlpatterns = [
     # Receipt URLs
     path('receipts/', ReceiptListCreateView.as_view(), name='receipt-list-create'),
     path('receipts/<int:pk>/', ReceiptRetrieveUpdateDestroyView.as_view(), name='receipt-retrieve-update-destroy'),
+
+    path('schools/', SchoolListAPI.as_view(), name='school-list'),
+    path('schools/create/', SchoolCreateAPI.as_view(), name='school-create'),
+    path('schools/<int:pk>/', SchoolRetrieveAPI.as_view(), name='school-detail'),
+    path('schools/<int:pk>/update/', SchoolUpdateAPI.as_view(), name='school-update'),
+    path('schools/<int:pk>/delete/', SchoolDeleteAPI.as_view(), name='school-delete'),
 ]

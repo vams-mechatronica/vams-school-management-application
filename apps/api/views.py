@@ -4,8 +4,8 @@ from .serializers import *
 from rest_framework import generics
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
-from .permissions import IsStaff, CanDeleteStudent, IsAdminOrStaff, IsInvoiceOwner, IsStudent
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from .permissions import IsStaff, CanDeleteStudent, IsAdminOrStaff, IsInvoiceOwner, IsStudent, CanDeleteSchool
 from rest_framework.authentication import BasicAuthentication,TokenAuthentication
 
 # Create your views here.
@@ -129,3 +129,35 @@ class ReceiptRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAdminOrStaff,)
 
 
+class SchoolCreateAPI(generics.CreateAPIView):
+    """API to create a new school"""
+    serializer_class = SchoolDetailSerializer
+    queryset = SchoolDetail.objects.all()
+    permission_classes = [IsAdminUser]  # Only admin can create
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
+
+class SchoolListAPI(generics.ListAPIView):
+    """API to list all schools"""
+    serializer_class = SchoolDetailSerializer
+    queryset = SchoolDetail.objects.all()
+    permission_classes = [AllowAny]  # Anyone can view list
+
+class SchoolRetrieveAPI(generics.RetrieveAPIView):
+    """API to retrieve details of a single school"""
+    serializer_class = SchoolDetailSerializer
+    queryset = SchoolDetail.objects.all()
+    permission_classes = [AllowAny]
+
+class SchoolUpdateAPI(generics.UpdateAPIView):
+    """API to update school details"""
+    serializer_class = SchoolDetailSerializer
+    queryset = SchoolDetail.objects.all()
+    permission_classes = [IsAdminUser]  # Only admin can update
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
+
+class SchoolDeleteAPI(generics.DestroyAPIView):
+    """API to delete a school (Only users with delete permission)"""
+    serializer_class = SchoolDetailSerializer
+    queryset = SchoolDetail.objects.all()
+    permission_classes = [IsAdminUser, CanDeleteSchool]  # Custom delete permission
+    authentication_classes = [TokenAuthentication, BasicAuthentication]

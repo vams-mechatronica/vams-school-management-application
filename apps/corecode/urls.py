@@ -20,7 +20,8 @@ from .views import (
     TermDeleteView,
     TermListView,
     TermUpdateView,
-    DashboardDataAPIView
+    DashboardDataAPIView,
+    SchoolDetailView
 )
 from django_select2.views import AutoResponseView
 
@@ -29,6 +30,7 @@ urlpatterns = [
     path("select2/", AutoResponseView.as_view(), name="django_select2"),
 
     path("site-config", SiteConfigView.as_view(), name="configs"),
+    path("site-detail-config", SchoolDetailView.as_view(), name="school-configs"),
     path(
         "current-session/", CurrentSessionAndTermView.as_view(), name="current-session"
     ),

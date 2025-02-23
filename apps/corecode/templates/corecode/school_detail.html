@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}
+School Configuration
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+  {% if school_detail and not edit_mode %}
+    <h3>School Configuration</h3>
+    <table class="table table-bordered">
+      <tr><th>School Name</th><td>{{ school_detail.name }}</td></tr>
+      <tr><th>Short Name</th><td>{{ school_detail.short_name }}</td></tr>
+      <tr><th>Address</th><td>{{ school_detail.address }}</td></tr>
+      <tr><th>Slogan</th><td>{{ school_detail.slogan }}</td></tr>
+      <tr><th>Subdomain</th><td>{{ school_detail.subdomain }}</td></tr>
+      <tr><th>Medium</th><td>{{ school_detail.medium }}</td></tr>
+      <tr><th>School Strength</th><td>{{ school_detail.school_strength }}</td></tr>
+      <tr>
+        <th>Logo (Vertical)</th>
+        <td>
+          {% if school_detail.logo_vertical %}
+            <img src="{{ school_detail.logo_vertical.url }}" alt="Vertical Logo" width="100">
+          {% else %}
+            <span class="text-muted">No image uploaded</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Logo (Horizontal)</th>
+        <td>
+          {% if school_detail.logo_horizontal %}
+            <img src="{{ school_detail.logo_horizontal.url }}" alt="Horizontal Logo" width="150">
+          {% else %}
+            <span class="text-muted">No image uploaded</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Favicon</th>
+        <td>
+          {% if school_detail.favicon %}
+            <img src="{{ school_detail.favicon.url }}" alt="Favicon" width="32">
+          {% else %}
+            <span class="text-muted">No favicon uploaded</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Letterhead</th>
+        <td>
+          {% if school_detail.letterhead %}
+            <img src="{{ school_detail.letterhead.url }}" alt="Letterhead" width="200">
+          {% else %}
+            <span class="text-muted">No letterhead uploaded</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Signature</th>
+        <td>
+          {% if school_detail.signature %}
+            <img src="{{ school_detail.signature.url }}" alt="Signature" width="100">
+          {% else %}
+            <span class="text-muted">No signature uploaded</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Background</th>
+        <td>
+          {% if school_detail.background %}
+            <img src="{{ school_detail.background.url }}" alt="Background Image" width="300">
+          {% else %}
+            <span class="text-muted">No background image uploaded</span>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+
+    <a href="?edit=true" class="btn btn-warning">Edit Configuration</a>
+
+  {% else %}
+    <h3>Edit School Configuration</h3>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+        {% for field in form %}
+        <div class="form-group row">
+          <div class="col-2">{{ field.label_tag}}</div>
+          <div class="col-6">
+            {{ field | add_class:"form-control"}}
+            <span class="small">{{ field.help_text |safe}}</span>
+
+            {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <input type="submit" value="Save" class="w-25 btn btn-primary">
+    </form>
+  {% endif %}
+</div>
+{% endblock content %}
