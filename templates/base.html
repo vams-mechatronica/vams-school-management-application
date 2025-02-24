@@ -408,6 +408,14 @@ document.getElementById('logout-link').addEventListener('click', function(event)
           allowClear: true
       });
   });
+
+  $(document).ready(function() {
+    $("#student-select").select2({
+        width: "100%",
+        placeholder: "Search...",
+        allowClear: true
+    });
+});
 </script>
 
 
