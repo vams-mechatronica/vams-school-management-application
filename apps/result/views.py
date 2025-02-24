@@ -100,20 +100,18 @@ from .models import Result, AcademicTerm
 class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
     permission_required = 'result.view_result'
     model = Result
+    paginate_by = 10  # Set default pagination limit
 
     def get_queryset(self):
         user = self.request.user
-
-        # If the user is a superuser or staff, allow viewing all records
+        
         if user.is_superuser or user.is_staff:
             return self.model.objects.all()
 
-        # If the user is in the 'Students' group, allow viewing only their own record
         if user.groups.filter(name='Students').exists():
             student = Student.objects.get(user=user)
             return self.model.objects.filter(student=student)
-
-        # Default: return an empty queryset if the user doesn't fit the above categories
+        
         return self.model.objects.none()
 
     def get(self, request, *args, **kwargs):
@@ -123,8 +121,7 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
         selected_student = request.GET.get("student")
 
         queryset = self.get_queryset()
-
-        # Apply filters based on the selected options
+        
         if session:
             queryset = queryset.filter(session_id=session)
         if selected_term:
@@ -133,10 +130,13 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
             queryset = queryset.filter(current_class_id=selected_class)
         if selected_student:
             queryset = queryset.filter(student_id=selected_student)
-
-        # Organize results by student and term
+        
+        paginator = Paginator(queryset, self.paginate_by)
+        page = request.GET.get('page')
+        paginated_results = paginator.get_page(page)
+        
         bulk = {}
-        for result in queryset:
+        for result in paginated_results:
             student_id = result.student.id
             if student_id not in bulk:
                 bulk[student_id] = {"student": result.student, "terms": {}}
@@ -155,7 +155,7 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
             term_data["test_total"] += result.test_score
             term_data["exam_total"] += result.exam_score
             term_data["total_total"] += result.test_score + result.exam_score
-
+        
         context = {
             "results": bulk,
             "terms": AcademicTerm.objects.all(),
@@ -166,5 +166,6 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
             "selected_session": session,
             "selected_class": selected_class,
             "selected_student": selected_student,
+            "paginated_results": paginated_results,
         }
         return render(request, "result/all_results.html", context)
