@@ -150,27 +150,29 @@
               </a>
             </li>
             <li class="nav-header">Results</li>
-            {% if request.user.is_staff %}
-            <li class="nav-item">
-              <a href="{% url 'create-result' %}" class="nav-link">
-                <i class="nav-icon fas fa-money-bill-alt"></i>
-                <p>
-                  Create Results
-                </p>
-              </a>
-            </li>
+            {% comment %} {% if request.user.is_staff and perms.result.add_result %}
+                <li class="nav-item">
+                    <a href="{% url 'create-result' %}" class="nav-link">
+                        <i class="nav-icon fas fa-list-alt"></i>
+                        <p>
+                            Create Results
+                        </p>
+                    </a>
+                </li>
+            {% endif %}
+            {% if request.user.is_staff and perms.result.update_result %}
             <li class="nav-item">
               <a href="{% url 'edit-results' %}" class="nav-link">
-                <i class="nav-icon fas fa-money-bill-alt"></i>
+                <i class="nav-icon fas fa-list-alt"></i>
                 <p>
                   Update Results
                 </p>
               </a>
             </li>
-            {% endif %}
+            {% endif %} {% endcomment %}
             <li class="nav-item">
               <a href="{% url 'view-results' %}" class="nav-link">
-                <i class="nav-icon fas fa-money-bill-alt"></i>
+                <i class="nav-icon fas fa-list-alt"></i>
                 <p>
                   View Results
                 </p>
@@ -180,7 +182,7 @@
             <li class="nav-header">Attendance</li>
             <li class="nav-item">
               <a href="{% url 'students-attendance' %}" class="nav-link">
-                <i class="nav-icon fas fa-money-bill-alt"></i>
+                <i class="nav-icon fas fa-user-clock"></i>
                 <p>
                   Student's Attendance
                 </p>
@@ -347,11 +349,6 @@
 
   <!-- OPTIONAL SCRIPTS -->
   <script src="{% static 'dist/js/demo.js' %}"></script>
-  <script src="https://code.jquery.com/jquery-1.12.4.min.js" 
-        integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" 
-        crossorigin="anonymous">
-  </script>
-  <script src="filtable.js"></script>
 
   {% if messages %}
   {% for message in messages %}
@@ -385,62 +382,6 @@ function printarea() {
 
     //document.body.innerHTML = originalContents;
 }
-</script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-      console.log("Script loaded!");  // Debugging line to check if script runs
-
-      let sidebarTitle = document.getElementById("sidebar-title");
-
-      // Ensure the element exists before running the script
-      if (!sidebarTitle) {
-          console.error("Sidebar title element not found!");
-          return;
-      }
-
-      let fullName = "{{ school_name | default:'MySchool' }}";
-      let shortName = "{{ short_name | default:'MS' }}";
-
-      function updateSidebarTitle() {
-          console.log("Updating sidebar title..."); // Debugging line
-
-          let body = document.body;
-
-          // Check if sidebar is collapsed
-          if (body.classList.contains("sidebar-collapse")) {
-              sidebarTitle.textContent = shortName;
-          } else {
-              sidebarTitle.textContent = fullName;
-          }
-      }
-
-      // Run on page load
-      updateSidebarTitle();
-
-      // Run when sidebar is toggled
-      let toggleButton = document.querySelector("[data-widget='pushmenu']");
-      if (toggleButton) {
-          toggleButton.addEventListener("click", function() {
-              console.log("Sidebar toggle clicked"); // Debugging line
-              setTimeout(updateSidebarTitle, 300); // Wait for animation to complete
-          });
-      } else {
-          console.error("Sidebar toggle button not found!");
-      }
-
-      // Detect sidebar collapse dynamically
-      let observer = new MutationObserver(function(mutationsList) {
-          for (let mutation of mutationsList) {
-              if (mutation.attributeName === "class") {
-                  console.log("Sidebar class changed"); // Debugging line
-                  updateSidebarTitle();
-              }
-          }
-      });
-
-      observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
-  });
 </script>
 
 <script>

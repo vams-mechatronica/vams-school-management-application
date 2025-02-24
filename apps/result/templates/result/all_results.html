@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
+{% block breadcrumb %}
 
+{% if request.user.is_staff and perms.result.add_result %}
+    <a class="btn btn-primary" href="{% url 'create-result' %}">
+        <i class="fas fa-plus"></i> Create Results
+    </a>
+{% endif %}
+{% if request.user.is_staff and perms.result.update_result %}
+  <a class="btn btn-primary" href="{% url 'edit-results' %}">
+    <i class="fas fa-pen-to-square"></i> Update Results
+  </a>
+{% endif %} 
+{% endblock breadcrumb %}
 {% block fullcard %}
 <div class="container">
   <!-- Filter Form -->

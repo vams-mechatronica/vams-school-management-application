@@ -1,9 +1,9 @@
 from django.urls import path
 
-from .views import ResultListView, create_result, edit_results
+from .views import ResultListView, CreateResultView, EditResultsView
 
 urlpatterns = [
-    path("create/", create_result, name="create-result"),
-    path("edit-results/", edit_results, name="edit-results"),
+    path("create/", CreateResultView.as_view(), name="create-result"),
+    path("edit-results/", EditResultsView.as_view(), name="edit-results"),
     path("view/all", ResultListView.as_view(), name="view-results"),
 ]

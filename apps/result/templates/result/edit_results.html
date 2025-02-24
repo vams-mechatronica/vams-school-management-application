@@ -46,3 +46,13 @@ Update Results
   </form>
 
 {% endblock content %}
+
+{% block morejs %}
+<script>
+   $('#studenttable').DataTable({
+    select: false
+    });
+</script>
+
+{% endblock morejs %}
+

@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
-from django.views.generic import DetailView, ListView, View
+from django.views.generic import DetailView, ListView, View, FormView
+from django.core.paginator import Paginator
 
 from apps.students.models import Student
 from apps.corecode.models import AcademicSession, AcademicTerm, StudentClass
@@ -12,55 +13,45 @@ from .forms import CreateResults, EditResults
 from .models import Result
 from .utils import has_permission,PermissionRequiredMessageMixin
 
-@has_permission('result.result.add_result')
-@login_required
-def create_result(request):
-    students = Student.objects.all()
-    if request.method == "POST":
+class CreateResultView(LoginRequiredMixin, PermissionRequiredMessageMixin, FormView):
+    template_name = "result/create_result.html"
+    form_class = CreateResults
+    permission_required = "result.result.add_result"
 
-        # after visiting the second page
+    def form_valid(self, form):
+        request = self.request
         if "finish" in request.POST:
-            form = CreateResults(request.POST)
-            if form.is_valid():
-                subjects = form.cleaned_data["subjects"]
-                session = form.cleaned_data["session"]
-                term = form.cleaned_data["term"]
-                students = request.POST["students"]
-                results = []
-                for student in students.split(","):
-                    stu = Student.objects.get(pk=student)
-                    if stu.current_class:
-                        for subject in subjects:
-                            check = Result.objects.filter(
-                                session=session,
-                                term=term,
-                                current_class=stu.current_class,
-                                subject=subject,
-                                student=stu,
-                            ).first()
-                            if not check:
-                                results.append(
-                                    Result(
-                                        session=session,
-                                        term=term,
-                                        current_class=stu.current_class,
-                                        subject=subject,
-                                        student=stu,
-                                    )
+            subjects = form.cleaned_data["subjects"]
+            session = form.cleaned_data["session"]
+            term = form.cleaned_data["term"]
+            students = request.POST["students"]
+            results = []
+            for student in students.split(","):
+                stu = Student.objects.get(pk=student)
+                if stu.current_class:
+                    for subject in subjects:
+                        check = Result.objects.filter(
+                            session=session,
+                            term=term,
+                            current_class=stu.current_class,
+                            subject=subject,
+                            student=stu,
+                        ).first()
+                        if not check:
+                            results.append(
+                                Result(
+                                    session=session,
+                                    term=term,
+                                    current_class=stu.current_class,
+                                    subject=subject,
+                                    student=stu,
                                 )
-
-                Result.objects.bulk_create(results)
-                return redirect("edit-results")
-
-        # after choosing students
+                            )
+            Result.objects.bulk_create(results)
+            return redirect("edit-results")
+        
         id_list = request.POST.getlist("students")
         if id_list:
-            form = CreateResults(
-                initial={
-                    "session": request.current_session,
-                    "term": request.current_term,
-                }
-            )
             studentlist = ",".join(id_list)
             return render(
                 request,
@@ -68,24 +59,40 @@ def create_result(request):
                 {"students": studentlist, "form": form, "count": len(id_list)},
             )
         else:
-            messages.warning(request, "You didnt select any student.")
-    return render(request, "result/create_result.html", {"students": students})
+            messages.warning(request, "You didn't select any student.")
+            return self.render_to_response(self.get_context_data(form=form))
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["students"] = Student.objects.all()
+        return context
 
-@has_permission('result.result.update_result')
-@login_required
-def edit_results(request):
-    if request.method == "POST":
-        form = EditResults(request.POST)
-        if form.is_valid():
-            form.save()
+class EditResultsView(LoginRequiredMixin, PermissionRequiredMessageMixin, ListView):
+    model = Result
+    template_name = "result/edit_results.html"
+    context_object_name = "results"
+    # paginate_by = 10  # Adjust this number as needed
+    permission_required = "result.result.update_result"
+    
+    def get_queryset(self):
+        return Result.objects.filter(
+            session=self.request.current_session, term=self.request.current_term
+        )
+
+    def post(self, request, *args, **kwargs):
+        results = self.get_queryset()
+        formset = EditResults(request.POST, queryset=results)
+        if formset.is_valid():
+            formset.save()
             messages.success(request, "Results successfully updated")
             return redirect("edit-results")
-    else:
-        results = Result.objects.filter(
-            session=request.current_session, term=request.current_term
-        )
-        form = EditResults(queryset=results)
-    return render(request, "result/edit_results.html", {"formset": form})
+        return self.get(request, *args, **kwargs, formset=formset)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if "formset" not in context:
+            context["formset"] = EditResults(queryset=self.get_queryset())
+        return context
 
 
 from .models import Result, AcademicTerm
