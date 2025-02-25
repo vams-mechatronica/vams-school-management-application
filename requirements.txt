@@ -23,3 +23,4 @@ dj-rest-auth==2.2.5
 django-filter==22.1
 django-select2==7.11.1
 setuptools==65.6.3
+django-cors-headers==3.12.0
