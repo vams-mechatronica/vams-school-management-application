@@ -12,7 +12,7 @@ from rest_framework.authentication import BasicAuthentication,TokenAuthenticatio
 class StudentAPI(generics.ListAPIView):
     serializer_class = StudentSerializer
     queryset = Student.objects.all()
-    permission_classes = (IsAdminUser,IsStaff)
+    permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
     ordering_fields = '__all__'

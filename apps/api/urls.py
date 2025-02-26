@@ -3,7 +3,7 @@ from .views import *
 urlpatterns = [
     path('account/',include('dj_rest_auth.urls')),
     path('account/registration/', include('dj_rest_auth.registration.urls')),
-    path('students/get/',StudentAPI.as_view()),
+    path('student/get/',StudentAPI.as_view()),
     path('student/create/',StudentCreateAPI.as_view()),
     path('student/detail/', StudentDetailAPI.as_view(), name='student-detail'),
     path('student/update/<int:pk>/', StudentUpdateAPI.as_view(), name='student-update'),
