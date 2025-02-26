@@ -38,14 +38,3 @@ InvoiceReceiptFormSet = inlineformset_factory(
 
 Invoices = modelformset_factory(Invoice, exclude=(), extra=4)
 
-# # Writing the updated content back to the files
-# with open(models_path, 'w') as models_file:
-#     models_file.write(updated_models_content)
-
-# with open(views_path, 'w') as views_file:
-#     views_file.write(updated_views_content)
-
-# with open(forms_path, 'w') as forms_file:
-#     forms_file.write(updated_forms_content)
-
-# (models_path, views_path, forms_path)
