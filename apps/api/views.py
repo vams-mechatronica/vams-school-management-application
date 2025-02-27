@@ -18,7 +18,7 @@ class StudentAPI(generics.ListAPIView):
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
     pagination_class = StandardResultsSetPagination
     ordering_fields = '__all__'
-    search_fields = '__all__'
+    search_fields = ['surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class__name','adharcard_number','parent_mobile_number','registration_number','user__id']
     ordering = ['user_id']
 
 class StudentDetailAPI(generics.RetrieveAPIView):
