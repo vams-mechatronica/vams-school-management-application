@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import *
 from .serializers import *
+from .pagination import LargeResultsSetPagination,StandardResultsSetPagination
 from rest_framework import generics
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,6 +16,7 @@ class StudentAPI(generics.ListAPIView):
     permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
+    pagination_class = StandardResultsSetPagination
     ordering_fields = '__all__'
     search_fields = '__all__'
     ordering = ['user_id']
