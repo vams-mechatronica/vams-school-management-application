@@ -155,44 +155,59 @@ class AcademicSessionListCreateView(generics.ListCreateAPIView):
     queryset = AcademicSession.objects.all()
     serializer_class = AcademicSessionSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 class AcademicSessionRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = AcademicSession.objects.all()
     serializer_class = AcademicSessionSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 # AcademicTerm Views
 class AcademicTermListCreateView(generics.ListCreateAPIView):
     queryset = AcademicTerm.objects.all()
     serializer_class = AcademicTermSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 class AcademicTermRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = AcademicTerm.objects.all()
     serializer_class = AcademicTermSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 # StudentClass Views
 class StudentClassListCreateView(generics.ListCreateAPIView):
     queryset = StudentClass.objects.all()
     serializer_class = StudentClassSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
 
 class StudentClassRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = StudentClass.objects.all()
     serializer_class = StudentClassSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 # Receipt Views
 class ReceiptListCreateView(generics.ListCreateAPIView):
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 class ReceiptRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
     permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 
 class SchoolCreateAPI(generics.CreateAPIView):
@@ -207,12 +222,16 @@ class SchoolListAPI(generics.ListAPIView):
     serializer_class = SchoolDetailSerializer
     queryset = SchoolDetail.objects.all()
     permission_classes = [AllowAny]  # Anyone can view list
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 class SchoolRetrieveAPI(generics.RetrieveAPIView):
     """API to retrieve details of a single school"""
     serializer_class = SchoolDetailSerializer
     queryset = SchoolDetail.objects.all()
     permission_classes = [AllowAny]
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 class SchoolUpdateAPI(generics.UpdateAPIView):
     """API to update school details"""
