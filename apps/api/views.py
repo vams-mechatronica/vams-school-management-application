@@ -2,7 +2,9 @@ from django.shortcuts import render
 from .models import *
 from .serializers import *
 from .pagination import LargeResultsSetPagination,StandardResultsSetPagination
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
+from django.contrib.auth.models import User, Group
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
@@ -34,10 +36,72 @@ class StudentDetailAPI(generics.RetrieveAPIView):
         return Student.objects.get(user=self.request.user)
 
 class StudentCreateAPI(generics.CreateAPIView):
-    serializer_class= StudentSerializer
+    serializer_class = StudentSerializer
     queryset = Student.objects.all()
-    permission_classes = (IsAdminUser,IsStaff)
-    authentication_classes = (BasicAuthentication,TokenAuthentication)
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication)
+
+    def create(self, request, *args, **kwargs):
+        admin_user = request.user  # Get admin user from token
+        if not admin_user or not admin_user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data
+
+        # Generate username (lastname.firstname) in lowercase
+        lastname = data.get("surname", "").strip().lower()
+        firstname = data.get("firstname", "").strip().lower()
+        username = f"{lastname}.{firstname}" if lastname and firstname else None
+
+        # Validate required fields
+        if not firstname or not username or "date_of_birth" not in data:
+            return Response({"error": "Missing required fields: firstname, surname, date_of_birth"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Parse date_of_birth to generate password
+        try:
+            dob = timezone.datetime.strptime(data["date_of_birth"], "%Y-%m-%d")
+            dob_part = dob.strftime("%d%m")  # Extract ddmm from DOB
+            today_part = timezone.now().strftime("%d%m%Y")  # Today's date
+            password = f"{dob_part}{firstname}{lastname}{today_part}#"  # Password format
+        except ValueError:
+            return Response({"error": "Invalid date_of_birth format. Use YYYY-MM-DD"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if user already exists
+        user, created = User.objects.get_or_create(username=username, defaults={
+            "first_name": data["firstname"],
+            "last_name": data.get("surname", ""),
+        })
+
+        if created:
+            user.set_password(password)
+            user.save()
+
+        # Ensure 'Student' group exists and assign user to it
+        student_group, _ = Group.objects.get_or_create(name="Student")
+        user.groups.add(student_group)
+
+        # Generate unique registration number
+        reg_number = f"VAMS/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}"
+
+        # Add user and generated registration number to request data
+        data["user"] = user.id
+        data["registration_number"] = reg_number
+
+        # Serialize and save student record
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            student = serializer.save()
+            return Response(
+                {
+                    "message": "Student created successfully",
+                    "student_id": student.id,
+                    "registration_number": student.registration_number,
+                    "username": user.username,
+                    "password": password if created else "User already exists",
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class StudentUpdateAPI(generics.UpdateAPIView):
     """API to update an existing Student."""
