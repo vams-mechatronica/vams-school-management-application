@@ -38,7 +38,7 @@ class StaffUpdateView(SuccessMessageMixin,PermissionRequiredMessageMixin, Update
         """add date picker in forms"""
         form = super(StaffUpdateView, self).get_form()
         form.fields["date_of_birth"].widget = widgets.DateInput(attrs={"type": "date"})
-        form.fields["date_of_admission"].widget = widgets.DateInput(
+        form.fields["date_of_joining"].widget = widgets.DateInput(
             attrs={"type": "date"}
         )
         form.fields["address"].widget = widgets.Textarea(attrs={"rows": 1})
