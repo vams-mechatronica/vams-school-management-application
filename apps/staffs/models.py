@@ -11,12 +11,14 @@ class Staff(models.Model):
     GENDER = [("male", "Male"), ("female", "Female")]
 
     current_status = models.CharField(max_length=10, choices=STATUS, default="active")
+    emp_code = models.CharField(max_length=200, unique=True,default=f"VAMS/emp/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}")
     surname = models.CharField(max_length=200)
     firstname = models.CharField(max_length=200)
     other_name = models.CharField(max_length=200, blank=True)
     gender = models.CharField(max_length=10, choices=GENDER, default="male")
     date_of_birth = models.DateField(default=timezone.now)
     date_of_joining = models.DateField(default=timezone.now)
+    adhar_card_number = models.CharField(max_length=12, blank=True, null=True)
 
     mobile_num_regex = RegexValidator(
         regex="^[0-9]{10,15}$", message="Entered mobile number isn't in a right format!"
@@ -28,6 +30,8 @@ class Staff(models.Model):
     address = models.TextField(blank=True)
     others = models.TextField(blank=True)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
 
     def __str__(self):
         return f"{self.surname} {self.firstname} {self.other_name}"

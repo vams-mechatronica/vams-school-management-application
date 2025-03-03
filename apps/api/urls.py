@@ -11,7 +11,8 @@ urlpatterns = [
     # path(''),
 
     #staff
-    path('staff/', StaffListCreateView.as_view(), name='staff-list-create'),
+    path('staff/get/', StaffListAPI.as_view(), name='staff-list'),
+    path('staff/create/', StaffCreateAPI.as_view(), name='staff-create'),
     path('staff/<int:pk>/', StaffRetrieveUpdateDestroyView.as_view(), name='staff-retrieve-update-destroy'),
 
 

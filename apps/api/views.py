@@ -118,12 +118,84 @@ class StudentDeleteAPI(generics.DestroyAPIView):
     authentication_classes = (BasicAuthentication, TokenAuthentication)
 
 
-class StaffListCreateView(generics.ListCreateAPIView):
+class StaffListAPI(generics.ListAPIView):
     queryset = Staff.objects.all()
     serializer_class = StaffSerializer
     permission_classes = (IsAdminUser,)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
+    filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
+    pagination_class = StandardResultsSetPagination
+    ordering_fields = '__all__'
+    search_fields = ['surname','firstname','other_name','gender','date_of_birth','date_of_joining','adharcard_number','mobile_number','user__id']
+    ordering = ['id']
 
+class StaffCreateAPI(generics.CreateAPIView):
+    serializer_class = StaffSerializer
+    queryset = Staff.objects.all()
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication)
+
+    def create(self, request, *args, **kwargs):
+        admin_user = request.user  # Get admin user from token
+        if not admin_user or not admin_user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data
+
+        # Generate username (lastname.firstname) in lowercase
+        lastname = data.get("surname", "").strip().lower()
+        firstname = data.get("firstname", "").strip().lower()
+        username = f"{lastname}.{firstname}" if lastname and firstname else None
+
+        # Validate required fields
+        if not firstname or not username or "date_of_birth" not in data:
+            return Response({"error": "Missing required fields: firstname, surname, date_of_birth"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Parse date_of_birth to generate password
+        try:
+            dob = timezone.datetime.strptime(data["date_of_birth"], "%Y-%m-%d")
+            dob_part = dob.strftime("%d%m")  # Extract ddmm from DOB
+            today_part = timezone.now().strftime("%d%m%Y")  # Today's date
+            password = f"{dob_part}{firstname}{lastname}{today_part}#"  # Password format
+        except ValueError:
+            return Response({"error": "Invalid date_of_birth format. Use YYYY-MM-DD"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if user already exists
+        user, created = User.objects.get_or_create(username=username, defaults={
+            "first_name": data["firstname"],
+            "last_name": data.get("surname", ""),
+        })
+
+        if created:
+            user.set_password(password)
+            user.save()
+
+        # Ensure 'Student' group exists and assign user to it
+        staff_group, _ = Group.objects.get_or_create(name="Staff")
+        user.groups.add(staff_group)
+
+        # Generate unique registration number
+        emp_code = f"VAMS/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}/{user.pk}"
+
+        # Add user and generated registration number to request data
+        data["user"] = user.id
+        data["emp_code"] = emp_code
+
+        # Serialize and save student record
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            staff = serializer.save()
+            return Response(
+                {
+                    "message": "Student created successfully",
+                    "student_id": staff.id,
+                    "registration_number": staff.emp_code,
+                    "username": user.username,
+                    "password": password if created else "User already exists",
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class StaffRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Staff.objects.all()
