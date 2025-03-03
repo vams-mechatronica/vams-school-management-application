@@ -126,7 +126,7 @@ class StaffListAPI(generics.ListAPIView):
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
     pagination_class = StandardResultsSetPagination
     ordering_fields = '__all__'
-    search_fields = ['surname','firstname','other_name','gender','date_of_birth','date_of_joining','adharcard_number','mobile_number','user__id']
+    search_fields = ['surname','firstname','other_name','gender','date_of_birth','date_of_joining','adhar_card_number','mobile_number','user__id']
     ordering = ['id']
 
 class StaffCreateAPI(generics.CreateAPIView):
