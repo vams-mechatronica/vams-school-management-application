@@ -1,6 +1,8 @@
 from django.urls import path,include
 from .views import *
 urlpatterns = [
+    path('app-version',APKVersionAPI.as_view()),
+
     path('account/',include('dj_rest_auth.urls')),
     path('account/registration/', include('dj_rest_auth.registration.urls')),
     path('student/get/',StudentAPI.as_view()),

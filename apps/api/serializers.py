@@ -5,6 +5,12 @@ from apps.result.models import *
 from apps.staffs.models import *
 from apps.user.models import *
 from rest_framework import serializers
+from .models import APKVersion
+
+class APKVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = APKVersion
+        fields = ['version', 'file','os','uploaded_at']
 
 class StudentSerializer(serializers.ModelSerializer):
 

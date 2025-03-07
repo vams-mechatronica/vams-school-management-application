@@ -3,6 +3,7 @@ from .models import *
 from .serializers import *
 from .pagination import LargeResultsSetPagination,StandardResultsSetPagination
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User, Group
 from rest_framework import filters
@@ -10,6 +11,22 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from .permissions import IsStaff, CanDeleteStudent, IsAdminOrStaff, IsInvoiceOwner, IsStudent, CanDeleteSchool
 from rest_framework.authentication import BasicAuthentication,TokenAuthentication
+
+class APKVersionAPI(APIView):
+    def get(self,request):
+        os = request.GET.get('os')
+        if os:
+            try:
+                latest_apk = APKVersion.objects.filter(os=os).latest('uploaded_at')
+                serializer = APKVersionSerializer(latest_apk)
+                # if serializer.is_valid():
+                return Response(serializer.data,status=status.HTTP_200_OK)
+                # else:
+                #     return Response(serializer.errors,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except APKVersion.DoesNotExist:
+                return Response({'message':'No matching record found.'},status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'message':'Please select OS.'},status=status.HTTP_400_BAD_REQUEST)
 
 # Create your views here.
 class StudentAPI(generics.ListAPIView):
