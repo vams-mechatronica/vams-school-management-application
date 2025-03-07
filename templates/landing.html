@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System by VAMS Mechatronica</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.pricing-card').forEach(card => {
+                card.addEventListener('mouseover', () => card.classList.add('shadow-2xl'));
+                card.addEventListener('mouseout', () => card.classList.remove('shadow-2xl'));
+            });
+        });
+    </script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-teal-600 text-white p-4 flex justify-between">
+        <div class="text-xl font-bold">VAMS Mechatronica</div>
+        <ul class="flex space-x-4">
+            <li><a href="#features" class="hover:underline">Features</a></li>
+            <li><a href="#pricing" class="hover:underline">Pricing</a></li>
+            <li><a href="#contact" class="hover:underline">Contact</a></li>
+        </ul>
+    </nav>
+    
+    <header class="bg-teal-600 text-white p-5 text-center text-2xl font-bold">
+        School Management System by VAMS Mechatronica
+    </header>
+    
+    <section class="text-center py-10">
+        <h1 class="text-4xl font-bold">Simplify School Operations</h1>
+        <p class="text-lg mt-2">Manage students, teachers, attendance, fees, and more with ease.</p>
+        <a href="#contact" class="mt-5 inline-block bg-teal-600 text-white px-6 py-2 rounded-lg">Get Started</a>
+    </section>
+    
+    <section id="features" class="p-10 bg-white shadow-md rounded-lg mx-5">
+        <h2 class="text-3xl font-bold text-center">Features</h2>
+        <div class="overflow-x-auto whitespace-nowrap mt-5">
+            <div class="flex space-x-5">
+                <div class="bg-teal-600 p-5 rounded-lg w-60 flex flex-col items-center text-white">
+                    <i class="fa-solid fa-user-graduate text-4xl"></i>
+                    <p class="mt-2 font-bold">Student Management</p>
+                </div>
+                <div class="bg-teal-600 p-5 rounded-lg w-60 flex flex-col items-center text-white">
+                    <i class="fa-solid fa-calendar-check text-4xl"></i>
+                    <p class="mt-2 font-bold">Attendance Tracking</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="pricing" class="p-10 bg-gray-100 text-center">
+        <h2 class="text-3xl font-bold">Pricing</h2>
+        <div class="flex justify-center mt-5 space-x-5">
+            <div class="bg-white p-5 rounded-lg shadow-md w-64 pricing-card">
+                <h3 class="text-xl font-bold">Basic</h3>
+                <p class="text-teal-600 text-2xl font-bold mt-2">$19/month</p>
+                <ul class="mt-3 text-gray-700">
+                    <li>✔ Student Management</li>
+                    <li>✔ Attendance Tracking</li>
+                </ul>
+                <button class="mt-4 bg-teal-600 text-white px-4 py-2 rounded-lg">Choose Plan</button>
+            </div>
+        </div>
+    </section>
+    
+    <section id="contact" class="p-10 bg-teal-600 text-white text-center">
+        <h2 class="text-3xl font-bold">Contact Us</h2>
+        <p>Get in touch for a demo or more details.</p>
+        <form id="contactForm" class="mt-5 max-w-md mx-auto">
+            <input type="text" name="fullName" placeholder="Full Name" class="w-full p-2 mb-3 rounded" required>
+            <input type="email" name="emailId" placeholder="Email ID" class="w-full p-2 mb-3 rounded" required>
+            <input type="tel" name="mobileNumber" placeholder="Mobile Number" class="w-full p-2 mb-3 rounded" required>
+            <input type="text" name="school" placeholder="School/Organization" class="w-full p-2 mb-3 rounded">
+            <input type="text" name="website" placeholder="Website" class="w-full p-2 mb-3 rounded">
+            <input type="text" name="address" placeholder="Address" class="w-full p-2 mb-3 rounded">
+            <input type="text" name="city" placeholder="City" class="w-full p-2 mb-3 rounded">
+            <textarea name="message" placeholder="Your Message" class="w-full p-2 mb-3 rounded"></textarea>
+            <label class="block mb-3">
+                <input type="checkbox" required> I am not a robot
+            </label>
+            <button type="submit" class="bg-white text-teal-600 px-6 py-2 rounded-lg font-bold">Submit</button>
+        </form>
+    </section>
+    
+    <footer class="text-center p-5 bg-gray-800 text-white">
+        &copy; 2025 VAMS Mechatronica. All Rights Reserved.
+    </footer>
+    
+    <script>
+        document.getElementById("contactForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const jsonObject = {};
+            formData.forEach((value, key) => jsonObject[key] = value);
+            
+            fetch("https://api.example.com/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(jsonObject)
+            })
+            .then(response => response.json())
+            .then(data => alert("Form submitted successfully!"))
+            .catch(error => alert("Error submitting form!"));
+        });
+    </script>
+</body>
+</html>
