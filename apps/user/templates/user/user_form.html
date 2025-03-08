@@ -1,54 +1,95 @@
 {% extends 'base.html' %}
-
+{% load widget_tweaks %}  <!-- Load widget_tweaks instead of django_select2 -->
 
 {% block title %}
-
   {% if object %}
     Update {{ object }}
   {% else %}
     Add New User
   {% endif %}
-
 {% endblock title %}
 
-
 {% block content %}
-
 <form action="" method="POST" enctype="multipart/form-data">
   {% csrf_token %}
-
   {% include 'corecode/form_snippet.html' %}
-    <script>
-        function updateUserList(selectElement) {
-            var role = selectElement.value;
-            //var domain = window.location.origin;
-            var url = 'get-users-list/';
 
-            fetch(url + '?role=' + role)
-                .then(response => response.json())
-                .then(data => {
-                    var dropdown = document.querySelector('select[name="selected_person"]');
-                    dropdown.innerHTML = '';
+  <script>
+      function updateUserList(selectElement) {
+          var role = selectElement.value;
+          var url = "{% url 'get_users_list' %}?role=" + role;
 
-                    data.forEach(item => {
-                        var option = document.createElement('option');
-                        option.value = item.id;
-                        option.text = item.name;
-                        dropdown.appendChild(option);
-                    });
-                });
-        }
+          fetch(url)
+              .then(response => response.json())
+              .then(data => {
+                  var dropdown = document.querySelector('select[name="selected_person"]');
+                  dropdown.innerHTML = '';
 
-        document.querySelector('select[name="selected_person"]').addEventListener('change', function() {
-            var selectedId = this.value;
-            var selectedText = this.options[this.selectedIndex].text;
-            var nameParts = selectedText.split(' ');
+                  data.forEach(item => {
+                      var option = document.createElement('option');
+                      option.value = item.id;
+                      option.text = item.name;
+                      dropdown.appendChild(option);
+                  });
 
-            document.getElementById('id_first_name').value = nameParts[0];
-            document.getElementById('id_last_name').value = nameParts[1];
-            document.getElementById('id_username').value = nameParts[1].toLowerCase()+"."+nameParts[0].toLowerCase();
+                  // Re-initialize Select2
+                  $(dropdown).select2();
+              });
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var selectedPersonDropdown = $('select[name="selected_person"]');
+    
+        selectedPersonDropdown.select2({
+            placeholder: "Search and select user...",
+            allowClear: true,
+            ajax: {
+                url: "{% url 'get_users_list' %}",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return { q: params.term };
+                },
+                processResults: function(data) {
+                    return { results: data.results };
+                }
+            }
         });
-    </script>
+    
+        // When user is selected from Select2
+        selectedPersonDropdown.on('select2:select', function(e) {
+            var selectedText = e.params.data.text.trim();  // Get the text of selected option
+            console.log("Selected Text: ", selectedText); // Debugging
+    
+            var nameParts = selectedText.split(' ');
+    
+            // Handle name variations: First, Middle, Last Name cases
+            var firstName = nameParts[0] || '';
+            var lastName = nameParts.length > 1 ? nameParts.slice(-1)[0] : ''; // Take the last word as last name
+    
+            // Clear previous values before updating
+            document.getElementById('id_first_name').value = '';
+            document.getElementById('id_last_name').value = '';
+            document.getElementById('id_username').value = '';
+    
+            // Set new values
+            document.getElementById('id_first_name').value = firstName;
+            document.getElementById('id_last_name').value = lastName;
+            document.getElementById('id_username').value = (lastName.toLowerCase() || '') + "." + (firstName.toLowerCase() || '');
+        });
+    
+        // Handle clearing fields when the selection is removed
+        selectedPersonDropdown.on('select2:clear', function() {
+            document.getElementById('id_first_name').value = '';
+            document.getElementById('id_last_name').value = '';
+            document.getElementById('id_username').value = '';
+        });
+    });
+    
+    
+
+    
+  </script>
 
   {% if object %}
     <input type="submit" class="btn btn-primary" value="Update Record">
@@ -57,5 +98,5 @@
   {% endif %}
 </form>
 
-
+{{ form.media }}  <!-- Load necessary JS for Select2 -->
 {% endblock content %}

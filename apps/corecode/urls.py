@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 
 from .views import (
     ClassCreateView,
@@ -27,7 +27,7 @@ from django_select2.views import AutoResponseView
 
 urlpatterns = [
     path("", IndexView.as_view(), name="home"),
-    path("select2/", AutoResponseView.as_view(), name="django_select2"),
+    path("select2/", include('django_select2.urls')),
 
     path("site-config", SiteConfigView.as_view(), name="configs"),
     path("site-detail-config", SchoolDetailView.as_view(), name="school-configs"),

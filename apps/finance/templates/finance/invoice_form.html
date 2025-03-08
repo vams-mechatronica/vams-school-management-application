@@ -110,7 +110,7 @@ Add new invoice
       //  const studentId = this.value;
     $('#id_student').on('change', function () {
         const studentId = $(this).val();
-        console.log(studentId);
+        //console.log(studentId);
 
         if (studentId) {
             fetch(`api/get-student-data/?student_id=${studentId}`)

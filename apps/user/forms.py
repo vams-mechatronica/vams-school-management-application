@@ -41,3 +41,4 @@ class UserCreateForm(forms.ModelForm):
 
         choices = [(user.id, f" {user.surname} {user.firstname} {user.other_name} ({user.registration_number})") for user in users]
         self.fields['selected_person'].choices = choices
+        self.order_fields(['student_or_staff', 'selected_person', 'username', 'first_name', 'last_name', 'password'])
