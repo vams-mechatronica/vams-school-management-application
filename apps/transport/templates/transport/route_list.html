@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Route{% endblock title %}
+
+{% block breadcrumb %}
+{% if request.user.is_superuser %}
+<a class="btn btn-primary" href="{% url 'route-create' %}"><i
+    class="fas fa-plus"></i> New Route</a>
+{% comment %} <a class="btn btn-primary" href="{% url 'bulk-route' %}"><i
+    class="fas fa-upload"></i> Bulk route</a> {% endcomment %}
+{% endif %}
+{% endblock breadcrumb %}
+
+{% block content %}
+  <div class="table-responsive">
+    <table id="routetable" class="table table-bordered table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th>S/N</th>
+          <th>Name</th>
+          <th>Start Location</th>
+          <th>End Location</th>
+          <th>Stops</th>
+          <th>Is Active</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for route in object_list %}
+          <tr class='clickable-row' data-href="{% if request.user.is_superuser %}{% url 'route-detail' route.id %}{% else %}#{% endif %}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ route.name }}</td>
+            <td>{{ route.start_location }}</td>
+            <td>{{ route.end_location}}</td>
+            <td>{{ route.stops}}</td>
+            <td>{{ route.is_active}}</td>
+          </tr>
+        {% endfor %}
+
+
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
+
+
+{% block morejs %}
+<script>
+   $('#routetable').DataTable({
+    select: false
+    });
+</script>
+
+{% endblock morejs %}

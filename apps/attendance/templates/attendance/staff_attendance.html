@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-
 {% block content %}
-    <h2>Student's Attendance</h2>
+    <h2>Staff's Attendance</h2>
     <form method="post" id="attendance-form" action="{% url 'students-attendance-add' %}">
         {% csrf_token %}
         
@@ -11,17 +10,6 @@
                 <label for="date-select">Date:</label>
                 <input type="date" id="date" name="date-select" class="form-control" required>
             </div>
-            
-            <div class="col-md-4">
-                <label for="class">Class:</label>
-                <select id="class" name="class" class="form-control" required onchange="loadStudents()">
-                    <option value="" disabled selected>Select a class</option>
-                    {% for class in classes %}
-                        <option value="{{ class.id }}">{{ class.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
             <div class="col-md-4">
                 <label for="period">Period:</label>
                 <select id="period" name="period" class="form-control" required>
@@ -36,7 +24,7 @@
             <table id="student-attendance-table" class="table table-bordered table-sm">
                 <thead class="thead-light">
                     <tr>
-                        <th>Student</th>
+                        <th>Staff</th>
                         <th>Attendance Status</th>
                         <th>Comments</th>
                     </tr>

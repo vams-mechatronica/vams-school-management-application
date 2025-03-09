@@ -4,8 +4,34 @@ from apps.finance.models import *
 from apps.result.models import *
 from apps.staffs.models import *
 from apps.user.models import *
-from rest_framework import serializers
+from apps.transport.models import *
 from .models import APKVersion
+from rest_framework import serializers
+
+class DriverSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = '__all__'  # Includes all fields
+
+class VehicleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = '__all__'
+
+class RouteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Route
+        fields = '__all__'
+
+class TripSerializer(serializers.ModelSerializer):
+    route_name = serializers.ReadOnlyField(source='route.name')
+    vehicle_number = serializers.ReadOnlyField(source='vehicle.vehicle_number')
+    driver_name = serializers.ReadOnlyField(source='driver.name')
+
+    class Meta:
+        model = Trip
+        fields = '__all__'
+
 
 class APKVersionSerializer(serializers.ModelSerializer):
     class Meta:

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.attendance",
     "apps.user",
     "apps.api",
+    "apps.transport",
     "django_select2",
     "rest_framework",
     'rest_framework.authtoken',

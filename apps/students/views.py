@@ -61,7 +61,7 @@ class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMes
 
 class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = Student
-    fields = ['current_status','registration_number','surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class','parent_mobile_number','address','others','adharcard_number','adharcard']
+    fields = ['current_status','registration_number','surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class','parent_mobile_number','address','others','uses_transport','route','pickup_drop_location','pickup_time','drop_time','adharcard_number','adharcard']
     success_message = "New student successfully added."
     permission_required = 'students.add_student' 
 
@@ -70,6 +70,8 @@ class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, Succe
         form = super(StudentCreateView, self).get_form()
         form.fields["date_of_birth"].widget = widgets.DateInput(attrs={"type": "date"})
         form.fields["date_of_admission"].widget = widgets.DateInput(attrs={"type": "date"})
+        form.fields["pickup_time"].widget = widgets.DateInput(attrs={"type": "time"})
+        form.fields["drop_time"].widget = widgets.DateInput(attrs={"type": "time"})
         form.fields["address"].widget = widgets.Textarea(attrs={"rows": 2})
         form.fields["others"].widget = widgets.Textarea(attrs={"rows": 2})
         return form

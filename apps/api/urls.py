@@ -1,5 +1,6 @@
 from django.urls import path,include
 from .views import *
+
 urlpatterns = [
     path('app-version',APKVersionAPI.as_view()),
 
@@ -43,4 +44,20 @@ urlpatterns = [
     path('schools/<int:pk>/', SchoolRetrieveAPI.as_view(), name='school-detail'),
     path('schools/<int:pk>/update/', SchoolUpdateAPI.as_view(), name='school-update'),
     path('schools/<int:pk>/delete/', SchoolDeleteAPI.as_view(), name='school-delete'),
+
+     # Driver URLs
+    path('drivers/', DriverListCreateView.as_view(), name='driver-list-create'),
+    path('drivers/<int:pk>/', DriverRetrieveUpdateDestroyView.as_view(), name='driver-detail'),
+
+    # Vehicle URLs
+    path('vehicles/', VehicleListCreateView.as_view(), name='vehicle-list-create'),
+    path('vehicles/<int:pk>/', VehicleRetrieveUpdateDestroyView.as_view(), name='vehicle-detail'),
+
+    # Route URLs
+    path('routes/', RouteListCreateView.as_view(), name='route-list-create'),
+    path('routes/<int:pk>/', RouteRetrieveUpdateDestroyView.as_view(), name='route-detail'),
+
+    # Trip URLs
+    path('trips/', TripListCreateView.as_view(), name='trip-list-create'),
+    path('trips/<int:pk>/', TripRetrieveUpdateDestroyView.as_view(), name='trip-detail'),
 ]

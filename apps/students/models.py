@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
 from apps.corecode.models import StudentClass
+from apps.transport.models import Route
 
 
 
@@ -15,7 +16,7 @@ class Student(models.Model):
     current_status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="active"
     )
-    registration_number = models.CharField(max_length=200, unique=True,default=f"Vedika/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}")
+    registration_number = models.CharField(max_length=200, unique=True,default=f"VAMS/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}")
     surname = models.CharField(max_length=200, blank=True,null=True)
     firstname = models.CharField(max_length=200)
     other_name = models.CharField(max_length=200, blank=True)
@@ -45,6 +46,13 @@ class Student(models.Model):
     )
     adharcard = models.ImageField(blank=True, upload_to="students/adharcard/")
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
+
+    uses_transport = models.BooleanField(default=False, help_text="Does the student use school transport?")
+    route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True, related_name="students")
+    pickup_drop_location = models.CharField(max_length=255, blank=True, help_text="Pickup/Drop location for transport")
+    pickup_time = models.TimeField(null=True, blank=True, help_text="Pickup time for the student")
+    drop_time = models.TimeField(null=True, blank=True, help_text="Drop time for the student")
+
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)
 

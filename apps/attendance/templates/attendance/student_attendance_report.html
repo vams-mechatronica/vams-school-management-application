@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Attendance Report{% endblock title %}
+{% block content %}
+
+
+    <!-- Form for selecting class and month -->
+    <form method="post" id="attendance-form" action="#">
+        {% csrf_token %}
+
+        <div class="form-group row">
+        {% comment %} <div class="row g-3"> {% endcomment %}
+            <div class="col-md-4">
+                <label for="class_id">Class:</label>
+                <select id="class" class="form-control" name="class_id" required>
+                    <option value="">-- Select Class --</option>
+                    {% for class in classes %}
+                        <option value="{{ class.id }}" {% if selected_class and selected_class.id == class.id %}selected{% endif %}>
+                            {{ class.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="year">Year:</label>
+                <input id="year" type="number" class="form-control" name="year" value="{{ year }}" required>
+            </div>
+            <div class="col-md-3">
+                <label for="month">Month:</label>
+                <select id="month" class="form-control" name="month" required>
+                    {% for num, name in select_month %}
+                    <option value="{{ num }}" {% if month == num %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Generate</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Attendance Table -->
+    {% if report_data %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Student Name</th>
+                    {% for date in headers|slice:"1:" %}
+                        <th>{{ date }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in report_data %}
+                <tr>
+                    <td>{{ row.Student }}</td>
+                    {% for date in headers|slice:"1:" %}
+                        <td>{{ row|get_item:date }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-center mt-3">No attendance data available. Please select a class and month.</p>
+    {% endif %}
+{% endblock content %}
+

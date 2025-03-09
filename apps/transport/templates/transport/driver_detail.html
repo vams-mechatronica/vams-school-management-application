@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content-header %}
+<div class="card-header">
+  <div class="card-tools">
+    <a href="#" class="btn btn-tool" onclick="printarea();">Print</a>
+    <a href="{% url 'driver-update' object.id %}" class="btn btn-tool">
+      <i class="fas fa-edit"></i>
+    </a>
+    <a href="{% url 'driver-delete' object.id %}" class="btn btn-tool">
+      <i class="fas fa-times"></i>
+    </a>
+  </div>
+</div>
+{% endblock content-header %}
+
+{% block content %}
+    <div class="row mb-4">
+      <div class="col-sm-4">
+        <div class="row mb-2">
+
+          {% if object.driver_photo %}
+            <img
+              src="{{ object.driver_photo.url }}"
+              class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+          {% else %}
+            <img
+              src="{% static 'dist/img/avatar.png' %}"
+              class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+          {% endif %}
+
+
+          <div class="float-right">
+            <h4>{{ object.name }} </h4>
+            <h4>{{ object.license_number }} </h4>
+          </div>
+        </div>
+        <h5>{{object.vehicle.vehicle_number}}</h5>
+        <h5></h5>
+
+      </div>
+      <div class="col-sm-8">
+        <div>
+          <div class="form-group border-bottom row">
+            <label class="col">
+              DL No.
+            </label>
+            <div class="col">
+              {{ object.license_number }}
+            </div>
+          </div>
+
+          <div class="form-group border-bottom row">
+            <label class="col">
+              Mobile Number
+            </label>
+            <div class="col">
+              {{ object.phone_number}}
+            </div>
+          </div>
+
+          <div class="form-group border-bottom row">
+            <label class="col">
+              Address
+            </label>
+            <div class="col">
+              {{ object.address }}
+            </div>
+          </div>
+          <div class="form-group border-bottom row">
+            <label class="col">
+              Date Joined
+            </label>
+            <div class="col">
+              {{ object.joined_date }}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      
+    </div>
+    <hr>
+    <h4>Assigned Vehicles</h4>
+    {% if vehicles %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Vehicle Number</th>
+                    <th>Type</th>
+                    <th>Capacity</th>
+                    <th>Vehicle Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles %}
+                    <tr>
+                        <td>{{ vehicle.vehicle_number }}</td>
+                        <td>{{ vehicle.get_vehicle_type_display }}</td>
+                        <td>{{ vehicle.capacity }}</td>
+                        <td>
+                            {% if vehicle.vehicle_image %}
+                                <img src="{{ vehicle.vehicle_image.url }}" alt="Vehicle Image" width="100">
+                            {% else %}
+                                No Image
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No vehicles assigned to this driver.</p>
+    {% endif %}
+
+
+
+    <h4>Invoice/Payment History</h4>
+    {% if payments %}
+      <table class="table table-sm table-bordered table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th>For</th>
+            <th>Amount Payable</th>
+            <th>Amount Paid</th>
+            <th>balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for payment in payments %}
+            <tr class='clickable-row' data-href="{% url 'invoice-detail' payment.id %}">
+              <td>{{payment.session}} - {{payment.term}}/{{payment.month}} - {{ payment.class_for}}</td>
+              <td>{{payment.total_amount_payable}}</td>
+              <td>{{payment.total_amount_paid}}</td>
+              <td>{{payment.balance}}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+        <p>There are no payment history for {{object}}</p>
+    {% endif %}
+
+
+
+
+{% endblock content %}

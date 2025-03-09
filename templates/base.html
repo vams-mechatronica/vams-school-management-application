@@ -188,6 +188,14 @@
                 </p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{% url 'attendance-report-view' %}" class="nav-link">
+                <i class="nav-icon fas fa-list"></i>
+                <p>
+                  Attendance Report
+                </p>
+              </a>
+            </li>
             {% comment %} <li class="nav-item">
               <a href="{% url 'edit-results' %}" class="nav-link">
                 <i class="nav-icon fas fa-money-bill-alt"></i>
@@ -197,6 +205,40 @@
               </a>
             </li> {% endcomment %}
             {% endif %}
+
+            <li class="nav-header">Transport</li>
+            <li class="nav-item">
+              <a href="{% url 'driver-list' %}" class="nav-link">
+                <i class="nav-icon fas fa-user"></i>
+                <p>
+                  Driver
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'vehicle-list' %}" class="nav-link">
+                <i class="nav-icon fas fa-car"></i>
+                <p>
+                  Vehicle
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'route-list' %}" class="nav-link">
+                <i class="nav-icon fas fa-route"></i>
+                <p>
+                  Routes
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'trip-list' %}" class="nav-link">
+                <i class="nav-icon fas fa-play"></i>
+                <p>
+                  Trips
+                </p>
+              </a>
+            </li>
             
             {% if request.user.is_staff %}
             <li class="nav-header">Others</li>

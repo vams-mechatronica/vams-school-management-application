@@ -22,6 +22,7 @@ urlpatterns = [
     path('api/v1/',include('apps.api.urls')),
     path("", include("apps.corecode.urls")),
     path("users/", include("apps.user.urls")),
+    path("transport/", include("apps.transport.urls")),
     path("staff/", include("apps.staffs.urls")),
     path("result/", include("apps.result.urls")),
     path("student/", include("apps.students.urls")),
