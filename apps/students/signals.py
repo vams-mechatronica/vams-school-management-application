@@ -31,6 +31,12 @@ def create_bulk_student(sender, created, instance, *args, **kwargs):
                 gender = (
                     (row["gender"]).lower() if "gender" in row and row["gender"] else ""
                 )
+                father_name = (
+                    (row['father_name']) if "father_name" in row and row["father_name"] else ""
+                )
+                mother_name = (
+                    (row['mother_name']) if "mother_name" in row and row["mother_name"] else ""
+                )
                 phone = (
                     row["parent_number"]
                     if "parent_number" in row and row["parent_number"]
@@ -56,6 +62,8 @@ def create_bulk_student(sender, created, instance, *args, **kwargs):
                             firstname=firstname,
                             other_name=other_names,
                             gender=gender,
+                            father_name=father_name,
+                            mother_name=mother_name,
                             current_class=theclass,
                             parent_mobile_number=phone,
                             address=address,
