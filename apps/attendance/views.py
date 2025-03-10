@@ -118,7 +118,10 @@ class AttendanceReportAPI(APIView):
         month = request.GET.get('month')
         if isinstance(month,str):
             month = int(month)
-
+        try:
+            class_obj = StudentClass.objects.get(id=class_id)
+        except StudentClass.DoesNotExist:
+            return Response({'error':'Enter a valid class'},status=status.HTTP_400_BAD_REQUEST)
         df = generate_attendance_report(class_id=class_id,year=year, month=month)
         return Response({'data':df.to_dict()},status=status.HTTP_200_OK)
 
@@ -126,7 +129,8 @@ def generate_attendance_report(class_id, year, month):
     try:
         class_obj = StudentClass.objects.get(id=class_id)
     except StudentClass.DoesNotExist:
-        return "Please select a valid class"
+
+        pass
     # Fetch students in the selected class
     students = Student.objects.filter(current_class=class_obj)
 
@@ -173,7 +177,7 @@ from datetime import datetime
 
 
 def attendance_report_view(request):
-    selected_class = 3
+    selected_class = None
     year = datetime.now().year
     month = datetime.now().month
     report_data = []
@@ -184,13 +188,15 @@ def attendance_report_view(request):
         year = int(request.POST.get("year"))
         month = int(request.POST.get("month"))
         # selected_class = StudentClass.objects.get(id=class_id)
-        
-    report_df = generate_attendance_report(selected_class, year, month)
-    report_data = report_df.to_dict(orient="records")
+    if selected_class:
+        report_df = generate_attendance_report(selected_class, year, month)
+        report_data = report_df.to_dict(orient="records")
+        headers = report_df.columns.tolist()
+    else:
+        report_data = pd.DataFrame().to_dict(orient='records')
     months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
-                                         (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
-                                         (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
-    headers = report_df.columns.tolist()
+                                        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+                                        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
     classes = StudentClass.objects.all()
     return render(request, "attendance/student_attendance_report.html", {
         "classes": classes,
