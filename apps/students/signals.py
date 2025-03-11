@@ -7,77 +7,61 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from apps.corecode.models import StudentClass
-
+from django.db import transaction
 from .models import Student, StudentBulkUpload
 
 
 @receiver(post_save, sender=StudentBulkUpload)
-def create_bulk_student(sender, created, instance, *args, **kwargs):
-    if created:
-        opened = StringIO(instance.csv_file.read().decode())
-        reading = csv.DictReader(opened, delimiter=",")
-        students = []
-        counter = 0 
-        for row in reading:
-                counter+= 1
-            # if "registration_number" in row and row["registration_number"]:
-                reg = row["registration_number"] if "registration_number" in row and row["registration_number"] else f"SLN/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}{counter}"
-                surname = row["surname"] if "surname" in row and row["surname"] else ""
-                firstname = (
-                    row["firstname"] if "firstname" in row and row["firstname"] else ""
-                )
-                other_names = (
-                    row["other_names"]
-                    if "other_names" in row and row["other_names"]
-                    else ""
-                )
-                gender = (
-                    (row["gender"]).lower() if "gender" in row and row["gender"] else ""
-                )
-                father_name = (
-                    (row['father_name']) if "father_name" in row and row["father_name"] else ""
-                )
-                mother_name = (
-                    (row['mother_name']) if "mother_name" in row and row["mother_name"] else ""
-                )
-                phone = (
-                    row["parent_number"]
-                    if "parent_number" in row and row["parent_number"]
-                    else ""
-                )
-                address = row["address"] if "address" in row and row["address"] else ""
-                current_class = (
-                    row["current_class"]
-                    if "current_class" in row and row["current_class"]
-                    else ""
-                )
-                if current_class:
-                    theclass, kind = StudentClass.objects.get_or_create(
-                        name=current_class
-                    )
+def create_bulk_student(sender, instance, created, *args, **kwargs):
+    if not created:
+        return
+    
+    # Read the uploaded CSV file
+    opened = StringIO(instance.csv_file.read().decode())
+    reading = csv.DictReader(opened, delimiter=",")
 
-                check = Student.objects.filter(registration_number=reg,firstname=firstname,surname=surname,current_class=current_class).exists()
-                if not check:
-                    students.append(
-                        Student(
-                            registration_number=reg,
-                            surname=surname,
-                            firstname=firstname,
-                            other_name=other_names,
-                            gender=gender,
-                            father_name=father_name,
-                            mother_name=mother_name,
-                            current_class=theclass,
-                            parent_mobile_number=phone,
-                            address=address,
-                            current_status="active",
-                        )
-                    )
+    students = []
+    timestamp = timezone.now().strftime('%m%d%H%M%S')
+    
+    with transaction.atomic():  # Ensures database integrity in case of failure
+        for counter, row in enumerate(reading, start=1):
+            reg = row.get("registration_number") or f"SLN/{timezone.now().year}/{timestamp}{counter}"
+            surname = row.get("surname", "")
+            firstname = row.get("firstname", "")
+            other_names = row.get("other_names", "")
+            gender = row.get("gender", "").lower()
+            father_name = row.get("father_name", "")
+            mother_name = row.get("mother_name", "")
+            phone = row.get("parent_number", "")
+            address = row.get("address", "")
+            current_class_name = row.get("current_class", "")
 
-        Student.objects.bulk_create(students)
-        instance.csv_file.close()
-        instance.delete()
+            # Fetch or create class
+            theclass = None
+            if current_class_name:
+                theclass, _ = StudentClass.objects.get_or_create(name=current_class_name)
 
+            students.append(
+                Student(
+                    registration_number=reg,
+                    surname=surname,
+                    firstname=firstname,
+                    other_name=other_names,
+                    gender=gender,
+                    father_name=father_name,
+                    mother_name=mother_name,
+                    current_class=theclass,
+                    parent_mobile_number=phone,
+                    address=address,
+                    current_status="active",
+                )
+            )
+
+        # Bulk insert students (avoiding duplicate checks in loop)
+        Student.objects.bulk_create(students, ignore_conflicts=True)  # Ignores duplicates if constraints exist
+
+    instance.csv_file.close()
+    instance.delete()
 
 def _delete_file(path):
     """Deletes file from filesystem."""
