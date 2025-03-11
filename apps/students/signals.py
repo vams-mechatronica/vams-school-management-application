@@ -1,6 +1,7 @@
 import csv
 import os
 from io import StringIO
+from django.utils import timezone
 
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -17,8 +18,8 @@ def create_bulk_student(sender, created, instance, *args, **kwargs):
         reading = csv.DictReader(opened, delimiter=",")
         students = []
         for row in reading:
-            if "registration_number" in row and row["registration_number"]:
-                reg = row["registration_number"]
+            # if "registration_number" in row and row["registration_number"]:
+                reg = row["registration_number"] if "registration_number" in row and row["registration_number"] else f"SLN/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}"
                 surname = row["surname"] if "surname" in row and row["surname"] else ""
                 firstname = (
                     row["firstname"] if "firstname" in row and row["firstname"] else ""
@@ -53,7 +54,7 @@ def create_bulk_student(sender, created, instance, *args, **kwargs):
                         name=current_class
                     )
 
-                check = Student.objects.filter(registration_number=reg).exists()
+                check = Student.objects.filter(registration_number=reg,firstname=firstname,surname=surname,current_class=current_class).exists()
                 if not check:
                     students.append(
                         Student(
