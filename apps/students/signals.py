@@ -17,9 +17,11 @@ def create_bulk_student(sender, created, instance, *args, **kwargs):
         opened = StringIO(instance.csv_file.read().decode())
         reading = csv.DictReader(opened, delimiter=",")
         students = []
+        counter = 0 
         for row in reading:
+                counter+= 1
             # if "registration_number" in row and row["registration_number"]:
-                reg = row["registration_number"] if "registration_number" in row and row["registration_number"] else f"SLN/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}"
+                reg = row["registration_number"] if "registration_number" in row and row["registration_number"] else f"SLN/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}{counter}"
                 surname = row["surname"] if "surname" in row and row["surname"] else ""
                 firstname = (
                     row["firstname"] if "firstname" in row and row["firstname"] else ""
