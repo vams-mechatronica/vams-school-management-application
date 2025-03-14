@@ -127,8 +127,11 @@ class DownloadCSVViewdownloadcsv(LoginRequiredMixin, View):
                 "firstname",
                 "other_names",
                 "gender",
-                "parent_number",
+                "parent_mobile_number",
                 "address",
+                "date_of_birth",
+                "date_of_admission",
+                "adharcard_number",
                 "current_class",
             ]
         )

@@ -4,6 +4,8 @@ from apps.corecode.models import StudentClass
 from django.utils import timezone
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
@@ -29,10 +31,11 @@ class StudentAttendanceView(LoginRequiredMixin, PermissionRequiredMessageMixin, 
         context['attendance_choices'] = StudentAttendance.ATTENDANCE_CHOICE
         return context
 
-class StudentAttendanceCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin, CreateView):
+class StudentAttendanceCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin,SuccessMessageMixin, CreateView):
     model = StudentAttendance
     fields = ['status', 'remarks']  # These fields are used by default; we'll override save method
     success_url = reverse_lazy('students-attendance')
+    success_message = "Attendance added successfully"
     permission_required = 'attendance.add_studentattendance'
 
     def post(self, request, *args, **kwargs):
@@ -52,7 +55,7 @@ class StudentAttendanceCreateView(LoginRequiredMixin, PermissionRequiredMessageM
                     'remarks': remarks
                 }
             )
-
+        # messages.success(request,'Attendance updated successfully')
         return redirect(self.success_url)
 
 

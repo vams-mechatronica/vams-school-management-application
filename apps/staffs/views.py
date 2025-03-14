@@ -1,11 +1,14 @@
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.forms import widgets
 from django.shortcuts import render
+from django.http import HttpResponse
+import csv
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView,View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from apps.result.utils import PermissionRequiredMessageMixin
-from .models import Staff
+from .models import Staff,StaffBulkUpload
 from .forms import StaffForm
 
 
@@ -50,3 +53,35 @@ class StaffDeleteView(PermissionRequiredMessageMixin,DeleteView):
     model = Staff
     permission_required = "staffs.delete_staff"
     success_url = reverse_lazy("staff-list")
+
+
+class StaffBulkUploadView(LoginRequiredMixin, SuccessMessageMixin,PermissionRequiredMessageMixin, CreateView):
+    model = StaffBulkUpload
+    template_name = "staffs/staff_upload.html"
+    fields = ["csv_file"]
+    success_url = "/staff/list"
+    permission_required = 'staff.add_staffbulkupload' 
+    success_message = "Successfully uploaded staff"
+
+
+class DownloadCSVViewdownloadcsv(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="staff_template.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(
+            [
+                "emp_code",
+                "firstname",
+                "surname",
+                "gender",
+                "date_of_birth",
+                "date_of_joining",
+                "adhar_card_number",
+                "address",
+                "mobile_number",
+            ]
+        )
+
+        return response

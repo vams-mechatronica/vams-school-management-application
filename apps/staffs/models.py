@@ -38,3 +38,8 @@ class Staff(models.Model):
 
     def get_absolute_url(self):
         return reverse("staff-detail", kwargs={"pk": self.pk})
+
+
+class StaffBulkUpload(models.Model):
+    date_uploaded = models.DateTimeField(auto_now=True)
+    csv_file = models.FileField(upload_to="staff/bulkupload/")
