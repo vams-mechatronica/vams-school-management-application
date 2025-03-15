@@ -80,6 +80,11 @@ class ReceiptSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class InvoiceSerializer(serializers.ModelSerializer):
+    student = StudentSerializer()
+    session = AcademicSessionSerializer()
+    term = AcademicTermSerializer()
+    class_for = StudentClassSerializer()
+
     class Meta:
         model = Invoice
         fields = '__all__'

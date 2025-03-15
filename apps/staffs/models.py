@@ -6,11 +6,11 @@ from django.contrib.auth.models import User
 
 
 class Staff(models.Model):
-    STATUS = [("active", "Active"), ("inactive", "Inactive")]
+    STATUS = [(1, "Active"), (0, "Inactive")]
 
     GENDER = [("male", "Male"), ("female", "Female")]
 
-    current_status = models.CharField(max_length=10, choices=STATUS, default="active")
+    current_status = models.BooleanField(default=1,choices=STATUS)
     emp_code = models.CharField(max_length=200, unique=True,default=f"VAMS/emp/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}")
     surname = models.CharField(max_length=200)
     firstname = models.CharField(max_length=200)

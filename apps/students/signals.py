@@ -21,11 +21,11 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
     reading = csv.DictReader(opened, delimiter=",")
 
     students = []
-    timestamp = timezone.now().strftime('%m%d%H%M%S')
+    timestamp = timezone.now().strftime('%d')
     
     with transaction.atomic():  # Ensures database integrity in case of failure
         for counter, row in enumerate(reading, start=1):
-            reg = row.get("registration_number") or f"SLN/{timezone.now().year}/{timestamp}{counter}"
+            reg = row.get("registration_number") or f"SLN/{timezone.now().year}/{timezone.now().month}/{timestamp}/{counter}"
             surname = row.get("surname", "")
             firstname = row.get("firstname", "")
             other_names = row.get("other_names", "")
@@ -53,7 +53,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
                     current_class=theclass,
                     parent_mobile_number=phone,
                     address=address,
-                    current_status="active",
+                    current_status=1,
                 )
             )
 

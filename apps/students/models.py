@@ -9,14 +9,12 @@ from apps.transport.models import Route
 
 
 class Student(models.Model):
-    STATUS_CHOICES = [("active", "Active"), ("inactive", "Inactive")]
+    STATUS_CHOICES = [(1, "Active"), (0, "Inactive")]
 
     GENDER_CHOICES = [("male", "Male"), ("female", "Female")]
 
-    current_status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default="active"
-    )
-    registration_number = models.CharField(max_length=200, unique=True,default=f"VAMS/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}")
+    current_status = models.BooleanField(default=1, choices=STATUS_CHOICES)
+    registration_number = models.CharField(max_length=200, unique=True,help_text=f"VAMS/{timezone.now().year}/{timezone.now().strftime('%m')}/{timezone.now().strftime('%d')}/{timezone.now().strftime('%S')}")
     surname = models.CharField(max_length=200, blank=True,null=True)
     firstname = models.CharField(max_length=200)
     other_name = models.CharField(max_length=200, blank=True)

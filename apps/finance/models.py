@@ -19,6 +19,7 @@ def get_current_academic_term():
 
 
 class Invoice(models.Model):
+    STATUS = [(1, "Active"), (0, "Closed")]
     MONTH_CHOICES = tuple((month_name[i], month_name[i]) for i in range(1, 13))
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     session = models.ForeignKey(AcademicSession, on_delete=models.SET_NULL, null=True, blank=True,default=get_current_academic_session)
@@ -26,11 +27,7 @@ class Invoice(models.Model):
     month = models.CharField(verbose_name="Month", max_length=50, null=True, blank=True, choices=MONTH_CHOICES,default=month_name[datetime.now().month])
     class_for = models.ForeignKey(StudentClass, on_delete=models.SET_NULL, null=True, blank=True)
     previous_balance = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(
-        max_length=20,
-        choices=[("active", "Active"), ("closed", "Closed")],
-        default="active"
-    )
+    status = models.BooleanField(default=1,choices=STATUS)
     # New field to control editing
     is_editable = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -110,3 +107,6 @@ class Receipt(models.Model):
         return f"Receipt for Invoice {self.invoice} - {self.amount_paid}"
 
 
+class InvoiceBulkUpload(models.Model):
+    date_uploaded = models.DateTimeField(auto_now=True)
+    csv_file = models.FileField(upload_to="invoice/bulkupload/")
