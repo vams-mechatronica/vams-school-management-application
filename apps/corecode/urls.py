@@ -20,7 +20,6 @@ from .views import (
     TermDeleteView,
     TermListView,
     TermUpdateView,
-    DashboardDataAPIView,
     SchoolDetailView
 )
 from django_select2.views import AutoResponseView
@@ -66,5 +65,4 @@ urlpatterns = [
         SubjectDeleteView.as_view(),
         name="subject-delete",
     ),
-    path('api/dashboard-data/', DashboardDataAPIView.as_view(), name='dashboard-data-api'),
 ]

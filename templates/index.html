@@ -84,7 +84,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        fetch('/api/dashboard-data/')
+        fetch('/api/v1/dashboard-data/')
             .then(response => response.json())
             .then(data => {
                 // Update dashboard cards
