@@ -12,7 +12,7 @@ from .models import Staff,StaffBulkUpload
 
 
 @receiver(post_save, sender=StaffBulkUpload)
-def create_bulk_student(sender, instance, created, *args, **kwargs):
+def create_bulk_staff(sender, instance, created, *args, **kwargs):
     if not created:
         return
     
@@ -20,7 +20,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
     opened = StringIO(instance.csv_file.read().decode())
     reading = csv.DictReader(opened, delimiter=",")
 
-    students = []
+    staff = []
     timestamp = timezone.now().strftime('%d')
     
     with transaction.atomic():  # Ensures database integrity in case of failure
@@ -32,31 +32,25 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
             gender = row.get("gender", "").lower()
             phone = row.get("mobile_number", "")
             address = row.get("address", "")
-            date_of_birth = row.get("address", "")
-            date_of_joining = row.get("address", "")
             adhar_card_number = row.get("adhar_card_number", "")
 
-            date_of_birth = datetime.strptime(date_of_birth,'%Y-%m-%d')
-            date_of_joining = datetime.strptime(date_of_joining,'%Y-%m-%d')
 
-            students.append(
+            staff.append(
                 Staff(
-                    registration_number=reg,
+                    emp_code=reg,
                     surname=surname,
                     firstname=firstname,
                     other_name=other_names,
                     gender=gender,
                     mobile_number=phone,
                     address=address,
-                    date_of_birth=date_of_birth,
-                    date_of_joining=date_of_joining,
                     adhar_card_number=adhar_card_number,
                     current_status="active",
                 )
             )
 
         # Bulk insert students (avoiding duplicate checks in loop)
-        Staff.objects.bulk_create(students, ignore_conflicts=True)  # Ignores duplicates if constraints exist
+        Staff.objects.bulk_create(staff, ignore_conflicts=True)  # Ignores duplicates if constraints exist
 
     instance.csv_file.close()
     instance.delete()
