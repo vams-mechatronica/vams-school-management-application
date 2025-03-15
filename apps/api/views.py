@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import *
+from math import ceil
 from .serializers import *
 from .pagination import LargeResultsSetPagination,StandardResultsSetPagination
 from rest_framework import generics, status
@@ -430,8 +431,8 @@ class DashboardDataAPIView(APIView):
             'total_staff': total_staff,
             'present_staff': present_staff,
             'absent_staff': absent_staff,
-            'fees_balance': fees_balance or 0,
-            'fees_received': fees_received or 0,
+            'fees_balance': ceil(fees_balance) if fees_balance else 0,
+            'fees_received': ceil(fees_received) if fees_received else 0,
             'attendance_graph': attendance_graph
         }
 
