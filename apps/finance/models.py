@@ -37,7 +37,7 @@ class Invoice(models.Model):
         get_latest_by = 'created_at'
     
     def __str__(self):
-        return f"{self.student.firstname} {self.student.surname}"
+        return f"{self.student.firstname} {self.student.surname} - {self.student.registration_number}"
 
     def get_absolute_url(self):
         return reverse('invoice-detail', kwargs={'pk': self.pk})
