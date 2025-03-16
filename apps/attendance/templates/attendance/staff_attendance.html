@@ -77,21 +77,6 @@
                             </td>
                         </tr>`;
                 });
-
-                /*const paginationControls = document.getElementById('pagination-controls');
-                paginationControls.innerHTML = `
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item ${data.page === 1 ? 'disabled' : ''}">
-                            <a class="page-link" href="#" ${data.page > 1 ? `onclick="loadStudents(${data.page - 1})"` : ''}>Previous</a>
-                        </li>
-                        ${Array.from({length: data.pages}, (_, i) => `
-                            <li class="page-item ${data.page === i + 1 ? 'active' : ''}">
-                                <a class="page-link" href="#" onclick="loadStudents(${i + 1})">${i + 1}</a>
-                            </li>`).join('')}
-                        <li class="page-item ${data.page === data.pages ? 'disabled' : ''}">
-                            <a class="page-link" href="#" ${data.page < data.pages ? `onclick="loadStudents(${data.page + 1})"` : ''}>Next</a>
-                        </li>
-                    </ul>`;*/
             });
     }
 </script>

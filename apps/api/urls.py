@@ -11,12 +11,12 @@ urlpatterns = [
     path('student/detail/', StudentDetailAPI.as_view(), name='student-detail'),
     path('student/update/<int:pk>/', StudentUpdateAPI.as_view(), name='student-update'),
     path('student/delete/<int:pk>/', StudentDeleteAPI.as_view(), name='student-delete'),
-    # path(''),
 
     #staff
     path('staff/get/', StaffListAPI.as_view(), name='staff-list'),
     path('staff/create/', StaffCreateAPI.as_view(), name='staff-create'),
     path('staff/<int:pk>/', StaffRetrieveUpdateDestroyView.as_view(), name='staff-retrieve-update-destroy'),
+    path('staff/attendance/',StaffAttendenceAPI.as_view(),name="staff-attendance-api"),
 
 
     # Invoice URLs

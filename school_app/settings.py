@@ -248,6 +248,11 @@ LOGGING = {
 }
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100
@@ -259,3 +264,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 SELECT2_JS = "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
 SELECT2_CSS = "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+
+
+#Email Backend 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtpout.secureserver.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS= True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER','info@vamsmechatronica.in')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD','OneManArmy3$')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_EMAIL_FROM','VAMS Mechatronica<info@vamsmechatronica.in>')

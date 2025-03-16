@@ -12,7 +12,7 @@ from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from .permissions import IsStaff, CanDeleteStudent, IsAdminOrStaff, IsInvoiceOwner, IsStudent, CanDeleteSchool
-from rest_framework.authentication import BasicAuthentication,TokenAuthentication
+from rest_framework.authentication import BasicAuthentication,TokenAuthentication, SessionAuthentication
 
 # Driver API
 class DriverListCreateView(generics.ListCreateAPIView):
@@ -396,8 +396,8 @@ class DashboardDataAPIView(APIView):
         present_students = StudentAttendance.objects.filter(date=today, status='present').count()
         absent_students = StudentAttendance.objects.filter(date=today, status='absent').count()
         total_staff = Staff.objects.count()
-        present_staff = StaffAttendance.objects.filter(time_in__date=today, status='present').count()
-        absent_staff = StaffAttendance.objects.filter(time_in__date=today, status='absent').count()
+        present_staff = StaffAttendance.objects.filter(time_in__date=today, status=1).count()
+        absent_staff = StaffAttendance.objects.filter(time_in__date=today, status=0).count()
         # Subquery to get the latest invoice for each student
         latest_invoice = Invoice.objects.filter(student=OuterRef('student')).order_by('-created_at')
 
@@ -437,3 +437,16 @@ class DashboardDataAPIView(APIView):
         }
 
         return Response(data, status=status.HTTP_200_OK)
+
+class StaffAttendenceAPI(generics.ListAPIView):
+    queryset = StaffAttendance.objects.all()
+    serializer_class = StaffAttendanceSerializer
+    permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (TokenAuthentication,BasicAuthentication,SessionAuthentication)
+    filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
+    pagination_class = StandardResultsSetPagination
+    ordering_fields = '__all__'
+    filterset_fields = ['date','staff__id','staff__surname','staff__firstname','staff__emp_code']
+    search_fields = ['date','staff__id','staff__surname','staff__firstname','staff__emp_code']
+    ordering = ['date']
+

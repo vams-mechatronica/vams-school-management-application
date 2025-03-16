@@ -3,6 +3,7 @@ from django.urls import reverse,reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from apps.students.models import Student
 from apps.staffs.models import Staff
+from datetime import date
 
 # Create your models here.
 class StudentAttendance(models.Model):
@@ -26,11 +27,12 @@ class StudentAttendance(models.Model):
     
 
 class StaffAttendance(models.Model):
-    ATTENDANCE_CHOICE = (('present', 'Present'),('absent','Absent'),('on-leave', 'On-leave'),('other', 'Other'))
+    ATTENDANCE_CHOICE = ((1, 'Present'),(0,'Absent'),(2, 'On-leave'),(3, 'Other'))
     staff = models.ForeignKey(Staff, verbose_name=_("Staff Name"), on_delete=models.CASCADE)
-    status = models.CharField(_("Status"), max_length=50, blank=True,null=True,choices=ATTENDANCE_CHOICE)
-    time_in = models.DateTimeField(_("Time-In"), auto_now=False, auto_now_add=True)
-    time_out = models.DateTimeField(_("Time-Out"), auto_now=True, auto_now_add=False)
+    date = models.DateField(default=date.today)
+    status = models.IntegerField(_("Status"),choices=ATTENDANCE_CHOICE, default=0)
+    time_in = models.TimeField(_("Time-In"),null=True,blank=True)
+    time_out = models.TimeField(_("Time-Out"),null=True,blank=True)
     remarks = models.CharField(_("Remarks"), max_length=500,null=True,blank=True)
 
     class Meta:

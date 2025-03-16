@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-3">Staff Attendance</h2>
+    <form method="post" id="attendanceForm">
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="{{ form.date.id_for_label }}" class="form-label fw-bold">Date:</label>
+                <input type="date" name="{{ form.date.name }}" id="{{ form.date.id_for_label }}" class="form-control" value="{{ form.date.value|default:'' }}">
+            </div>
+        </div>
+        
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Staff Name</th>
+                    <th>Status</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceTable">
+                {% for staff in staff_list %}
+                {% with attendance_records|dict_key:staff.id as attendance %}
+                <tr data-staff-id="{{ staff.id }}">
+                    <td class="fw-semibold align-middle">{{ staff.get_full_name }}</td>
+                    <td>
+                        <select name="attendance_{{ staff.id }}" class="form-control attendance-status">
+                            <option value="1">Present</option>
+                            <option value="0">Absent</option>
+                            <option value="2">On-leave</option>
+                            <option value="3">Other</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="time" name="check_in_{{ staff.id }}" class="form-control check-in">
+                    </td>
+                    <td>
+                        <input type="time" name="check_out_{{ staff.id }}" class="form-control check-out">
+                    </td>
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Submit Attendance</button>
+    </form>
+</div>
+{% endblock %}
+{% block morejs %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const dateField = document.querySelector("#{{ form.date.id_for_label }}");
+    const tableBody = document.querySelector("#attendanceTable");
+
+    dateField.addEventListener("change", function () {
+        const selectedDate = dateField.value;
+        if (!selectedDate) return;
+
+        fetchAttendanceData(selectedDate);
+    });
+
+    function fetchAttendanceData(date) {
+        fetch(`/api/v1/staff/attendance/?date=${date}`, {
+            method: "GET",
+            credentials: "include",  // Ensures session authentication is used
+            headers: {
+                "X-CSRFToken": getCSRFToken(),  // Include CSRF token for security
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateAttendanceTable(data.results);
+        })
+        .catch(error => console.error("Error fetching attendance data:", error));
+    }
+
+    function updateAttendanceTable(attendanceRecords) {
+        document.querySelectorAll("#attendanceTable tr").forEach(row => {
+            const staffId = row.getAttribute("data-staff-id");
+            const attendance = attendanceRecords.find(a => a.staff == staffId);
+
+            if (attendance) {
+                row.querySelector(".attendance-status").value = attendance.status;
+                row.querySelector(".check-in").value = attendance.time_in ? attendance.time_in.slice(0, 5) : "";
+                row.querySelector(".check-out").value = attendance.time_out ? attendance.time_out.slice(0, 5) : "";
+            } else {
+                row.querySelector(".attendance-status").value = "";
+                row.querySelector(".check-in").value = "";
+                row.querySelector(".check-out").value = "";
+            }
+        });
+    }
+
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+});
+</script>
+{% endblock morejs %}

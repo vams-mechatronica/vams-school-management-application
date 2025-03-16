@@ -38,6 +38,9 @@ class Staff(models.Model):
 
     def get_absolute_url(self):
         return reverse("staff-detail", kwargs={"pk": self.pk})
+    
+    def get_full_name(self):
+        return f"{self.firstname} {self.surname}"
 
 
 class StaffBulkUpload(models.Model):
