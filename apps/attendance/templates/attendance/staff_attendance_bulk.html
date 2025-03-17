@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load custom_filters %}
+{% block title %}Staff Attendance{% endblock title %}
 {% block content %}
 <div class="container">
-    <h2 class="mb-3">Staff Attendance</h2>
+    {% comment %} <h2 class="mb-3">Staff Attendance</h2> {% endcomment %}
     <form method="post" id="attendanceForm">
         {% csrf_token %}
         <div class="row mb-3">

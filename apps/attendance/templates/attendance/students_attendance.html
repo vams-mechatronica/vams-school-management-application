@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-
+{% block title %}Student's Attendance{% endblock title %}
 {% block content %}
-    <h2>Student's Attendance</h2>
     <form method="post" id="attendance-form" action="{% url 'students-attendance-add' %}">
         {% csrf_token %}
         

@@ -162,28 +162,28 @@
             {% if request.user.is_staff %}
             <li class="nav-header">Attendance</li>
             <li class="nav-item">
-              <a href="{% url 'students-attendance' %}" class="nav-link">
-                <i class="nav-icon fas fa-user-clock"></i>
-                <p>
-                  Student's Attendance
-                </p>
-              </a>
+                <a href="{% url 'students-attendance' %}" class="nav-link">
+                    <i class="nav-icon fas fa-user-graduate"></i> 
+                    <p>Student Attendance</p>
+                </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'staff-attendance' %}" class="nav-link">
-                <i class="nav-icon fas fa-user-check"></i>
-                <p>
-                  Staff's Attendance
-                </p>
-              </a>
+                <a href="{% url 'staff-attendance' %}" class="nav-link">
+                    <i class="nav-icon fas fa-user-tie"></i> 
+                    <p>Staff Attendance</p>
+                </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'attendance-report-view' %}" class="nav-link">
-                <i class="nav-icon fas fa-list"></i>
-                <p>
-                  Attendance Report
-                </p>
-              </a>
+                <a href="{% url 'attendance-report-view' %}" class="nav-link">
+                    <i class="nav-icon fas fa-file-alt"></i> 
+                    <p>Attendance Report</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'staff-attendance-report' %}" class="nav-link">
+                    <i class="nav-icon fas fa-clipboard-list"></i> 
+                    <p>Staff Attendance Report</p>
+                </a>
             </li>
 
             <li class="nav-header">Transport</li>

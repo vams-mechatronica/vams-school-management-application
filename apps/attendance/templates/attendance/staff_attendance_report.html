@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load custom_filters %}  {# Load the custom filter #}
+{% block title %}Monthly Attendance Report - {{ month }}{% endblock title %}
+{% block content %}
+{% comment %} <h2>Monthly Attendance Report - {{ month }}</h2> {% endcomment %}
+
+
+    <form method="GET" class="mb-3">
+        <div class="form-group row">
+            <div class="col-md-4">
+                <label for="month">Select Month:</label>
+                <input type="month" class="form-control" name="month" id="month" value="{{ month }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Generate</button>
+            </div>
+        </div>
+    </form>    
+
+
+    {% if report_available %}
+    <div class="table-responsive" style="max-height: 500px; overflow-y: auto; overflow-x: auto;">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Staff Name</th>
+                    {% for date in date_range %}
+                        <th>{{ date }}</th>  
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for staff in staff_list %}
+                <tr>
+                    <td>{{ staff.firstname }} {{ staff.surname }}</td>
+                    {% for date in date_range %}
+                        <td>
+                            {% with attendance_data|get_item:staff.pk|get_item:date as record %}
+                                {% if record %}
+                                    {{ record }} 
+                                {% else %}
+                                    - 
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="text-danger">Attendance Not Available for this month.</p>
+{% endif %}
+
+    
+{% endblock %}

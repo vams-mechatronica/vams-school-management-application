@@ -8,10 +8,14 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, View
 from django.shortcuts import redirect
 from .forms import BulkAttendanceForm
+import logging
 from apps.result.utils import PermissionRequiredMessageMixin
+from django.db.models import Sum, F, ExpressionWrapper, fields
+
+logger = logging.getLogger(__name__)
 
 
 class StudentAttendanceView(LoginRequiredMixin, PermissionRequiredMessageMixin, ListView):
@@ -243,3 +247,93 @@ def bulk_attendance_view(request):
         'staff_list': staff_list,
         'attendance_records': attendance_records  # Pass the dictionary correctly
     })
+
+def get_holidays():
+    # Placeholder function to fetch holidays (this should be replaced with actual holiday fetching logic)
+    return {datetime.now().date(): "Holiday"}  # Example: Dictionary with holiday dates
+
+class MonthlyAttendanceReportView(LoginRequiredMixin,PermissionRequiredMessageMixin,SuccessMessageMixin,View):
+    permission_required = "attendance.view_staffattendance"
+    def get(self, request):
+        try:
+            month = request.GET.get('month', datetime.now().strftime('%Y-%m'))  # Default to current month
+            start_date = datetime.strptime(month, '%Y-%m').date().replace(day=1)
+            end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+
+            # Generate a list of formatted dates (to be used as table headers)
+            date_range = [(start_date + timedelta(days=i)).strftime('%d/%m') for i in range((end_date - start_date).days + 1)]
+
+            # Get all staff members
+            staff_list = Staff.objects.all()
+
+            # Fetch attendance data for the given month
+            attendance_records = StaffAttendance.objects.filter(
+                date__range=[start_date, end_date],
+                status=1, time_in__isnull=False, time_out__isnull=False
+            ).annotate(
+                hours_spent=ExpressionWrapper(
+                    F('time_out') - F('time_in'),
+                    output_field=fields.DurationField()
+                )
+            ).values('staff__id', 'staff__firstname', 'staff__surname', 'date').annotate(
+                total_hours=Sum('hours_spent')
+            )
+
+            # Process attendance data into a dictionary {staff_id: {date: total_hours}}
+            attendance_data = {}
+            for record in attendance_records:
+                staff_id = record['staff__id']
+                date_str = record['date'].strftime('%d/%m')
+                total_seconds = record['total_hours'].total_seconds()
+                hours = int(total_seconds // 3600)
+                minutes = int((total_seconds % 3600) // 60)
+                formatted_hours = f"{hours}h {minutes}m"
+
+                if staff_id not in attendance_data:
+                    attendance_data[staff_id] = {}
+                attendance_data[staff_id][date_str] = formatted_hours
+
+        except Exception as e:
+            # Handle unexpected errors gracefully
+            logger.error(f"Error generating report: {e}")
+            attendance_data = {}
+            date_range = []
+            staff_list = []
+
+        # If no attendance data is found, set a flag
+        report_available = bool(attendance_data)
+
+        return render(request, 'attendance/staff_attendance_report.html', {
+            'month': month,
+            'date_range': date_range,
+            'staff_list': staff_list,
+            'attendance_data': attendance_data,
+            'report_available': report_available  # Flag to handle missing data in template
+        })
+
+def api_monthly_attendance_report(request):
+    month = request.GET.get('month', datetime.now().strftime('%Y-%m'))
+    start_date = datetime.strptime(month, '%Y-%m').date().replace(day=1)
+    end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+    
+    holidays = get_holidays()
+    
+    attendance_data = StaffAttendance.objects.filter(date__range=[start_date, end_date], status=1, time_in__isnull=False, time_out__isnull=False)
+    
+    attendance_data = attendance_data.annotate(
+        hours_spent=ExpressionWrapper(
+            F('time_out') - F('time_in'),
+            output_field=fields.DurationField()
+        )
+    ).values('staff__firstname', 'staff__surname', 'date').annotate(
+        total_hours=Sum('hours_spent')
+    ).order_by('date')
+    
+    # Format hours_spent to only show hours and minutes
+    for record in attendance_data:
+        total_seconds = record['total_hours'].total_seconds()
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        record['total_hours'] = f"{hours}h {minutes}m"
+    
+    return JsonResponse({'attendance_data': list(attendance_data), 'holidays': holidays})

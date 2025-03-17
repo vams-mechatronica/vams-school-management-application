@@ -396,8 +396,8 @@ class DashboardDataAPIView(APIView):
         present_students = StudentAttendance.objects.filter(date=today, status='present').count()
         absent_students = StudentAttendance.objects.filter(date=today, status='absent').count()
         total_staff = Staff.objects.count()
-        present_staff = StaffAttendance.objects.filter(time_in__date=today, status=1).count()
-        absent_staff = StaffAttendance.objects.filter(time_in__date=today, status=0).count()
+        present_staff = StaffAttendance.objects.filter(date=today, status=1).count()
+        absent_staff = StaffAttendance.objects.filter(date=today, status=0).count()
         # Subquery to get the latest invoice for each student
         latest_invoice = Invoice.objects.filter(student=OuterRef('student')).order_by('-created_at')
 

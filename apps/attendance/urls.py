@@ -9,4 +9,5 @@ urlpatterns = [
    path('generate-report',AttendanceReportAPI.as_view(),name="generate-attendance-report"),
    path('attendance-report-view',attendance_report_view,name="attendance-report-view"),
    path('staff-attendance/', bulk_attendance_view, name='staff-attendance'),
+   path('staff-attendance-report/', MonthlyAttendanceReportView.as_view(), name='staff-attendance-report'),
 ]
