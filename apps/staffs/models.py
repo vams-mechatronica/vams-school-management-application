@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 
 class Staff(models.Model):
@@ -26,7 +27,7 @@ class Staff(models.Model):
     mobile_number = models.CharField(
         validators=[mobile_num_regex], max_length=13, blank=True
     )
-
+    email = models.EmailField(_("Email Address"), max_length=254, null=True, blank=True)
     address = models.TextField(blank=True)
     others = models.TextField(blank=True)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)

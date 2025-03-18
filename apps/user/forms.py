@@ -26,7 +26,7 @@ class UserCreateForm(forms.ModelForm):
 
     class Meta:
         model = user
-        fields = ['username', 'first_name', 'last_name', 'password']
+        fields = ['username','email', 'first_name', 'last_name', 'password']
 
     def __init__(self, *args, **kwargs):
         super(UserCreateForm, self).__init__(*args, **kwargs)
@@ -41,4 +41,4 @@ class UserCreateForm(forms.ModelForm):
 
         choices = [(user.id, f" {user.surname} {user.firstname} {user.other_name} ({user.registration_number})") for user in users]
         self.fields['selected_person'].choices = choices
-        self.order_fields(['student_or_staff', 'selected_person', 'username', 'first_name', 'last_name', 'password'])
+        self.order_fields(['student_or_staff', 'selected_person', 'username','email', 'first_name', 'last_name', 'password'])

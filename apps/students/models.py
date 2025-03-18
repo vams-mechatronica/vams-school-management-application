@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from apps.corecode.models import StudentClass
 from apps.transport.models import Route
+from django.utils.translation import gettext_lazy as _
+
 
 
 
@@ -50,6 +52,9 @@ class Student(models.Model):
     pickup_drop_location = models.CharField(max_length=255, blank=True, help_text="Pickup/Drop location for transport")
     pickup_time = models.TimeField(null=True, blank=True, help_text="Pickup time for the student")
     drop_time = models.TimeField(null=True, blank=True, help_text="Drop time for the student")
+
+    email = models.EmailField(_("Email Address"), max_length=254, null=True, blank=True)
+
 
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)

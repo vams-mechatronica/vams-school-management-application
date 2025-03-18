@@ -93,7 +93,7 @@ class UserCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin, Success
 
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin,PermissionRequiredMessageMixin, UpdateView):
     model = user
-    fields = ("is_active","username")
+    fields = ("is_active","username","email")
     success_message = "Record successfully updated."
     template_name = "user/user_form.html"
     permission_required = 'auth.update_user'
@@ -108,11 +108,11 @@ class UserDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteVi
 def get_users_list(request):
     role = request.GET.get('role')
     if role == 'student':
-        users = Student.objects.all().values('id', 'firstname', 'surname','other_name','registration_number')
-        users_list = [{'id': user['id'], 'name': f"{user['surname']} {user['firstname']} {user['other_name']} ({user['registration_number']})"} for user in users]
+        users = Student.objects.all().values('id', 'firstname', 'surname','other_name','registration_number','email')
+        users_list = [{'id': user['id'], 'name': f"{user['surname']} {user['firstname']} {user['other_name']} ({user['registration_number']})",'email':user['email']} for user in users]
     else:
-        users = Staff.objects.all().values('id', 'firstname', 'surname','other_name')
-        users_list = [{'id': user['id'], 'name': f"{user['surname']} {user['firstname']} {user['other_name']}"} for user in users]
+        users = Staff.objects.all().values('id', 'firstname', 'surname','other_name','email')
+        users_list = [{'id': user['id'], 'name': f"{user['surname']} {user['firstname']} {user['other_name']}",'email':user['email']} for user in users]
     
    
     
