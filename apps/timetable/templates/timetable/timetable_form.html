@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Timetable{% endblock title %}
+
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {% include 'corecode/form_snippet.html' %}
+
+        {% if object %}
+        <input type="submit" class="btn btn-primary" value="Update Record">
+      {% else %}
+        <input type="submit" class="btn btn-primary" value="Save">
+      {% endif %}
+    </form>
+
+    {% if timetable_records %}
+    <div class="my-5">
+    <table class="table table-bordered" id="timetable_form_table">
+      <thead>
+          <tr>
+              <th>ID</th>
+              <th>Day</th>
+              <th>Period</th>
+              <th>Class</th>
+              <th>Subject</th>
+              <th>Teacher</th>
+              <th>Actions</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for timetable in timetable_records %}
+          <tr>
+              <td>{{ timetable.id }}</td>
+              <td>{{ timetable.day }}</td>
+              <td>{{ timetable.period }}</td>
+              <td>{{ timetable.class_assigned }}</td>
+              <td>{{ timetable.subject }}</td>
+              <td>{{ timetable.staff.firstname }} {{ timetable.staff.surname }}</td>
+              <td>
+                  <a href="#" class="btn btn-warning btn-sm">Edit</a>
+                  <a href="#" class="btn btn-danger btn-sm">Delete</a>
+              </td>
+          </tr>
+          {% empty %}
+          <tr>
+              <td colspan="7">No timetable records found.</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+  {% endif %}
+{% endblock content %}
+{% block morejs %}
+<script>
+  $('#timetable_form_table').DataTable({
+    select: false
+  });
+</script>
+
+{% endblock morejs %}

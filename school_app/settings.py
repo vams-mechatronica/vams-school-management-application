@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "apps.user",
     "apps.api",
     "apps.transport",
+    "apps.timetable",
     "django_select2",
     "rest_framework",
     'rest_framework.authtoken',

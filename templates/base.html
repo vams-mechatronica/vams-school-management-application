@@ -51,6 +51,7 @@
         /* Additional styling if needed */
       }
     }
+    {% block morecss %}{% endblock morecss %}
   </style>
 </head>
 
@@ -185,6 +186,15 @@
                     <p>Staff Attendance Report</p>
                 </a>
             </li>
+
+            <li class="nav-header">Time Table</li>
+            <li class="nav-item">
+                <a href="{% url 'view-timetable' %}" class="nav-link">
+                    <i class="nav-icon fas fa-calendar-alt"></i>
+                    <p>View TimeTable</p>
+                </a>
+            </li>
+          
 
             <li class="nav-header">Transport</li>
             <li class="nav-item">
