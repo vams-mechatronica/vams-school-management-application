@@ -27,7 +27,7 @@ class StaffDetailView(DetailView,PermissionRequiredMessageMixin):
 class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin,CreateView):
     model = Staff
     form_class = StaffForm
-    permission_required = "staffs.create_staff"
+    permission_required = "staffs.add_staff"
     success_message = "New staff successfully added"
 
 
@@ -60,7 +60,7 @@ class StaffBulkUploadView(LoginRequiredMixin, SuccessMessageMixin,PermissionRequ
     template_name = "staffs/staff_upload.html"
     fields = ["csv_file"]
     success_url = "/staff/list"
-    permission_required = 'staff.add_staffbulkupload' 
+    permission_required = 'staffs.add_staffbulkupload' 
     success_message = "Successfully uploaded staff"
 
 
