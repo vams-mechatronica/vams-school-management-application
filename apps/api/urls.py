@@ -17,6 +17,7 @@ urlpatterns = [
     path('staff/create/', StaffCreateAPI.as_view(), name='staff-create'),
     path('staff/<int:pk>/', StaffRetrieveUpdateDestroyView.as_view(), name='staff-retrieve-update-destroy'),
     path('staff/attendance/',StaffAttendenceAPI.as_view(),name="staff-attendance-api"),
+    path('staff/attendance/record-time/',StaffAttendanceView.as_view(),name="staff-attendance-time-record"),
 
 
     # Invoice URLs

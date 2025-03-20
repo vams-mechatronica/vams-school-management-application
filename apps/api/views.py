@@ -450,3 +450,23 @@ class StaffAttendenceAPI(generics.ListAPIView):
     search_fields = ['date','staff__id','staff__surname','staff__firstname','staff__emp_code']
     ordering = ['date']
 
+class StaffAttendanceView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (BasicAuthentication, TokenAuthentication, SessionAuthentication)
+    
+    def post(self, request):
+        user = request.user
+        today = now().date()
+        current_time = now().time()
+        getStaff = Staff.objects.get(user=user)
+        
+        try:
+            attendance = StaffAttendance.objects.get(staff=getStaff, date=today)
+            if attendance:
+                attendance.time_out = current_time
+                attendance.save()
+                return Response({"message": "Time out recorded", "data": StaffAttendanceSerializer(attendance).data})
+
+        except StaffAttendance.DoesNotExist:
+            attendance = StaffAttendance.objects.create(staff=getStaff, date=today, time_in=current_time)
+            return Response({"message": "Time in recorded", "data": StaffAttendanceSerializer(attendance).data})
