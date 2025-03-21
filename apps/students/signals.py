@@ -20,6 +20,8 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
     students = []
     timestamp = timezone.now().strftime('%d')
     ext = os.path.splitext(instance.csv_file.name)[1].lower()
+
+    last_id = Student.objects.latest('created_at').id
     
     with transaction.atomic():  # Ensures database integrity in case of failure
         if ext == ".csv":
@@ -32,8 +34,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
         
         column_mapping = {
             "registration_number": "registration_number",
-            "student_name": "surname",
-            "student_name": "firstname",
+            "student_name": "student_name",
             "other_names": "other_names",
             "gender": "gender",
             "father_name": "father_name",
@@ -45,11 +46,11 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
         }
         
         for counter, row in enumerate(reading, start=1):
+            counter += last_id
             normalized_row = {column_mapping.get(k.strip().lower().replace(" ", "_"), k.strip().lower().replace(" ", "_")): v for k, v in row.items()}
             
             reg = normalized_row.get("registration_number") or f"SLN/{timezone.now().year}/{timezone.now().month}/{timestamp}/{counter}"
-            surname = normalized_row.get("surname", "")
-            firstname = normalized_row.get("firstname", "")
+            student_name = normalized_row.get("student_name", "")
             other_names = normalized_row.get("other_names", "")
             gender = str(normalized_row.get("gender", "")).lower()
             father_name = normalized_row.get("father_name", "")
@@ -71,6 +72,17 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
                         dob = timezone.now()
             else:
                 dob = timezone.now()
+            
+            first_name = None
+            sur_name = None
+            if student_name:
+                sname = student_name.split(' ')
+                if len(sname) > 1:
+                    first_name = sname[0]
+                    sur_name = sname[1]
+                elif len(sname) == 1:
+                    first_name = sname[0]
+                    sur_name = None
 
             # Fetch or create class
             theclass = None
@@ -80,8 +92,8 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
             students.append(
                 Student(
                     registration_number=reg,
-                    surname=surname,
-                    firstname=firstname,
+                    surname=sur_name,
+                    firstname=first_name,
                     other_name=other_names,
                     gender=gender,
                     father_name=father_name,
@@ -95,7 +107,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
             )
 
         # Bulk insert students (avoiding duplicate checks in loop)
-        Student.objects.bulk_create(students, ignore_conflicts=True)  # Ignores duplicates if constraints exist
+        Student.objects.bulk_create(students, update_conflicts=True,unique_fields=['registration_number'],update_fields=['updated_at'])  # Ignores duplicates if constraints exist
 
     instance.csv_file.close()
     instance.delete()

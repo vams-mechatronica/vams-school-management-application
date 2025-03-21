@@ -175,6 +175,12 @@ class StudentDeleteAPI(generics.DestroyAPIView):
     permission_classes = (IsAdminUser, CanDeleteStudent)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
 
+class StudentBulkUploadAPI(generics.CreateAPIView):
+    queryset = StudentBulkUpload.objects.all()
+    serializer_class = StudentBulkUploadSerializer
+    permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 class StaffListAPI(generics.ListAPIView):
     queryset = Staff.objects.all()

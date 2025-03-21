@@ -4,6 +4,7 @@ from apps.finance.models import *
 from apps.result.models import *
 from apps.staffs.models import *
 from apps.user.models import *
+from apps.students.models import *
 from apps.transport.models import *
 from .models import APKVersion
 from rest_framework import serializers
@@ -43,6 +44,11 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = '__all__'
+
+class StudentBulkUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = StudentBulkUpload
+        exclude = ('date_uploaded',)
 
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:

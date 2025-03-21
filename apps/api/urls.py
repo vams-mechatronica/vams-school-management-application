@@ -8,6 +8,7 @@ urlpatterns = [
     path('account/registration/', include('dj_rest_auth.registration.urls')),
     path('student/get/',StudentAPI.as_view()),
     path('student/create/',StudentCreateAPI.as_view()),
+    path('student/create/bulk/',StudentBulkUploadAPI.as_view()),
     path('student/detail/', StudentDetailAPI.as_view(), name='student-detail'),
     path('student/update/<int:pk>/', StudentUpdateAPI.as_view(), name='student-update'),
     path('student/delete/<int:pk>/', StudentDeleteAPI.as_view(), name='student-delete'),
