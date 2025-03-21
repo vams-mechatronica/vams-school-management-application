@@ -4,6 +4,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+import os
+from django.core.exceptions import ValidationError
 
 
 class Staff(models.Model):
@@ -43,7 +45,12 @@ class Staff(models.Model):
     def get_full_name(self):
         return f"{self.firstname} {self.surname}"
 
+def validate_file_extension(value):
+    ext = os.path.splitext(value.name)[1].lower()
+    allowed_extensions = [".csv", ".xlsx"]
+    if ext not in allowed_extensions:
+        raise ValidationError(_(f"Invalid file type: {ext}. Only CSV and XLSX files are allowed."))
 
 class StaffBulkUpload(models.Model):
     date_uploaded = models.DateTimeField(auto_now=True)
-    csv_file = models.FileField(upload_to="staff/bulkupload/")
+    csv_file = models.FileField(upload_to="staff/bulkupload/", validators=[validate_file_extension])

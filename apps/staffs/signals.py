@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from apps.corecode.models import StudentClass
 from django.db import transaction
 from .models import Staff,StaffBulkUpload
+import pandas as pd
 
 
 @receiver(post_save, sender=StaffBulkUpload)
@@ -16,24 +17,41 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
     if not created:
         return
     
-    # Read the uploaded CSV file
-    opened = StringIO(instance.csv_file.read().decode())
-    reading = csv.DictReader(opened, delimiter=",")
-
     staff = []
     timestamp = timezone.now().strftime('%d')
+    ext = os.path.splitext(instance.csv_file.name)[1].lower()
     
     with transaction.atomic():  # Ensures database integrity in case of failure
+        if ext == ".csv":
+            opened = StringIO(instance.csv_file.read().decode())
+            reading = csv.DictReader(opened, delimiter=",")
+        elif ext == ".xlsx":
+            df = pd.read_excel(instance.csv_file)
+            df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+            reading = df.to_dict(orient="records")
+        
+        column_mapping = {
+            "emp_code": "emp_code",
+            "surname": "surname",
+            "firstname": "firstname",
+            "other_names": "other_names",
+            "gender": "gender",
+            "mobile_number": "mobile_number",
+            "address": "address",
+            "adhar_card_number": "adhar_card_number"
+        }
+        
         for counter, row in enumerate(reading, start=1):
-            reg = row.get("emp_code") or f"SLN/EMP/{timezone.now().year}/{timestamp}{counter}"
-            surname = row.get("surname", "")
-            firstname = row.get("firstname", "")
-            other_names = row.get("other_names", "")
-            gender = row.get("gender", "").lower()
-            phone = row.get("mobile_number", "")
-            address = row.get("address", "")
-            adhar_card_number = row.get("adhar_card_number", "")
-
+            normalized_row = {column_mapping.get(k.strip().lower().replace(" ", "_"), k.strip().lower().replace(" ", "_")): v for k, v in row.items()}
+            
+            reg = normalized_row.get("emp_code") or f"SLN/EMP/{timezone.now().year}/{timestamp}{counter}"
+            surname = normalized_row.get("surname", "")
+            firstname = normalized_row.get("firstname", "")
+            other_names = normalized_row.get("other_names", "")
+            gender = str(normalized_row.get("gender", "")).lower()
+            phone = normalized_row.get("mobile_number", "")
+            address = normalized_row.get("address", "")
+            adhar_card_number = normalized_row.get("adhar_card_number", "")
 
             staff.append(
                 Staff(
@@ -48,12 +66,12 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
                     current_status="active",
                 )
             )
-
-        # Bulk insert students (avoiding duplicate checks in loop)
-        Staff.objects.bulk_create(staff, ignore_conflicts=True)  # Ignores duplicates if constraints exist
-
+        
+        Staff.objects.bulk_create(staff, ignore_conflicts=True)
+    
     instance.csv_file.close()
     instance.delete()
+
 
 def _delete_file(path):
     """Deletes file from filesystem."""
