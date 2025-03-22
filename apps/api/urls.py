@@ -16,6 +16,7 @@ urlpatterns = [
     #staff
     path('staff/get/', StaffListAPI.as_view(), name='staff-list'),
     path('staff/create/', StaffCreateAPI.as_view(), name='staff-create'),
+    path('staff/create/bulk/',StaffBulkUploadAPI.as_view()),
     path('staff/<int:pk>/', StaffRetrieveUpdateDestroyView.as_view(), name='staff-retrieve-update-destroy'),
     path('staff/attendance/',StaffAttendenceAPI.as_view(),name="staff-attendance-api"),
     path('staff/attendance/record-time/',StaffAttendanceView.as_view(),name="staff-attendance-time-record"),

@@ -65,6 +65,11 @@ class StaffSerializer(serializers.ModelSerializer):
         model = Staff
         fields = '__all__'
 
+class StaffBulkCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffBulkUpload
+        exclude = ('date_uploaded',)
+
 class StaffAttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffAttendance

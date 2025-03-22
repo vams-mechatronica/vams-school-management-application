@@ -181,6 +181,12 @@ class StudentBulkUploadAPI(generics.CreateAPIView):
     permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
 
+class StaffBulkUploadAPI(generics.CreateAPIView):
+    queryset = StaffBulkUpload.objects.all()
+    serializer_class = StaffBulkCreateSerializer
+    permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
 
 class StaffListAPI(generics.ListAPIView):
     queryset = Staff.objects.all()
