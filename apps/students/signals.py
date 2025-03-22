@@ -20,8 +20,10 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
     students = []
     timestamp = timezone.now().strftime('%d')
     ext = os.path.splitext(instance.csv_file.name)[1].lower()
-
-    last_id = Student.objects.latest('created_at').id
+    try:
+        last_id = Student.objects.latest('created_at').id
+    except Student.DoesNotExist:
+        last_id = 0
     
     with transaction.atomic():  # Ensures database integrity in case of failure
         if ext == ".csv":
@@ -73,8 +75,8 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
             else:
                 dob = timezone.now()
             
-            first_name = None
-            sur_name = None
+            first_name = ""
+            sur_name = ""
             if student_name:
                 sname = student_name.split(' ')
                 if len(sname) > 1:
@@ -82,7 +84,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
                     sur_name = sname[1]
                 elif len(sname) == 1:
                     first_name = sname[0]
-                    sur_name = None
+                    sur_name = ""
 
             # Fetch or create class
             theclass = None
@@ -107,7 +109,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
             )
 
         # Bulk insert students (avoiding duplicate checks in loop)
-        Student.objects.bulk_create(students, update_conflicts=True,unique_fields=['registration_number'],update_fields=['updated_at'])  # Ignores duplicates if constraints exist
+        Student.objects.bulk_create(students, update_conflicts=True,unique_fields=['registration_number'],update_fields=['updated_at'])
 
     instance.csv_file.close()
     instance.delete()
