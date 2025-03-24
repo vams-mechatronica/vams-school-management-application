@@ -72,7 +72,7 @@
                     {% for status in attendance_choices %}
                         statusHtml += `
                             <label style="margin-right: 20px; font-weight:400">
-                                <input type="radio" name="status_${student.id}" value="{{ status.0 }}" ${student.status === "{{ status.0 }}" ? 'checked' : ''} required>
+                                <input type="radio" name="status_${student.id}" value="{{ status.0 }}" ${student.status === {{ status.0 }} ? 'checked' : ''} required>
                                 {{ status.1 }}
                             </label>
                         `;

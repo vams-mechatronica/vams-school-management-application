@@ -9,7 +9,9 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(StudentClass)
 class StudentClassAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id','name','tuition_fees','computer_fees','admission_fees','exam_fees','miscellaneous')
+    search_fields = ('id','name')
+    ordering = ('id','name','tuition_fees')
 
 @admin.register(StudentBulkUpload)
 class StudentBulkUploadAdmin(admin.ModelAdmin):

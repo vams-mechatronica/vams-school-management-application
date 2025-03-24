@@ -33,7 +33,7 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
         column_mapping = {
             "emp_code": "emp_code",
             "surname": "surname",
-            "firstname": "firstname",
+            "first_name": "firstname",
             "other_names": "other_names",
             "gender": "gender",
             "mobile_number": "mobile_number",
@@ -45,13 +45,16 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
             normalized_row = {column_mapping.get(k.strip().lower().replace(" ", "_"), k.strip().lower().replace(" ", "_")): v for k, v in row.items()}
             
             reg = normalized_row.get("emp_code") or f"SLN/EMP/{timezone.now().year}/{timestamp}{counter}"
-            surname = normalized_row.get("surname", "")
-            firstname = normalized_row.get("firstname", "")
-            other_names = normalized_row.get("other_names", "")
+            surname = normalized_row.get("surname", "-")
+            firstname = normalized_row.get("firstname", None)
+            other_names = normalized_row.get("other_names", "-")
             gender = str(normalized_row.get("gender", "")).lower()
             phone = normalized_row.get("mobile_number", "")
             address = normalized_row.get("address", "")
             adhar_card_number = normalized_row.get("adhar_card_number", "")
+
+            if not firstname:
+                firstname = surname
 
             staff.append(
                 Staff(
@@ -63,7 +66,7 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
                     mobile_number=phone,
                     address=address,
                     adhar_card_number=adhar_card_number,
-                    current_status="active",
+                    current_status=1,
                 )
             )
         
@@ -85,7 +88,7 @@ def delete_csv_file(sender, instance, *args, **kwargs):
         _delete_file(instance.csv_file.path)
 
 
-@receiver(post_delete, sender=Staff)
-def delete_passport_on_delete(sender, instance, *args, **kwargs):
-    if instance.adharcard:
-        _delete_file(instance.adharcard.path)
+# @receiver(post_delete, sender=Staff)
+# def delete_passport_on_delete(sender, instance, *args, **kwargs):
+#     if instance.adharcard:
+#         _delete_file(instance.adharcard.path)

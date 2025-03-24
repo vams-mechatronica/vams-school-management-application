@@ -78,6 +78,7 @@ class StudentAPI(generics.ListAPIView):
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
     pagination_class = StandardResultsSetPagination
     ordering_fields = '__all__'
+    filterset_fields = ['current_class','date_of_admission','registration_number','firstname','gender']
     search_fields = ['surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class__name','adharcard_number','parent_mobile_number','registration_number','user__id']
     ordering = ['user_id']
 
@@ -405,8 +406,8 @@ class DashboardDataAPIView(APIView):
         last_day_of_month = next_month - timezone.timedelta(days=1)
 
         total_students = Student.objects.count()
-        present_students = StudentAttendance.objects.filter(date=today, status='present').count()
-        absent_students = StudentAttendance.objects.filter(date=today, status='absent').count()
+        present_students = StudentAttendance.objects.filter(date=today, status=1).count()
+        absent_students = StudentAttendance.objects.filter(date=today, status=0).count()
         total_staff = Staff.objects.count()
         present_staff = StaffAttendance.objects.filter(date=today, status=1).count()
         absent_staff = StaffAttendance.objects.filter(date=today, status=0).count()
@@ -433,8 +434,8 @@ class DashboardDataAPIView(APIView):
         past_week_dates = [today - timedelta(days=i) for i in range(7)]
         for date in past_week_dates:
             attendance_graph['labels'].append(date.strftime('%Y-%m-%d'))
-            attendance_graph['present'].append(StudentAttendance.objects.filter(date=date, status='present').count())
-            attendance_graph['absent'].append(StudentAttendance.objects.filter(date=date, status='absent').count())
+            attendance_graph['present'].append(StudentAttendance.objects.filter(date=date, status=1).count())
+            attendance_graph['absent'].append(StudentAttendance.objects.filter(date=date, status=0).count())
 
         data = {
             'total_students': total_students,

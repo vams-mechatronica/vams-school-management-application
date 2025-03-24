@@ -7,10 +7,10 @@ from datetime import date
 
 # Create your models here.
 class StudentAttendance(models.Model):
-    ATTENDANCE_CHOICE = (('present', 'Present'),('absent','Absent'),('on-leave', 'On-leave'),('other', 'Other'))
+    ATTENDANCE_CHOICE = ((1, 'Present'),(0,'Absent'),(2, 'On-leave'),(3, 'Other'))
     student = models.ForeignKey(Student, verbose_name=_("Student Name"), on_delete=models.CASCADE)
     date = models.DateField(_("Date"), auto_now=False, auto_now_add=False)
-    status = models.CharField(_("Status"), max_length=50, blank=True,null=True,choices=ATTENDANCE_CHOICE)
+    status = models.IntegerField(_("Status"),choices=ATTENDANCE_CHOICE, default=0)
     remarks = models.CharField(_("Remarks"), max_length=500,null=True,blank=True)
     created_at = models.DateTimeField(_("Created At"), auto_now=False, auto_now_add=True)
     modified_at = models.DateTimeField(_("Modified At"), auto_now=True, auto_now_add=False)
