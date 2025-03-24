@@ -56,11 +56,11 @@
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
-  <div id="loader">
+  {% comment %} <div id="loader">
     <div class="spinner-border text-primary" role="status">
         <span class="sr-only">Loading...</span>
     </div>
-  </div>
+  </div> {% endcomment %}
   <div class="wrapper">
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -453,7 +453,7 @@
       });
     });
   </script>
-  <script>
+  {% comment %} <script>
     $(document).ready(function () {
         $('#loader').fadeOut(); // Hide loader when page is fully loaded
     });
@@ -461,7 +461,7 @@
     $(document).on('click', 'a.nav-link', function () {
         $('#loader').fadeIn(); // Show loader on navigation click
     });
-</script>
+</script> {% endcomment %}
 
   {% block morejs %}
 
