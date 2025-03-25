@@ -47,6 +47,9 @@
 
 {% block morejs %}
 <script>
+  $('#studenttable').DataTable({
+    "ordering": false
+  });
   // Simple JavaScript to select/deselect all
   document.addEventListener('DOMContentLoaded', function() {
       const selectAll = document.createElement('input');
