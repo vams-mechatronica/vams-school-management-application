@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+from django.urls import reverse,reverse_lazy
+from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
 
@@ -155,6 +157,23 @@ class StudentClass(models.Model):
 
     def __str__(self):
         return self.name
+
+class ClassSubjectRelation(models.Model):
+    class_id = models.ForeignKey(StudentClass, verbose_name=_("Class"), on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, verbose_name=_("Subjects"), on_delete=models.SET_NULL,null=True,blank=True)
+    created_at = models.DateTimeField(_("Created at"), auto_now=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated at"), auto_now=True, auto_now_add=False)
+    
+    class Meta:
+        verbose_name = _("ClassSubjectRelation")
+        verbose_name_plural = _("ClassSubjectRelations")
+
+    def __str__(self):
+        return "Class: {} Subject: {}".format(self.class_id,self.subject)
+
+    def get_absolute_url(self):
+        return reverse("ClassSubjectRelation_detail", kwargs={"pk": self.pk})
+
 
 
 class EmailMessageImageLink(models.Model):

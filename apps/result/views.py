@@ -13,87 +13,120 @@ from .forms import CreateResults, EditResults
 from .models import Result
 from .utils import has_permission,PermissionRequiredMessageMixin
 
-class CreateResultView(LoginRequiredMixin, PermissionRequiredMessageMixin, FormView):
+class CreateResultView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
     template_name = "result/create_result.html"
+    second_template_name = "result/create_result_page2.html"
     form_class = CreateResults
-    permission_required = "result.result.add_result"
+    permission_required = "result.add_result"
 
-    def form_valid(self, form):
-        request = self.request
-        if "finish" in request.POST:
-            subjects = form.cleaned_data["subjects"]
-            session = form.cleaned_data["session"]
-            term = form.cleaned_data["term"]
-            students = request.POST["students"]
-            results = []
-            for student in students.split(","):
-                stu = Student.objects.get(pk=student)
-                if stu.current_class:
-                    for subject in subjects:
-                        check = Result.objects.filter(
-                            session=session,
-                            term=term,
-                            current_class=stu.current_class,
-                            subject=subject,
-                            student=stu,
-                        ).first()
-                        if not check:
-                            results.append(
-                                Result(
-                                    session=session,
-                                    term=term,
-                                    current_class=stu.current_class,
-                                    subject=subject,
-                                    student=stu,
-                                )
-                            )
-            Result.objects.bulk_create(results)
-            return redirect("edit-results")
+    def post(self,request):
+        if "finish" in request.POST: 
+            form = self.form_class(request.POST)
+            if form.is_valid():
+                return self.final_submission(request, form)
+            return self.handle_invalid_form(request, form)
+        selected_ids = request.POST.getlist('students')
         
-        id_list = request.POST.getlist("students")
-        if id_list:
-            studentlist = ",".join(id_list)
-            return render(
-                request,
-                "result/create_result_page2.html",
-                {"students": studentlist, "form": form, "count": len(id_list)},
-            )
-        else:
-            messages.warning(request, "You didn't select any student.")
-            return self.render_to_response(self.get_context_data(form=form))
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["students"] = Student.objects.all()
-        return context
+        if not selected_ids:
+            messages.warning(request, "Please select at least one student.")
+            return redirect('student-selection')  # Redirect back if no selection
+            
 
-class EditResultsView(LoginRequiredMixin, PermissionRequiredMessageMixin, ListView):
-    model = Result
-    template_name = "result/edit_results.html"
-    context_object_name = "results"
-    # paginate_by = 10  # Adjust this number as needed
-    permission_required = "result.result.update_result"
+        studentlist = ",".join(selected_ids)
+        form = self.form_class()
+        return render(request, self.second_template_name, {
+            'students': studentlist,
+            'count': len(selected_ids),
+            'form':form
+        })
+
+    def final_submission(self, request, form):
+        subjects = form.cleaned_data["subjects"]
+        session = form.cleaned_data["session"]
+        term = form.cleaned_data["term"]
+        students = request.POST["students"]
+        
+        results = []
+        for student in students.split(","):
+            stu = Student.objects.get(pk=student)
+            if stu.current_class:
+                for subject in subjects:
+                    check = Result.objects.filter(
+                        session=session,
+                        term=term,
+                        current_class=stu.current_class,
+                        subject=subject,
+                        student=stu,
+                    ).first()
+                    if not check:
+                        results.append(
+                            Result(
+                                session=session,
+                                term=term,
+                                current_class=stu.current_class,
+                                subject=subject,
+                                student=stu,
+                            )
+                        )
+        
+        Result.objects.bulk_create(results)
+        messages.success(request, "Results created successfully!")
+        return redirect("edit-results")
+
+    def handle_invalid_form(self, request, form):
+        # If form is invalid, get the original student selection
+        studentlist = request.POST.get("students", "")
+        selected_count = len(studentlist.split(",")) if studentlist else 0
+        
+        return render(request, self.second_template_name, {
+            'students': studentlist,
+            'form': form,
+            'count': selected_count
+        })
     
-    def get_queryset(self):
-        return Result.objects.filter(
-            session=self.request.current_session, term=self.request.current_term
+    def get(self, request):
+        students = Student.objects.all()
+        return render(request, self.template_name, {'students': students})
+from django.forms import modelformset_factory
+
+class EditResultsView(LoginRequiredMixin, PermissionRequiredMessageMixin, FormView):
+    template_name = "result/edit_results.html"
+    permission_required = "result.update_result"
+    
+    def get_form_class(self):
+        return modelformset_factory(
+            Result,
+            fields=('test_score', 'exam_score'),
+            extra=0,
+            can_delete=True
         )
 
-    def post(self, request, *args, **kwargs):
-        results = self.get_queryset()
-        formset = EditResults(request.POST, queryset=results)
-        if formset.is_valid():
-            formset.save()
-            messages.success(request, "Results successfully updated")
-            return redirect("edit-results")
-        return self.get(request, *args, **kwargs, formset=formset)
-    
+    def get_queryset(self):
+        return Result.objects.filter(
+            session=self.request.current_session,
+            term=self.request.current_term
+        ).select_related('student', 'subject', 'current_class')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['queryset'] = self.get_queryset()
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if "formset" not in context:
-            context["formset"] = EditResults(queryset=self.get_queryset())
+        context['results'] = self.get_queryset()
         return context
 
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "Results successfully updated")
+        return redirect("edit-results")
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Please correct the errors below")
+        return self.render_to_response(
+            self.get_context_data(form=form)
+        )
 
 from .models import Result, AcademicTerm
 
@@ -169,3 +202,25 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
             "paginated_results": paginated_results,
         }
         return render(request, "result/all_results.html", context)
+
+
+class SimpleStudentSelectionView(View):
+    template_name = "result/simple_student_selection.html"
+    second_page_template = "result/selected_student_display.html"
+
+    def get(self, request):
+        students = Student.objects.all()
+        return render(request, self.template_name, {'students': students})
+
+    def post(self, request):
+        selected_ids = request.POST.getlist('students')  # Get list of selected student IDs
+        
+        if not selected_ids:
+            messages.warning(request, "Please select at least one student.")
+            return redirect('student-selection')  # Redirect back if no selection
+            
+        students = Student.objects.filter(id__in=selected_ids)
+        return render(request, self.second_page_template, {
+            'selected_students': students,
+            'count': students.count()
+        })

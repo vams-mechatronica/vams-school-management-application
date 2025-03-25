@@ -7,12 +7,10 @@
 
 
 {% block content-header %}
-  <form method="POST">
-    {% csrf_token %}
   <div class="card-header">
-    <h3 class="card-title">
+    {% comment %} <h3 class="card-title">
       <input type="submit" class="btn btn-success" value="Proceed >">
-    </h3>
+    </h3> {% endcomment %}
 
     <div class="card-tools">
       <p class="small btn btn-tool">You can also search by name/class by typing in the search box</p>
@@ -21,11 +19,12 @@
 {% endblock content-header %}
 
 {% block content %}
-
+<form method="POST">
+{% csrf_token %}
   <table id="studenttable" class="table table-sm table-bordered" data-page-length='10'>
     <thead class="thead-light">
       <tr>
-        <th><input type="checkbox" id="selecter"></th>
+        <th>Select</th>
         <th>Name</th>
         <th>Current Class</th>
       </tr>
@@ -33,7 +32,7 @@
     <tbody>
       {% for student in students %}
         <tr>
-          <td><input type="checkbox" id="{{ student.id }}" name="students" value="{{ student.id}}"></td>
+          <td><input type="checkbox" name="students" value="{{ student.id }}"></td>
           <td>{{student}} </td>
           <td>{{student.current_class}}</td>
         </tr>
@@ -42,25 +41,22 @@
   </table>
 
   <input type="submit" class="btn btn-success mt-2" value="Proceed >">
-
-
 </form>
 {% endblock content %}
 
 
 {% block morejs %}
 <script>
-  $('#studenttable').DataTable({
-    "ordering": false
-  });
-
-  $("#selecter").change(function () {
-    if (this.checked) {
-      $('input[name="students"]').prop('checked', true);
-    }
-    else {
-      $('input[name="students"]').prop('checked', false);
-    }
+  // Simple JavaScript to select/deselect all
+  document.addEventListener('DOMContentLoaded', function() {
+      const selectAll = document.createElement('input');
+      selectAll.type = 'checkbox';
+      selectAll.onchange = function() {
+          document.querySelectorAll('input[name="students"]').forEach(box => {
+              box.checked = this.checked;
+          });
+      };
+      document.querySelector('th:first-child').prepend(selectAll);
   });
 </script>
 

@@ -20,7 +20,14 @@ class SubjectAdmin(admin.ModelAdmin):
 @admin.register(EmailMessageImageLink)
 class EmailMessageImageLinkAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(ClassSubjectRelation)
+class ClassSubjectRelationAdmin(admin.ModelAdmin):
+    list_display = ('class_id','subject','created_at')
+    search_fields = ('class_id','subject')
+    ordering = ('class_id','subject')
     
+
 
     
 
