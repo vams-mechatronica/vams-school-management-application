@@ -108,7 +108,8 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
             )
 
         # Bulk insert students (avoiding duplicate checks in loop)
-        Student.objects.bulk_create(students, update_conflicts=True,unique_fields=['registration_number'],update_fields=['updated_at'])
+        Student.objects.bulk_create(students,ignore_conflicts=True)
+        # Student.objects.bulk_create(students, update_conflicts=True,unique_fields=['registration_number'],update_fields=['updated_at'])
 
     instance.csv_file.close()
     instance.delete()
