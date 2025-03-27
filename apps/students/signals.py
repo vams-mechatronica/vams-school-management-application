@@ -37,14 +37,13 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
         column_mapping = {
             "registration_number": "registration_number",
             "student_name": "student_name",
-            "other_names": "other_names",
             "gender": "gender",
             "father_name": "father_name",
             "mother_name": "mother_name",
             "mobile_number": "parent_mobile_number",
             "address": "address",
             "current_class": "current_class",
-            "dob":"date_of_birth"
+            "date_of_birth":"date_of_birth"
         }
         
         for counter, row in enumerate(reading, start=1):

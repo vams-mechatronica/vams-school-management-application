@@ -114,26 +114,43 @@ class StudentBulkUploadView(LoginRequiredMixin, SuccessMessageMixin,PermissionRe
 
 
 
-class DownloadCSVViewdownloadcsv(LoginRequiredMixin, View):
+class DownloadCSVView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = 'attachment; filename="student_template.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(
-            [
-                "registration_number",
-                "surname",
-                "firstname",
-                "other_names",
-                "gender",
-                "parent_mobile_number",
-                "address",
-                "date_of_birth",
-                "date_of_admission",
-                "adharcard_number",
-                "current_class",
-            ]
-        )
+        
+        # Define CSV Headers
+        writer.writerow([
+            "registration_number",  # Unique ID for student
+            "student_name",         # Full name of the student
+            "current_class",        # e.g., 5th, 10th
+            "date_of_birth",        # YYYY-MM-DD
+            "date_of_admission",    # YYYY-MM-DD
+            "father_name",          # Father's full name
+            "mother_name",          # Mother's full name
+            "gender",               # Male/Female/Other
+            "mobile_number",        # 10-digit phone number
+            "email",                # Valid email address
+            "address",              # Residential address
+            "adharcard_number",     # 12-digit Aadhar number
+        ])
+        
+        # Add a row with sample data for guidance
+        writer.writerow([
+            "REG12345",             # Sample registration number
+            "John Doe",             # Sample student name
+            "10th",                 # Class
+            "2005-08-15",           # Date of birth
+            "2020-06-12",           # Date of admission
+            "Richard Doe",          # Father's name
+            "Jane Doe",             # Mother's name
+            "Male",                 # Gender
+            "9876543210",           # Mobile number
+            "john.doe@example.com", # Email
+            "221B Baker Street",    # Address
+            "123456789012",         # Aadhar number
+        ])
 
         return response
