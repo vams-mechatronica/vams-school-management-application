@@ -39,8 +39,14 @@ class APKVersionSerializer(serializers.ModelSerializer):
         model = APKVersion
         fields = ['version', 'file','os','uploaded_at']
 
-class StudentSerializer(serializers.ModelSerializer):
+class StudentClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentClass
+        fields = '__all__'
 
+
+class StudentSerializer(serializers.ModelSerializer):
+    current_class = serializers.CharField(source='current_class.name', read_only=True)
     class Meta:
         model = Student
         fields = '__all__'
@@ -85,10 +91,6 @@ class AcademicTermSerializer(serializers.ModelSerializer):
         model = AcademicTerm
         fields = '__all__'
 
-class StudentClassSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StudentClass
-        fields = '__all__'
 
 class ReceiptSerializer(serializers.ModelSerializer):
     class Meta:
