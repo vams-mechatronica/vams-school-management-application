@@ -4,7 +4,7 @@
 {% block title %}Route{% endblock title %}
 
 {% block breadcrumb %}
-{% if request.user.is_superuser %}
+{% if request.user.is_staff %}
 <a class="btn btn-primary" href="{% url 'route-create' %}"><i
     class="fas fa-plus"></i> New Route</a>
 {% comment %} <a class="btn btn-primary" href="{% url 'bulk-route' %}"><i

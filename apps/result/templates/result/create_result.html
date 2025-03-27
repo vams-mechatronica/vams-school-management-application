@@ -1,17 +1,16 @@
 {% extends 'base.html' %}
 
-
 {% block title %}
   Select Student(s) <span class="small">and then click on proceed</span>
 {% endblock title %}
 
-
 {% block content-header %}
   <div class="card-header">
-    {% comment %} <h3 class="card-title">
-      <input type="submit" class="btn btn-success" value="Proceed >">
-    </h3> {% endcomment %}
-
+    <div class="row">
+      <div class="col-md-6">
+        <h5 class="card-title">Select Students</h5>
+      </div>
+    </div>
     <div class="card-tools">
       <p class="small btn btn-tool">You can also search by name/class by typing in the search box</p>
     </div>
@@ -19,6 +18,15 @@
 {% endblock content-header %}
 
 {% block content %}
+{% comment %} <div class="col-md-6 my-2 text-end"> {% endcomment %}
+  <label for="select-student-filter" style="margin-left:0px;font-weight:400;">Class: </label>
+  <select id="classFilter" name="select-student-filter" class="form-select form-select-sm" style="width: 200px; display: inline-block;">
+    <option value="">All Classes</option>
+    {% for class in classes %}
+      <option value="{{ class.name }}">{{ class.name }}</option>
+    {% endfor %}
+  </select>
+{% comment %} </div> {% endcomment %}
 <form method="POST">
 {% csrf_token %}
   <table id="studenttable" class="table table-sm table-bordered" data-page-length='10'>
@@ -31,10 +39,10 @@
     </thead>
     <tbody>
       {% for student in students %}
-        <tr>
+        <tr data-class="{{ student.current_class }}">
           <td><input type="checkbox" name="students" value="{{ student.id }}"></td>
-          <td>{{student}} </td>
-          <td>{{student.current_class}}</td>
+          <td>{{ student }}</td>
+          <td>{{ student.current_class }}</td>
         </tr>
       {% endfor %}
     </tbody>
@@ -44,23 +52,41 @@
 </form>
 {% endblock content %}
 
-
 {% block morejs %}
 <script>
-  $('#studenttable').DataTable({
-    "ordering": false
-  });
-  // Simple JavaScript to select/deselect all
-  document.addEventListener('DOMContentLoaded', function() {
+  $(document).ready(function() {
+    // Initialize DataTable
+    let table = $('#studenttable').DataTable({
+      "ordering": true
+    });
+
+    // Class Filter Dropdown
+    // Class Filter Dropdown
+$('#classFilter').on('change', function() {
+  let selectedClass = $(this).val(); // Get selected class
+
+  if (selectedClass) {
+      // Use DataTables search API on the "Current Class" column
+      table.column(2).search('^' + selectedClass + '$', true, false).draw(); 
+  } else {
+      // Clear the filter if no class is selected
+      table.column(2).search('').draw();
+  }
+});
+
+
+
+    // Select All Checkbox
+    document.addEventListener('DOMContentLoaded', function() {
       const selectAll = document.createElement('input');
       selectAll.type = 'checkbox';
       selectAll.onchange = function() {
-          document.querySelectorAll('input[name="students"]').forEach(box => {
-              box.checked = this.checked;
-          });
+        document.querySelectorAll('input[name="students"]').forEach(box => {
+          box.checked = this.checked;
+        });
       };
       document.querySelector('th:first-child').prepend(selectAll);
+    });
   });
 </script>
-
 {% endblock morejs %}

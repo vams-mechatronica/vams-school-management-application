@@ -34,10 +34,12 @@ class CreateResultView(LoginRequiredMixin, PermissionRequiredMessageMixin, View)
 
         studentlist = ",".join(selected_ids)
         form = self.form_class()
+        classes = StudentClass.objects.all()
         return render(request, self.second_template_name, {
             'students': studentlist,
             'count': len(selected_ids),
-            'form':form
+            'form':form,
+            'classes':classes
         })
 
     def final_submission(self, request, form):
@@ -86,7 +88,8 @@ class CreateResultView(LoginRequiredMixin, PermissionRequiredMessageMixin, View)
     
     def get(self, request):
         students = Student.objects.all()
-        return render(request, self.template_name, {'students': students})
+        classes = StudentClass.objects.all()
+        return render(request, self.template_name, {'students': students,'classes':classes})
 from django.forms import modelformset_factory
 
 class EditResultsView(LoginRequiredMixin, PermissionRequiredMessageMixin, FormView):
@@ -202,25 +205,3 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
             "paginated_results": paginated_results,
         }
         return render(request, "result/all_results.html", context)
-
-
-class SimpleStudentSelectionView(View):
-    template_name = "result/simple_student_selection.html"
-    second_page_template = "result/selected_student_display.html"
-
-    def get(self, request):
-        students = Student.objects.all()
-        return render(request, self.template_name, {'students': students})
-
-    def post(self, request):
-        selected_ids = request.POST.getlist('students')  # Get list of selected student IDs
-        
-        if not selected_ids:
-            messages.warning(request, "Please select at least one student.")
-            return redirect('student-selection')  # Redirect back if no selection
-            
-        students = Student.objects.filter(id__in=selected_ids)
-        return render(request, self.second_page_template, {
-            'selected_students': students,
-            'count': students.count()
-        })
