@@ -3,6 +3,7 @@ from .views import *
 
 urlpatterns = [
     path('app-version',APKVersionAPI.as_view()),
+    path('error-log/',ErrorLogAPI.as_view()),
     path('dashboard-data/', DashboardDataAPIView.as_view(), name='dashboard-data-api'),
     path('account/',include('dj_rest_auth.urls')),
     path('account/registration/', include('dj_rest_auth.registration.urls')),

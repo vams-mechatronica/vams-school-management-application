@@ -503,4 +503,7 @@ class UserProfile(APIView):
             serializer = StudentProfileSerializer(data)
             return Response(serializer.data,status=status.HTTP_200_OK)
 
-
+class ErrorLogAPI(generics.ListCreateAPIView):
+    queryset = ErrorLog.objects.all()
+    serializer_class = ErrorSerializer
+    permission_classes = (AllowAny,)

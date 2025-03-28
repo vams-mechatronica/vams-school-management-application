@@ -6,7 +6,7 @@ from apps.staffs.models import *
 from apps.user.models import *
 from apps.students.models import *
 from apps.transport.models import *
-from .models import APKVersion
+from .models import APKVersion, ErrorLog
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
@@ -130,4 +130,9 @@ class StudentProfileSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = Student
+        fields = '__all__'
+
+class ErrorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ErrorLog
         fields = '__all__'
