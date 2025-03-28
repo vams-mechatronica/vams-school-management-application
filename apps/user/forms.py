@@ -12,33 +12,42 @@ class UserForm(forms.ModelForm):
 
 class UserCreateForm(forms.ModelForm):
     student_or_staff = forms.ChoiceField(
-        choices=[('admin','Admin'),('student', 'Student'), ('staff', 'Staff')],
+        choices=[('admin', 'Admin'), ('student', 'Student'), ('staff', 'Staff')],
         label='Select Role',
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control', 'onchange': 'updateUserList(this)'})
+    )
+
+    selected_person = forms.ModelChoiceField(
+        queryset=Student.objects.none(),
+        label='Select User',
         required=True,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    selected_person = forms.ChoiceField(
-        label='Select User',
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control', 'data-url': reverse_lazy('get_users_list')})
-    )
-
     class Meta:
         model = user
-        fields = ['username','email', 'first_name', 'last_name', 'password']
+        fields = ['username', 'email', 'first_name', 'last_name', 'password']
 
     def __init__(self, *args, **kwargs):
+        role = kwargs.pop('role', None)
         super(UserCreateForm, self).__init__(*args, **kwargs)
         self.fields['password'].widget = forms.PasswordInput()
-        self.load_user_dropdown(role='student')
+        self.load_user_dropdown(role)
 
     def load_user_dropdown(self, role):
+        """Dynamically populate user dropdown based on role."""
         if role == 'student':
-            users = Student.objects.all()
+            self.fields['selected_person'].queryset = Student.objects.filter(user__isnull=True)
+        elif role == 'staff':
+            self.fields['selected_person'].queryset = Staff.objects.filter(user__isnull=True)
         else:
-            users = Staff.objects.all()
+            self.fields['selected_person'].queryset = Staff.objects.none()  # Admin has no related model
+        
+        self.order_fields(['student_or_staff', 'selected_person', 'username', 'email', 'first_name', 'last_name', 'password'])
 
-        choices = [(user.id, f" {user.surname} {user.firstname} {user.other_name} ({user.registration_number})") for user in users]
-        self.fields['selected_person'].choices = choices
-        self.order_fields(['student_or_staff', 'selected_person', 'username','email', 'first_name', 'last_name', 'password'])
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('selected_person'):
+            raise forms.ValidationError("Please select a valid user.")
+        return cleaned_data

@@ -50,46 +50,46 @@ class UserCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin, Success
     permission_required = 'auth.add_user'
     success_url = reverse_lazy('users-list')
 
-    def get_form(self, *args, **kwargs):
-        form = super().get_form(*args, **kwargs)
-        form.fields['student_or_staff'].widget.attrs.update({'onchange': 'updateUserList(this)'})
-        return form
+    def get_form_kwargs(self):
+        """Pass role to form for initial loading."""
+        kwargs = super().get_form_kwargs()
+        role = self.request.GET.get('role') or self.request.POST.get('student_or_staff')
+        kwargs['role'] = role
+        return kwargs
 
     def form_valid(self, form):
         selected_role = form.cleaned_data.get('student_or_staff')
-        selected_person_id = form.cleaned_data.get('selected_person')
+        selected_person = form.cleaned_data.get('selected_person')
         password = form.cleaned_data.get('password')
-        
-        # Set first_name and last_name based on selected student or staff
-        if selected_role == 'student':
-            selected_person = Student.objects.get(id=selected_person_id)
-            group_name = 'Students'
-            if selected_person.user:
-                form.add_error(None, f"A user account already exists for the student {selected_person.firstname} {selected_person.surname}.")
-                return self.form_invalid(form)
-        elif selected_role == 'staff':
-            selected_person = Staff.objects.get(id=selected_person_id)
-            group_name = 'Staff'
-            if selected_person.user:
-                form.add_error(None, f"A user account already exists for the staff member {selected_person.firstname} {selected_person.surname}.")
-                return self.form_invalid(form)
-        else:
-            group_name = 'Admin'  # Default or Admin group
 
+        if selected_role == 'student':
+            group_name = 'Students'
+        elif selected_role == 'staff':
+            group_name = 'Staff'
+            form.instance.is_staff = True
+            form.instance.is_superuser = False
+        else:
+            group_name = 'Admin'
+            form.instance.is_staff = True
+            form.instance.is_superuser = True
+
+        if selected_person.user:
+            form.add_error(None, f"A user account already exists for {selected_person.firstname} {selected_person.surname}.")
+            return self.form_invalid(form)
+
+        # Create user and assign group
         form.instance.first_name = selected_person.firstname
         form.instance.last_name = selected_person.surname
         form.instance.password = make_password(password)
 
-        # Assign the user to the appropriate group
-        group, _ = Group.objects.get_or_create(name=group_name)
         form.instance.save()
+        group, _ = Group.objects.get_or_create(name=group_name)
         form.instance.groups.add(group)
 
-        # Associate the user with the selected student or staff
+        # Associate the user with the selected student/staff
         selected_person.user = form.instance
         selected_person.save()
-
-        return super(UserCreateView, self).form_valid(form)
+        return super().form_valid(form)
 
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin,PermissionRequiredMessageMixin, UpdateView):
     model = user
@@ -110,7 +110,7 @@ def get_users_list(request):
     if role == 'student':
         users = Student.objects.all().values('id', 'firstname', 'surname','other_name','registration_number','email')
         users_list = [{'id': user['id'], 'name': f"{user['surname']} {user['firstname']} {user['other_name']} ({user['registration_number']})",'email':user['email']} for user in users]
-    else:
+    elif role == 'staff':
         users = Staff.objects.all().values('id', 'firstname', 'surname','other_name','email')
         users_list = [{'id': user['id'], 'name': f"{user['surname']} {user['firstname']} {user['other_name']}",'email':user['email']} for user in users]
     

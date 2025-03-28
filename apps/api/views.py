@@ -483,3 +483,24 @@ class StaffAttendanceView(APIView):
         except StaffAttendance.DoesNotExist:
             attendance = StaffAttendance.objects.create(staff=getStaff, date=today, time_in=current_time)
             return Response({"message": "Time in recorded", "data": StaffAttendanceSerializer(attendance).data})
+
+class UserProfile(APIView):
+    authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
+    def get(self,request):
+        user = self.request.user
+
+        if user.is_superuser:
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        
+        elif not user.is_superuser and user.is_staff:
+            data = Staff.objects.get(user=user)
+            serializer = StaffProfileSerializer(data)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        
+        else:
+            data = Student.objects.get(user=user)
+            serializer = StudentProfileSerializer(data)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+
+

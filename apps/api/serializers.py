@@ -8,6 +8,7 @@ from apps.students.models import *
 from apps.transport.models import *
 from .models import APKVersion
 from rest_framework import serializers
+from django.contrib.auth.models import User
 
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
@@ -113,5 +114,20 @@ class SchoolDetailSerializer(serializers.ModelSerializer):
         model = SchoolDetail
         fields = '__all__'
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password',)
 
 
+class StaffProfileSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer()
+    class Meta:
+        model = Staff
+        fields = '__all__'
+
+class StudentProfileSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer()
+    class Meta:
+        model = Student
+        fields = '__all__'
