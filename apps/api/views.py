@@ -95,10 +95,26 @@ class StudentDetailAPI(generics.RetrieveAPIView):
         return Student.objects.get(user=self.request.user)
 
 class StudentCreateAPI(generics.CreateAPIView):
-    serializer_class = StudentSerializer
+    serializer_class = StudentCreateSerializer
     queryset = Student.objects.all()
     permission_classes = (IsAdminUser,)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
+
+    def get_registration_number(self):
+        student = self.get_queryset().latest('updated_at')
+        if student:
+            last_id = student.id
+        else:
+            import random
+            last_id = random.randint(0,99999)
+        
+        try:
+            school_short_name = SchoolDetail.objects.latest('updated_at').short_name
+        except SchoolDetail.DoesNotExist:
+            school_short_name = "VAMS"
+        timestamp = timezone.now().strftime('%d')
+        reg_number = f"{school_short_name}/{timezone.now().year}/{timezone.now().month}/{timestamp}/{last_id + 1}"
+        return reg_number
 
     def create(self, request, *args, **kwargs):
         admin_user = request.user  # Get admin user from token
@@ -119,9 +135,9 @@ class StudentCreateAPI(generics.CreateAPIView):
         # Parse date_of_birth to generate password
         try:
             dob = timezone.datetime.strptime(data["date_of_birth"], "%Y-%m-%d")
-            dob_part = dob.strftime("%d%m")  # Extract ddmm from DOB
-            today_part = timezone.now().strftime("%d%m%Y")  # Today's date
-            password = f"{dob_part}{firstname}{lastname}{today_part}#"  # Password format
+            dob_part = dob.strftime("%d%m")
+            today_part = timezone.now().strftime("%d%m%Y")
+            password = f"{dob_part}{firstname}{lastname}{today_part}#"
         except ValueError:
             return Response({"error": "Invalid date_of_birth format. Use YYYY-MM-DD"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -139,9 +155,8 @@ class StudentCreateAPI(generics.CreateAPIView):
         student_group, _ = Group.objects.get_or_create(name="Student")
         user.groups.add(student_group)
 
-        # Generate unique registration number
-        reg_number = f"VAMS/{timezone.now().year}/{timezone.now().strftime('%m%d%H%M%S')}"
-
+        reg_number = self.get_registration_number()
+        
         # Add user and generated registration number to request data
         data["user"] = user.id
         data["registration_number"] = reg_number

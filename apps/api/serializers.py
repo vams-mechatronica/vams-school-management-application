@@ -52,6 +52,11 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = '__all__'
 
+class StudentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = '__all__'
+
 class StudentBulkUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model  = StudentBulkUpload
