@@ -63,7 +63,7 @@ class UserCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin, Success
         password = form.cleaned_data.get('password')
 
         if selected_role == 'student':
-            group_name = 'Students'
+            group_name = 'Student'
         elif selected_role == 'staff':
             group_name = 'Staff'
             form.instance.is_staff = True

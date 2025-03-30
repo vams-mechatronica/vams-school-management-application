@@ -8,7 +8,7 @@ from apps.students.models import *
 from apps.transport.models import *
 from .models import APKVersion, ErrorLog
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Permission
 
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
@@ -114,10 +114,24 @@ class SchoolDetailSerializer(serializers.ModelSerializer):
         model = SchoolDetail
         fields = '__all__'
 
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =Permission
+        fields = '__all__'
+
 class UserProfileSerializer(serializers.ModelSerializer):
+    user_permissions = serializers.SerializerMethodField()
+    groups = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         exclude = ('password',)
+
+    def get_user_permissions(self, obj):
+        return list(obj.get_all_permissions())
+
+    def get_groups(self, obj):
+        return [{"id": group.id, "name": group.name} for group in obj.groups.all()]
 
 
 class StaffProfileSerializer(serializers.ModelSerializer):
