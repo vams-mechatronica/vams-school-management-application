@@ -64,6 +64,12 @@ class Invoice(models.Model):
             amount += receipt.amount_paid
         return amount
     
+    def get_status_display(self):
+        if self.status:
+            return "Closed"
+        else:
+            return "Active"
+    
     def disable_editing(self):
         """Disable editing if payments have been made or the invoice is older than 30 days"""
         if self.total_amount_paid() > 0 or (now() - self.created_at) > timedelta(days=30):

@@ -43,7 +43,7 @@ class InvoiceListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListVie
 
 class InvoiceCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, CreateView):
     model = Invoice
-    fields = "__all__"
+    fields = ('student','session','term','month','class_for','previous_balance')
     permission_required = "finance.add_invoice"
     success_url = "/finance/list"
 

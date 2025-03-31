@@ -41,11 +41,11 @@
             
             {% if request.user.is_superuser %}
               <td>
-                <a class="btn btn-success btn-sm {% if not invoice.is_editable %}disabled{% endif %}"
-                  href="{% url 'receipt-create' %}?invoice={{ invoice.id }}" 
-                  >
+                <a class="btn btn-sm {% if invoice.is_editable %}btn-success{% else %}btn-danger disabled{% endif %}"
+                  href="{% url 'receipt-create' %}?invoice={{ invoice.id }}">
                   Add new receipt
                 </a>
+
               </td>
             {% endif %}
           </tr>

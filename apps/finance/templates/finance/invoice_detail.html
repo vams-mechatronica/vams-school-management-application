@@ -25,8 +25,15 @@
     <h5>Session: {{ object.session }} </h5>
     <h5>Term  : {{ object.term }} </h5>
     <h5>Month : {{ object.month  }} </h5>
-    <h5>Class : {{ object.class_for }} </h5>
-    <h6>Status: {{ object.get_status_display }} </h6>
+    <h5>Class : {{ object.class_for }} </h5><br>
+    <h6>
+      Status: 
+      <span class="badge {% if object.get_status_display == 'Active' %}bg-success{% elif object.get_status_display == 'Closed' %}bg-danger{% endif %}">
+        {{ object.get_status_display }}
+      </span>
+    </h6>
+    
+    <br><br>
     <hr>
     <div>
       <h4>Expected Balance: {{ object.balance | intcomma }}</h4>
@@ -87,6 +94,7 @@
       <th>S/N</th>
       <th>Amount Paid</th>
       <th>Date Paid</th>
+      <th>Payment Type</th>
       <th>Comment Paid</th>
     </tr>
   </thead>
@@ -96,6 +104,7 @@
       <td>{{ forloop.counter }}</td>
       <td>{{ receipt.amount_paid}}</td>
       <td>{{ receipt.date_paid}}</td>
+      <td>{{ receipt.payment_mode}}</td>
       <td>{{ receipt.comment}}</td>
     </tr>
     {% endfor %}
