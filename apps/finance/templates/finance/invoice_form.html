@@ -129,19 +129,23 @@ Add new invoice
 
                         // Add new invoice items
                         data.items.forEach((item, index) => {
-                            const itemHtml = `
-                                <div class="form-group row items-group dynamic-form">
-                                    <input type="hidden" name="invoiceitem_set-${index}-id" id="id_invoiceitem_set-${index}-id">
-                                    <div class="col">
-                                        <input type="text" name="invoiceitem_set-${index}-description" maxlength="255" class="form-control" id="id_invoiceitem_set-${index}-description" value="${item.description}" readonly>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number" name="invoiceitem_set-${index}-amount" step="0.01" class="form-control" id="id_invoiceitem_set-${index}-amount" value="${item.amount}">
-                                    </div>
-                                </div>
-                            `;
-                            itemsContainer.innerHTML += itemHtml;
-                        });
+                          const isNew = !item.description;  // If item has no ID, it's a new row
+                          const itemHtml = `
+                              <div class="form-group row items-group dynamic-form">
+                                  <input type="hidden" name="invoiceitem_set-${index}-id" id="id_invoiceitem_set-${index}-id">
+                                  <div class="col">
+                                      <input type="text" name="invoiceitem_set-${index}-description" maxlength="255" class="form-control"
+                                             id="id_invoiceitem_set-${index}-description" value="${item.description}" ${isNew ? '' : 'readonly'}>
+                                  </div>
+                                  <div class="col">
+                                      <input type="number" name="invoiceitem_set-${index}-amount" step="0.01" class="form-control"
+                                             id="id_invoiceitem_set-${index}-amount" value="${item.amount}">
+                                  </div>
+                              </div>
+                          `;
+                          itemsContainer.innerHTML += itemHtml;
+                      });
+                      
 
                         // Update the management form total forms count
                         document.getElementById('id_invoiceitem_set-TOTAL_FORMS').value = data.items.length;
@@ -159,12 +163,17 @@ Add new invoice
 });
 
 function initializeFormset() {
-    $(".items-group").formset({
-        prefix: '{{ items.prefix }}',
-        deleteText: "<div class='btn btn-danger btn-circle'><i class='fas fa-trash'></i></div>",
-        addText: "<div class='btn btn-success btn-circle'><i class='fas fa-plus'></i></div>"
-    });
+  $(".items-group").formset({
+      prefix: '{{ items.prefix }}',
+      deleteText: "<div class='btn btn-danger btn-circle'><i class='fas fa-trash'></i></div>",
+      addText: "<div class='btn btn-success btn-circle'><i class='fas fa-plus'></i></div>",
+      added: function(row) {
+          // Enable description field only for newly added rows
+          $(row).find('input[name$="-description"]').prop('readonly', false);
+      }
+  });
 }
+
 
 </script>
 {% endblock morejs %}

@@ -12,13 +12,15 @@ from .models import Invoice,InvoiceItem, InvoiceBulkUpload, Student, StudentClas
 @receiver(post_save, sender=Invoice)
 def after_creating_invoice(sender, instance, created, **kwargs):
     if created:
+        instance.total_payable = instance.amount_payable()
+        instance.save
         previous_inv = (
             Invoice.objects.filter(student=instance.student)
             .exclude(id=instance.id)
             .last()
         )
         if previous_inv:
-            previous_inv.status = 0
+            previous_inv.status = False
             previous_inv.save()
             instance.balance_from_previous_term = previous_inv.balance()
             instance.save()
@@ -77,7 +79,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
                 term=term,
                 month=fee_for_month,
                 class_for=classi,
-                status=1,
+                status=True,
                 defaults={"previous_balance": previous_balance}
             )
 

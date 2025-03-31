@@ -66,9 +66,9 @@ class Invoice(models.Model):
     
     def get_status_display(self):
         if self.status:
-            return "Closed"
-        else:
             return "Active"
+        else:
+            return "Closed"
     
     def disable_editing(self):
         """Disable editing if payments have been made or the invoice is older than 30 days"""
@@ -80,14 +80,12 @@ class Invoice(models.Model):
         """
         When a new invoice is created, mark the previous invoice for the same student as non-editable.
         """
-        if self.pk is None:  # Only execute this check for new invoices
-            previous_invoice = Invoice.objects.filter(student=self.student).order_by('-updated_at')
-            for inv in previous_invoice:
-                if inv:
-                    inv.is_editable = False
-                    inv.save(update_fields=['is_editable'])
+        is_new = self.pk is None  # Check if this is a new invoice
+        super().save(*args, **kwargs)  # Save the current instance first
 
-        super().save(*args, **kwargs)
+        if is_new:  
+            # Mark all previous invoices for the same student as non-editable
+            Invoice.objects.filter(student=self.student, is_editable=True).update(is_editable=False, status=False)
 
 
 class InvoiceItem(models.Model):
