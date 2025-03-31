@@ -62,6 +62,17 @@ class StudentBulkUploadSerializer(serializers.ModelSerializer):
         model  = StudentBulkUpload
         exclude = ('date_uploaded',)
 
+class StudentAttendanceSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    class Meta:
+        model = StudentAttendance
+        fields = '__all__'
+    
+    def get_student_name(self,obj):
+        name = obj.student.get_fullname()
+        return name
+        
+
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentAttendance

@@ -71,7 +71,7 @@ class Student(models.Model):
         return reverse("student-detail", kwargs={"pk": self.pk})
     
     def get_fullname(self):
-        return "{firstname} {othername} {surname}".format(firstname=self.firstname,othername=self.other_name, surname=self.surname)
+        return "{firstname} {surname}".format(firstname=self.firstname,surname=self.surname)
 
 def validate_file_extension(value):
     ext = os.path.splitext(value.name)[1].lower()

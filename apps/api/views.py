@@ -197,6 +197,29 @@ class StudentBulkUploadAPI(generics.CreateAPIView):
     permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
 
+class StudentAttendanceAPI(generics.ListCreateAPIView):
+    queryset = StudentAttendance.objects.all()
+    serializer_class = StudentAttendanceSerializer
+    permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_fields = ('date', 'status', 'remarks', 'created_at', 'modified_at', 'student')
+    search_fields = ('date', 'status', 'remarks', 'created_at', 'modified_at', 'student')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Get class_id from request parameters
+        class_id = self.request.query_params.get('class')
+
+        if class_id:
+            queryset = queryset.filter(student__current_class_id=class_id)
+
+        return queryset
+
+    
+
+
 class StaffBulkUploadAPI(generics.CreateAPIView):
     queryset = StaffBulkUpload.objects.all()
     serializer_class = StaffBulkCreateSerializer
