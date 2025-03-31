@@ -27,6 +27,8 @@ urlpatterns = [
 
     # Invoice URLs
     path('invoices/', InvoiceListCreateView.as_view(), name='invoice-list-create'),
+    path('invoices/set/', InvoiceViewSet.as_view({'get': 'list', 'post': 'create'}), name="invoice-list"),
+    path('invoices/set/<int:pk>/', InvoiceViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name="invoice-detail"),
     path('invoices/<int:pk>/', InvoiceRetrieveUpdateDestroyView.as_view(), name='invoice-retrieve-update-destroy'),
 
     # AcademicSession URLs

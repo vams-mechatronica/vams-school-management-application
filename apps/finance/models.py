@@ -17,7 +17,6 @@ def get_current_academic_term():
     return AcademicTerm.objects.get(current=True)
 
 
-
 class Invoice(models.Model):
     STATUS = [(1, "Active"), (0, "Closed")]
     MONTH_CHOICES = tuple((month_name[i], month_name[i]) for i in range(1, 13))
@@ -27,6 +26,7 @@ class Invoice(models.Model):
     month = models.CharField(verbose_name="Month", max_length=50, null=True, blank=True, choices=MONTH_CHOICES,default=month_name[datetime.now().month])
     class_for = models.ForeignKey(StudentClass, on_delete=models.SET_NULL, null=True, blank=True)
     previous_balance = models.DecimalField(max_digits=10, decimal_places=2)
+    total_payable = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
     status = models.BooleanField(default=1,choices=STATUS)
     # New field to control editing
     is_editable = models.BooleanField(default=True)

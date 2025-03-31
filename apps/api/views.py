@@ -545,3 +545,31 @@ class ErrorLogAPI(generics.ListCreateAPIView):
     queryset = ErrorLog.objects.all()
     serializer_class = ErrorSerializer
     permission_classes = (AllowAny,)
+
+from rest_framework import viewsets, status
+class InvoiceViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.all()
+    serializer_class = InvoiceSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        """ Fetch student invoice with previous balance and class fees """
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """ Create invoice and compute total_payable """
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        """ Update invoice, allowing fee edits but keeping class_for unchanged """
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -166,3 +166,76 @@ class ErrorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ErrorLog
         fields = '__all__'
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source="student.name", read_only=True)
+    session = serializers.PrimaryKeyRelatedField(queryset=AcademicSession.objects.all())
+    term = serializers.PrimaryKeyRelatedField(queryset=AcademicTerm.objects.all())
+    month = serializers.ChoiceField(choices=Invoice.MONTH_CHOICES)
+    
+    class_for = serializers.PrimaryKeyRelatedField(queryset=StudentClass.objects.all())
+    previous_balance = serializers.DecimalField(max_digits=10, decimal_places=2)
+    
+    tuition_fees = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    computer_fees = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    admission_fees = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    exam_fees = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    miscellaneous = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+
+    class Meta:
+        model = Invoice
+        fields = "__all__"
+        read_only_fields = ["total_payable"]
+
+    def validate(self, data):
+        previous_balance = data.get("previous_balance", 0)
+        class_for = data.get("class_for")
+
+        # Get class fees
+        tuition_fees = data.get("tuition_fees", class_for.tuition_fees)
+        computer_fees = data.get("computer_fees", class_for.computer_fees)
+        admission_fees = data.get("admission_fees", class_for.admission_fees)
+        exam_fees = data.get("exam_fees", class_for.exam_fees)
+        miscellaneous = data.get("miscellaneous", class_for.miscellaneous)
+
+        # Compute total payable
+        total_payable = (
+            previous_balance +
+            tuition_fees + computer_fees +
+            admission_fees + exam_fees +
+            miscellaneous
+        )
+        data["total_payable"] = total_payable
+        data['previous_balance'] = total_payable
+        return data
+
+    def create(self, validated_data):
+        # Extract fee amounts before creating the invoice
+        class_for = validated_data.pop("class_for")
+        tuition_fees = validated_data.pop("tuition_fees", class_for.tuition_fees)
+        computer_fees = validated_data.pop("computer_fees", class_for.computer_fees)
+        admission_fees = validated_data.pop("admission_fees", class_for.admission_fees)
+        exam_fees = validated_data.pop("exam_fees", class_for.exam_fees)
+        miscellaneous = validated_data.pop("miscellaneous", class_for.miscellaneous)
+
+        # Create Invoice
+        invoice = Invoice.objects.create(**validated_data, class_for=class_for)
+
+        # Create corresponding InvoiceItem entries
+        fee_data = {
+            "Tuition Fees": tuition_fees,
+            "Computer Fees": computer_fees,
+            "Admission Fees": admission_fees,
+            "Exam Fees": exam_fees,
+            "Miscellaneous": miscellaneous,
+        }
+        
+        for description, amount in fee_data.items():
+            InvoiceItem.objects.create(
+                invoice=invoice,
+                description=description,
+                amount=amount,
+                class_for=class_for
+            )
+
+        return invoice

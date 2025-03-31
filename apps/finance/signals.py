@@ -18,7 +18,7 @@ def after_creating_invoice(sender, instance, created, **kwargs):
             .last()
         )
         if previous_inv:
-            previous_inv.status = "closed"
+            previous_inv.status = 0
             previous_inv.save()
             instance.balance_from_previous_term = previous_inv.balance()
             instance.save()
