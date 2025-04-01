@@ -23,8 +23,9 @@
           <th>Total Payable</th>
           <th>Total Paid</th>
           <th>Balance</th>
+          <th>Updated At</th>
           {% if request.user.is_superuser %}
-          <th></th>
+          <th>Action</th>
           {% endif %}
         </tr>
       </thead>
@@ -38,6 +39,7 @@
             <td>{{ invoice.total_amount_payable | intcomma }}</td>
             <td>{{ invoice.total_amount_paid | intcomma }}</td>
             <td>{{ invoice.balance | intcomma }}</td>
+            <td>{{ invoice.updated_at }}</td>
             
             {% if request.user.is_superuser %}
               <td>
