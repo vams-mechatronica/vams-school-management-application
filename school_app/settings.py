@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "__$1ud47e&nyso5h5o3fwnqu4+hfqcply9h$k*h2s34)hn5@nc"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -65,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -194,13 +195,17 @@ USE_TZ = True
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
+STATIC_URL = "/static/"
+
 if DEBUG:
-    STATIC_URL = "static/"
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-    STATICFILES_DIRS = [BASE_DIR, "static"]
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # Dev mode
+    STATIC_ROOT = None
 else:
-    STATIC_URL = "static/"
-    STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+    STATICFILES_DIRS = []  # Ensure it does NOT interfere in production
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
