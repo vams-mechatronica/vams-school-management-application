@@ -172,7 +172,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
     session = serializers.PrimaryKeyRelatedField(queryset=AcademicSession.objects.all())
     term = serializers.PrimaryKeyRelatedField(queryset=AcademicTerm.objects.all())
     month = serializers.ChoiceField(choices=Invoice.MONTH_CHOICES)
-    
     class_for = serializers.PrimaryKeyRelatedField(queryset=StudentClass.objects.all())
     previous_balance = serializers.DecimalField(max_digits=10, decimal_places=2)
     
@@ -186,6 +185,19 @@ class InvoiceSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = "__all__"
         read_only_fields = ["total_payable"]
+
+    def to_representation(self, instance):
+        """Modify GET response to include student name, session name, and term name."""
+        data = super().to_representation(instance)
+
+        # Add additional fields for GET request
+        data["session_name"] = instance.session.name
+        data["term_name"] = instance.term.name
+        data["student_name"] = instance.student.firstname + " "+ instance.student.surname
+        data["registration_number"] = instance.student.registration_number
+        data["class_name"] = instance.class_for.name
+
+        return data
 
     def validate(self, data):
         previous_balance = data.get("previous_balance", 0)
@@ -210,7 +222,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Extract fee amounts before creating the invoice
         class_for = validated_data.pop("class_for")
         tuition_fees = validated_data.pop("tuition_fees", class_for.tuition_fees)
         computer_fees = validated_data.pop("computer_fees", class_for.computer_fees)
@@ -218,10 +229,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
         exam_fees = validated_data.pop("exam_fees", class_for.exam_fees)
         miscellaneous = validated_data.pop("miscellaneous", class_for.miscellaneous)
 
-        # Create Invoice
         invoice = Invoice.objects.create(**validated_data, class_for=class_for)
 
-        # Create corresponding InvoiceItem entries
         fee_data = {
             "Tuition Fees": tuition_fees,
             "Computer Fees": computer_fees,

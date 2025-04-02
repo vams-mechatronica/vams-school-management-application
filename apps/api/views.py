@@ -548,7 +548,7 @@ class ErrorLogAPI(generics.ListCreateAPIView):
 
 from rest_framework import viewsets, status
 class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.all()
+    queryset = Invoice.objects.filter(status=True)
     serializer_class = InvoiceSerializer
 
     def retrieve(self, request, *args, **kwargs):
