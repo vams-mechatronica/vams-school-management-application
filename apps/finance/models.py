@@ -1,6 +1,7 @@
 # Updated models.py
 
 from django.db import models
+from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta, datetime
@@ -18,24 +19,28 @@ def get_current_academic_term():
 
 
 class Invoice(models.Model):
-    STATUS = [(1, "Active"), (0, "Closed")]
+    STATUS = [(True, "Active"), (False, "Closed")]
+    
     MONTH_CHOICES = tuple((month_name[i], month_name[i]) for i in range(1, 13))
+    
+    def get_current_month():
+        return month_name[datetime.now().month]
+
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    session = models.ForeignKey(AcademicSession, on_delete=models.SET_NULL, null=True, blank=True,default=get_current_academic_session)
-    term = models.ForeignKey(AcademicTerm, on_delete=models.SET_NULL, null=True, blank=True,default=get_current_academic_term)
-    month = models.CharField(verbose_name="Month", max_length=50, null=True, blank=True, choices=MONTH_CHOICES,default=month_name[datetime.now().month])
+    session = models.ForeignKey(AcademicSession, on_delete=models.SET_NULL, null=True, blank=True, default=get_current_academic_session)
+    term = models.ForeignKey(AcademicTerm, on_delete=models.SET_NULL, null=True, blank=True, default=get_current_academic_term)
+    month = models.CharField(verbose_name="Month", max_length=50, null=True, blank=True, choices=MONTH_CHOICES, default=get_current_month)
     class_for = models.ForeignKey(StudentClass, on_delete=models.SET_NULL, null=True, blank=True)
     previous_balance = models.DecimalField(max_digits=10, decimal_places=2)
-    total_payable = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
-    status = models.BooleanField(default=1,choices=STATUS)
-    # New field to control editing
+    total_payable = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    status = models.BooleanField(default=True,choices=STATUS)  # Removed choices
     is_editable = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         get_latest_by = 'created_at'
-    
+
     def __str__(self):
         return f"{self.student.firstname} {self.student.surname} - {self.student.registration_number}"
 
@@ -43,49 +48,39 @@ class Invoice(models.Model):
         return reverse('invoice-detail', kwargs={'pk': self.pk})
 
     def balance(self):
-        payable = self.total_amount_payable()
-        paid = self.total_amount_paid()
-        return payable - paid
+        return self.total_amount_payable() - self.total_amount_paid()
 
     def amount_payable(self):
-        items = InvoiceItem.objects.filter(invoice=self)
-        total = 0
-        for item in items:
-            total += item.amount
-        return total
+        return InvoiceItem.objects.filter(invoice=self).aggregate(Sum('amount'))['amount__sum'] or 0
 
     def total_amount_payable(self):
         return self.previous_balance + self.amount_payable()
 
     def total_amount_paid(self):
-        receipts = Receipt.objects.filter(invoice=self)
-        amount = 0
-        for receipt in receipts:
-            amount += receipt.amount_paid
-        return amount
-    
+        return Receipt.objects.filter(invoice=self).aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+
     def get_status_display(self):
-        if self.status:
-            return "Active"
-        else:
-            return "Closed"
-    
+        return "Active" if self.status else "Closed"
+
     def disable_editing(self):
         """Disable editing if payments have been made or the invoice is older than 30 days"""
         if self.total_amount_paid() > 0 or (now() - self.created_at) > timedelta(days=30):
             self.is_editable = False
-            self.save()
-    
+            self.save(update_fields=['is_editable'])
+
     def save(self, *args, **kwargs):
         """
-        When a new invoice is created, mark the previous invoice for the same student as non-editable.
+        - Update `total_payable` before saving.
+        - Mark the previous invoice for the same student as non-editable/inactive.
         """
-        is_new = self.pk is None  # Check if this is a new invoice
-        super().save(*args, **kwargs)  # Save the current instance first
+        self.total_payable = self.balance()
+
+        is_new = self.pk is None  
+        super().save(*args, **kwargs)  
 
         if is_new:  
-            # Mark all previous invoices for the same student as non-editable
-            Invoice.objects.filter(student=self.student, is_editable=True).update(is_editable=False, status=False)
+            Invoice.objects.filter(student=self.student, is_editable=True).exclude(pk=self.pk).update(is_editable=False, status=False)
+
 
 
 class InvoiceItem(models.Model):

@@ -196,6 +196,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         data["student_name"] = instance.student.firstname + " "+ instance.student.surname
         data["registration_number"] = instance.student.registration_number
         data["class_name"] = instance.class_for.name
+        data["total_payable"] = str(instance.balance())
 
         return data
 

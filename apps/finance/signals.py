@@ -6,13 +6,13 @@ import os
 from io import StringIO
 from django.utils import timezone
 from django.db import transaction
-from .models import Invoice,InvoiceItem, InvoiceBulkUpload, Student, StudentClass, AcademicSession, AcademicTerm
+from .models import Invoice,InvoiceItem, InvoiceBulkUpload, Student, StudentClass, AcademicSession, AcademicTerm,Receipt
 
 
 @receiver(post_save, sender=Invoice)
 def after_creating_invoice(sender, instance, created, **kwargs):
     if created:
-        instance.total_payable = instance.amount_payable()
+        instance.total_payable = instance.balance()
         instance.save
         previous_inv = (
             Invoice.objects.filter(student=instance.student)
@@ -24,6 +24,16 @@ def after_creating_invoice(sender, instance, created, **kwargs):
             previous_inv.save()
             instance.balance_from_previous_term = previous_inv.balance()
             instance.save()
+
+@receiver(post_save,sender=Receipt)
+def after_creating_new_receipt(sender, instance,created, **kwargs):
+    if created:
+        invoice = instance.invoice  
+        if invoice:  
+            invoice.total_payable = invoice.balance()
+            invoice.disable_editing()
+            invoice.save(update_fields=['total_payable', 'is_editable','updated_at'])
+
 
 from decimal import Decimal, InvalidOperation
 

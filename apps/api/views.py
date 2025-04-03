@@ -548,7 +548,7 @@ class ErrorLogAPI(generics.ListCreateAPIView):
 
 from rest_framework import viewsets, status
 class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.filter(status=True)
+    queryset = Invoice.objects.filter(status=True).order_by('-updated_at')
     serializer_class = InvoiceSerializer
 
     def retrieve(self, request, *args, **kwargs):

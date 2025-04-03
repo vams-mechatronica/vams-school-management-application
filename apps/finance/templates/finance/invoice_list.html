@@ -23,6 +23,7 @@
           <th>Total Payable</th>
           <th>Total Paid</th>
           <th>Balance</th>
+          <th>Status</th>
           <th>Updated At</th>
           {% if request.user.is_superuser %}
           <th>Action</th>
@@ -39,13 +40,18 @@
             <td>{{ invoice.total_amount_payable | intcomma }}</td>
             <td>{{ invoice.total_amount_paid | intcomma }}</td>
             <td>{{ invoice.balance | intcomma }}</td>
+            <td>
+              <span class="badge {% if invoice.status %}bg-success{% else %}bg-danger{% endif %}">
+                {% if invoice.status %}Active{% else %}Closed{% endif %}
+              </span>
+            </td>
             <td>{{ invoice.updated_at }}</td>
             
             {% if request.user.is_superuser %}
               <td>
-                <a class="btn btn-sm {% if invoice.is_editable %}btn-success{% else %}btn-danger disabled{% endif %}"
+                <a class="btn btn-sm {% if invoice.status %}btn-success{% else %}btn-danger disabled{% endif %}"
                   href="{% url 'receipt-create' %}?invoice={{ invoice.id }}">
-                  Add new receipt
+                  {% if invoice.status %}Add new receipt{% else %}Disabled{% endif %}
                 </a>
 
               </td>
