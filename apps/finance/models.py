@@ -84,7 +84,7 @@ class Invoice(models.Model):
 
 
 class InvoiceItem(models.Model):
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE,related_name='invoice_items')
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     class_for = models.ForeignKey(StudentClass, on_delete=models.CASCADE, null=True, blank=True)
@@ -96,7 +96,7 @@ class InvoiceItem(models.Model):
         return reverse('invoiceitem-detail', kwargs={'pk': self.pk})
 
 class Receipt(models.Model):
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE,related_name='receipts')
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
     payment_mode = models.CharField(max_length=50,choices=(('upi','UPI'),('cash','Cash'),('debit-card','Debit Card'),('credit-card','Credit Card'),('net-banking','Net Banking'),('select','Select')),default="select")
     date_paid = models.DateTimeField()

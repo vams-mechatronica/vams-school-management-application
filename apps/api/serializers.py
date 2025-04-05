@@ -82,6 +82,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = '__all__'
+
+class InvoiceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceItem
+        fields = '__all__'
     
 class StaffSerializer(serializers.ModelSerializer):
     class Meta:
@@ -249,3 +254,48 @@ class InvoiceSerializer(serializers.ModelSerializer):
             )
 
         return invoice
+
+class InvoiceDetailSerializer(serializers.ModelSerializer):
+    invoice_items = InvoiceItemSerializer(many=True)
+    receipts = ReceiptSerializer(many=True)
+    registration_number = serializers.SerializerMethodField()
+    student_name = serializers.SerializerMethodField()
+    session = serializers.SerializerMethodField()
+    term = serializers.SerializerMethodField()
+    student_class = serializers.SerializerMethodField()
+    amount_payable = serializers.SerializerMethodField()
+    total_amount_payable = serializers.SerializerMethodField()
+    total_amount_paid = serializers.SerializerMethodField()
+    balance = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+    
+    def get_balance(self,obj):
+        return obj.balance()
+    
+    def get_amount_payable(self,obj):
+        return obj.amount_payable()
+    
+    
+    def get_total_amount_payable(self,obj):
+        return obj.total_amount_payable()
+    
+    def get_total_amount_paid(self,obj):
+        return obj.total_amount_paid()
+    
+    def get_registration_number(self,obj):
+        return obj.student.registration_number
+
+    def get_student_name(self,obj):
+        return obj.student.get_fullname()
+
+    def get_student_class(self,obj):
+        return obj.class_for.name
+    
+    def get_term(self, obj):
+        return obj.term.name
+    
+    def get_session(self,obj):
+        return obj.session.name

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from .models import *
 from math import ceil
 from .serializers import *
@@ -573,3 +573,16 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class InvoiceDetailAPI(APIView):
+    def get(self, request):
+        invoice_id = request.GET.get('invoice_id', None)
+        
+        if not invoice_id:
+            return Response({"error": "Invoice ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        invoice = get_object_or_404(Invoice, id=invoice_id)
+        serializer = InvoiceDetailSerializer(invoice)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
