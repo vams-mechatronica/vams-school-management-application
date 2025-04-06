@@ -445,10 +445,10 @@ class DashboardDataAPIView(APIView):
 
         total_students = Student.objects.count()
         present_students = StudentAttendance.objects.filter(date=today, status=1).count()
-        absent_students = StudentAttendance.objects.filter(date=today, status=0).count()
+        absent_students = total_students - present_students
         total_staff = Staff.objects.count()
         present_staff = StaffAttendance.objects.filter(date=today, status=1).count()
-        absent_staff = StaffAttendance.objects.filter(date=today, status=0).count()
+        absent_staff = total_staff-present_staff
         # Subquery to get the latest invoice for each student
         latest_invoice = Invoice.objects.filter(student=OuterRef('student')).order_by('-created_at')
 
@@ -471,9 +471,11 @@ class DashboardDataAPIView(APIView):
         # Assuming you have a method to get attendance data for the past week
         past_week_dates = [today - timedelta(days=i) for i in range(7)]
         for date in past_week_dates:
+            present_students_date =StudentAttendance.objects.filter(date=date, status=1).count()
+            absent_students_date = total_students - StudentAttendance.objects.filter(date=date, status=1).count()
             attendance_graph['labels'].append(date.strftime('%Y-%m-%d'))
-            attendance_graph['present'].append(StudentAttendance.objects.filter(date=date, status=1).count())
-            attendance_graph['absent'].append(StudentAttendance.objects.filter(date=date, status=0).count())
+            attendance_graph['present'].append(present_students_date)
+            attendance_graph['absent'].append(absent_students_date)
 
         data = {
             'total_students': total_students,
@@ -586,3 +588,26 @@ class InvoiceDetailAPI(APIView):
         
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+class SubjectAPI(generics.ListCreateAPIView):
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+
+
+
+class SubjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+    permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+
+class ClassSubjectRelationAPI(generics.ListCreateAPIView):
+    queryset = ClassSubjectRelation.objects.all()
+    serializer_class = SubjectClassSerializer
+
+
+
+class ClassSubjectRelationRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ClassSubjectRelation.objects.all()
+    serializer_class = SubjectClassSerializer
+    permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication,TokenAuthentication)

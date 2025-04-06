@@ -44,6 +44,12 @@ urlpatterns = [
     path('student-classes/', StudentClassListCreateView.as_view(), name='student-class-list-create'),
     path('student-classes/<int:pk>/', StudentClassRetrieveUpdateDestroyView.as_view(), name='student-class-retrieve-update-destroy'),
 
+    # Subjects
+    path('academic-subjects/',SubjectAPI.as_view()),
+    path('academic-subjects/<int:pk>/',SubjectRetrieveUpdateDestroyView.as_view()),
+    path('academic-class-subjects/',ClassSubjectRelationAPI.as_view()),
+    path('academic-class-subjects/<int:pk>/',ClassSubjectRelationRetrieveUpdateDestroyView.as_view()),
+
     # Receipt URLs
     path('receipts/', ReceiptListCreateView.as_view(), name='receipt-list-create'),
     path('receipts/<int:pk>/', ReceiptRetrieveUpdateDestroyView.as_view(), name='receipt-retrieve-update-destroy'),

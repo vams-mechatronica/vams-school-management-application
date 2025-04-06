@@ -299,3 +299,24 @@ class InvoiceDetailSerializer(serializers.ModelSerializer):
     
     def get_session(self,obj):
         return obj.session.name
+
+class SubjectSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Subject
+        fields = '__all__'
+    
+    
+
+class SubjectClassSerializer(serializers.ModelSerializer):
+    subject_name = serializers.SerializerMethodField()
+    class_name = serializers.SerializerMethodField()
+    class Meta:
+        model= ClassSubjectRelation
+        fields = '__all__'
+    
+    def get_subject_name(self,obj):
+        return obj.subject.name
+    
+    def get_class_name(self,obj):
+        return obj.class_id.name
