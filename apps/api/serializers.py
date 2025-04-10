@@ -154,6 +154,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_groups(self, obj):
         return [{"id": group.id, "name": group.name} for group in obj.groups.all()]
 
+class UsersSerializer(serializers.ModelSerializer):
+    user_permissions = serializers.SerializerMethodField()
+    groups = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        exclude = ('password',)
+    
+    def get_user_permissions(self, obj):
+        return list(obj.get_all_permissions())
+
+    def get_groups(self, obj):
+        return [{"id": group.id, "name": group.name} for group in obj.groups.all()]
+    
+    def get_role(self, obj):
+        group = obj.groups.first()
+        return group.name if group else None
+
 
 class StaffProfileSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
@@ -320,3 +338,28 @@ class SubjectClassSerializer(serializers.ModelSerializer):
     
     def get_class_name(self,obj):
         return obj.class_id.name
+
+class ResultSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    session_name = serializers.SerializerMethodField()
+    term_name = serializers.SerializerMethodField()
+    class_name = serializers.SerializerMethodField()
+    subject_name = serializers.SerializerMethodField()
+    class Meta:
+        model = Result
+        fields = '__all__'
+    
+    def get_student_name(self, obj):
+        return obj.student.get_fullname()
+    
+    def get_session_name(self,obj):
+        return obj.session.name
+    
+    def get_term_name(self,obj):
+        return obj.term.name
+    
+    def get_class_name(self,obj):
+        return obj.current_class.name
+    
+    def get_subject_name(self,obj):
+        return obj.subject.name

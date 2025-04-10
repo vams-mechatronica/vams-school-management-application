@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User, Group
 from rest_framework import filters
+from collections import defaultdict
+from django.core.paginator import Paginator
 from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
@@ -611,3 +613,99 @@ class ClassSubjectRelationRetrieveUpdateDestroyView(generics.RetrieveUpdateDestr
     serializer_class = SubjectClassSerializer
     permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
+
+class UsersAPI(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UsersSerializer
+    filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
+    filterset_fields = ['is_active','is_superuser']
+    search_fields = ['username','first_name','last_name','email']
+
+class StudentResultView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        student_id = request.GET.get('student_id')
+
+        if student_id:
+            students = [get_object_or_404(Student, id=student_id)]
+        else:
+            students = Student.objects.all()
+
+        session_name = request.query_params.get('session')
+        term_name = request.query_params.get('term')
+        class_name = request.query_params.get('class')
+        subject_search = request.query_params.get('search')
+
+        # ----- Build academic result per student -----
+        all_results = []
+
+        for student in students:
+            results = Result.objects.filter(student=student)
+
+            # Apply filters
+            if session_name:
+                results = results.filter(session__name__icontains=session_name)
+            if term_name:
+                term_id = get_object_or_404(AcademicTerm,name=term_name)
+                results = results.filter(term=term_id)
+            if class_name:
+                results = results.filter(current_class__name__icontains=class_name)
+            if subject_search:
+                results = results.filter(subject__name__icontains=subject_search)
+
+            # Group results by session and term
+            data = defaultdict(lambda: defaultdict(list))
+            for result in results:
+                session = result.session.name
+                term = result.term.name
+                subject_info = {
+                    "subject_id":result.subject.id,
+                    "subject": result.subject.name,
+                    "test_score": result.test_score,
+                    "exam_score": result.exam_score,
+                    "total_score": result.total_score(),
+                    "grade": result.calc_grade(),
+                }
+                data[session][term].append(subject_info)
+
+            academic_results = []
+            for session, terms in data.items():
+                term_data = []
+                for term, subjects in terms.items():
+                    term_data.append({
+                        "term": term,
+                        "subjects": subjects
+                    })
+                academic_results.append({
+                    "academic_year": session,
+                    "terms": term_data
+                })
+
+            if academic_results:  # Only include students who have results
+                all_results.append({
+                    "student_id": student.id,
+                    "student_name": student.get_fullname(),
+                    "academic_results": academic_results
+                })
+
+        # ----- Pagination -----
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 10))
+
+        paginator = Paginator(all_results, page_size)
+        current_page = paginator.get_page(page)
+
+        def build_page_url(page_number):
+            if page_number > paginator.num_pages or page_number < 1:
+                return None
+            query_params = request.query_params.copy()
+            query_params['page'] = page_number
+            return request.build_absolute_uri(f"?{urlencode(query_params)}")
+
+        return Response({
+            "count": paginator.count,
+            "next": build_page_url(current_page.next_page_number()) if current_page.has_next() else None,
+            "previous": build_page_url(current_page.previous_page_number()) if current_page.has_previous() else None,
+            "results": list(current_page),
+        })

@@ -4,6 +4,7 @@ from .views import *
 urlpatterns = [
     path('app-version',APKVersionAPI.as_view()),
     path('error-log/',ErrorLogAPI.as_view()),
+    path('users/',UsersAPI.as_view()),
     path('dashboard-data/', DashboardDataAPIView.as_view(), name='dashboard-data-api'),
     path('account/',include('dj_rest_auth.urls')),
     path('account/registration/', include('dj_rest_auth.registration.urls')),
@@ -31,6 +32,9 @@ urlpatterns = [
     path('invoices/set/<int:pk>/', InvoiceViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name="invoice-detail"),
     path('invoices/<int:pk>/', InvoiceRetrieveUpdateDestroyView.as_view(), name='invoice-retrieve-update-destroy'),
     path('invoice/detail/',InvoiceDetailAPI.as_view()),
+
+    # Results 
+    path('results/',StudentResultView.as_view()),
 
     # AcademicSession URLs
     path('academic-sessions/', AcademicSessionListCreateView.as_view(), name='academic-session-list-create'),
