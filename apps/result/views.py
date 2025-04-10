@@ -149,6 +149,33 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
             return self.model.objects.filter(student=student)
         
         return self.model.objects.none()
+    
+    def getGrade(self,obt_score,mm_score):
+        perc = (float(obt_score)/float(mm_score)) * 100
+
+        if perc == 100:
+            grade = 'A+'
+        elif perc <100 and perc >= 90:
+            grade = 'A'
+        elif perc < 90 and perc >= 80:
+            grade = 'B+'
+        elif perc < 80 and perc >= 70:
+            grade = 'B'
+        
+        elif perc < 70 and perc >= 60:
+            grade = 'C+'
+        
+        elif perc < 60 and perc >= 50:
+            grade = 'C'
+        
+        elif perc < 50 and perc >= 40:
+            grade = 'D+'
+        elif perc < 40 and perc >= 33:
+            grade = 'D'
+        else:
+            grade = 'F'
+        return grade
+
 
     def get(self, request, *args, **kwargs):
         session = request.GET.get("session")
@@ -184,6 +211,8 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
                     "test_total": 0,
                     "exam_total": 0,
                     "total_total": 0,
+                    "total_mm":0,
+                    "total_grade":None
                 }
 
             term_data = bulk[student_id]["terms"][result.term.id]
@@ -191,6 +220,11 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
             term_data["test_total"] += result.test_score
             term_data["exam_total"] += result.exam_score
             term_data["total_total"] += result.test_score + result.exam_score
+            term_data['total_mm'] += result.subject.test_max_marks + result.subject.exam_max_marks
+            term_data['total_grade'] = "{grade}/ {remarks}".format(grade=self.getGrade(obt_score=term_data['total_total'],\
+                                                     mm_score=term_data['total_mm']),remarks="Pass" if self.getGrade(obt_score=term_data['total_total'],\
+                                                     mm_score=term_data['total_mm']) != 'F' else 'Fail')
+        
         
         context = {
             "results": bulk,

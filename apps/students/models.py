@@ -47,6 +47,8 @@ class Student(models.Model):
         validators=[adhar_num_validator], max_length=12, blank=True
     )
     adharcard = models.ImageField(blank=True, upload_to="students/adharcard/")
+    student_image = models.ImageField(_("Student Image"), upload_to="students/profile_image/", null=True,blank=True)
+    roll_number = models.IntegerField(_("Roll Number"),null=True,blank=True)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
 
     uses_transport = models.BooleanField(default=False, help_text="Does the student use school transport?")
@@ -72,6 +74,11 @@ class Student(models.Model):
     
     def get_fullname(self):
         return "{firstname} {surname}".format(firstname=self.firstname,surname=self.surname)
+    
+    def clean(self):
+        if self.roll_number is not None:
+            if Student.objects.exclude(pk=self.pk).filter(roll_number=self.roll_number).exists():
+                raise ValidationError({'roll_number': 'This roll number is already in use.'})
 
 def validate_file_extension(value):
     ext = os.path.splitext(value.name)[1].lower()

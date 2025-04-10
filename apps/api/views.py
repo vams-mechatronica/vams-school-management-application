@@ -624,48 +624,73 @@ class UsersAPI(generics.ListAPIView):
 class StudentResultView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_grade(self, obt_score, mm_score):
+        perc = (float(obt_score) / float(mm_score)) * 100 if mm_score else 0
+        if perc == 100:
+            grade = 'A+'
+        elif 90 <= perc < 100:
+            grade = 'A'
+        elif 80 <= perc < 90:
+            grade = 'B+'
+        elif 70 <= perc < 80:
+            grade = 'B'
+        elif 60 <= perc < 70:
+            grade = 'C+'
+        elif 50 <= perc < 60:
+            grade = 'C'
+        elif 40 <= perc < 50:
+            grade = 'D+'
+        elif 33 <= perc < 40:
+            grade = 'D'
+        else:
+            grade = 'F'
+        return grade
+
     def get(self, request):
         student_id = request.GET.get('student_id')
-
-        if student_id:
-            students = [get_object_or_404(Student, id=student_id)]
-        else:
-            students = Student.objects.all()
+        students = [get_object_or_404(Student, id=student_id)] if student_id else Student.objects.all()
 
         session_name = request.query_params.get('session')
         term_name = request.query_params.get('term')
         class_name = request.query_params.get('class')
         subject_search = request.query_params.get('search')
 
-        # ----- Build academic result per student -----
         all_results = []
 
         for student in students:
             results = Result.objects.filter(student=student)
 
-            # Apply filters
             if session_name:
                 results = results.filter(session__name__icontains=session_name)
             if term_name:
-                term_id = get_object_or_404(AcademicTerm,name=term_name)
+                term_id = get_object_or_404(AcademicTerm, name=term_name)
                 results = results.filter(term=term_id)
             if class_name:
                 results = results.filter(current_class__name__icontains=class_name)
             if subject_search:
                 results = results.filter(subject__name__icontains=subject_search)
 
-            # Group results by session and term
             data = defaultdict(lambda: defaultdict(list))
+            total_obt_score = 0
+            total_max_score = 0
+
             for result in results:
                 session = result.session.name
                 term = result.term.name
+                subject_max = result.subject.test_max_marks + result.subject.exam_max_marks
+                subject_obt = result.test_score + result.exam_score
+
+                total_max_score += subject_max
+                total_obt_score += subject_obt
+
                 subject_info = {
-                    "subject_id":result.subject.id,
+                    "subject_id": result.subject.id,
                     "subject": result.subject.name,
                     "test_score": result.test_score,
                     "exam_score": result.exam_score,
                     "total_score": result.total_score(),
                     "grade": result.calc_grade(),
+                    "max_score": subject_max
                 }
                 data[session][term].append(subject_info)
 
@@ -673,26 +698,47 @@ class StudentResultView(APIView):
             for session, terms in data.items():
                 term_data = []
                 for term, subjects in terms.items():
+                    term_total = sum(sub["total_score"] for sub in subjects)
+                    term_max = sum(sub["max_score"] for sub in subjects)
+                    term_grade = self.get_grade(term_total, term_max)
+                    term_remarks = "Pass" if term_grade != 'F' else "Fail"
+
                     term_data.append({
                         "term": term,
-                        "subjects": subjects
+                        "subjects": subjects,
+                        "overall": {
+                            "total_score": term_total,
+                            "max_score": term_max,
+                            "grade": term_grade,
+                            "remarks": term_remarks
+                        }
                     })
                 academic_results.append({
                     "academic_year": session,
                     "terms": term_data
                 })
 
-            if academic_results:  # Only include students who have results
+            # Overall for student
+            overall_grade = self.get_grade(total_obt_score, total_max_score)
+            overall_remarks = "Pass" if overall_grade != 'F' else "Fail"
+
+            if academic_results:
                 all_results.append({
                     "student_id": student.id,
                     "student_name": student.get_fullname(),
-                    "academic_results": academic_results
+                    "student_class": student.current_class.name,
+                    "academic_results": academic_results,
+                    "overall": {
+                        "total_score": total_obt_score,
+                        "max_score": total_max_score,
+                        "grade": overall_grade,
+                        "remarks": overall_remarks
+                    }
                 })
 
-        # ----- Pagination -----
+        # Pagination
         page = int(request.query_params.get('page', 1))
         page_size = int(request.query_params.get('page_size', 10))
-
         paginator = Paginator(all_results, page_size)
         current_page = paginator.get_page(page)
 
