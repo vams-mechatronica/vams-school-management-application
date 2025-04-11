@@ -30,6 +30,7 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("attendance/", include("apps.attendance.urls")),
     path("time-table/", include("apps.timetable.urls")),
+    path("alerts/", include("apps.notifications.urls")),
 
 ]
 

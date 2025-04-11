@@ -755,3 +755,24 @@ class StudentResultView(APIView):
             "previous": build_page_url(current_page.previous_page_number()) if current_page.has_previous() else None,
             "results": list(current_page),
         })
+
+
+class NotificationListAPI(generics.ListAPIView):
+    serializer_class = DeliveredNotificationSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
+    filterset_fields = ['mark_as_read']
+
+    def get_queryset(self):
+        return DeliveredNotification.objects.filter(user=self.request.user)
+
+class NotificationMarkAsReadAPI(APIView):
+    def post(self,request):
+        data = request.data
+        notification_id = data.get('notification_id')
+        if notification_id:
+           noti = DeliveredNotification.objects.get(id=notification_id)
+           noti.mark_as_read = True
+           noti.save()
+           return Response({'message':'Notification marked as read'},status=status.HTTP_200_OK)
+        return Response({'message':'Notification Id is mandatory'},status=status.HTTP_400_BAD_REQUEST)

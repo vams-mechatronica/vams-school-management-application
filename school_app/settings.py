@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "apps.api",
     "apps.transport",
     "apps.timetable",
+    "apps.notifications",
     "django_select2",
     "rest_framework",
     'rest_framework.authtoken',

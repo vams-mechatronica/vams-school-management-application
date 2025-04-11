@@ -6,9 +6,11 @@ from apps.staffs.models import *
 from apps.user.models import *
 from apps.students.models import *
 from apps.transport.models import *
+from apps.notifications.models import *
 from .models import APKVersion, ErrorLog
 from rest_framework import serializers
 from django.contrib.auth.models import User,Permission
+from django.shortcuts import get_object_or_404
 
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
@@ -363,3 +365,59 @@ class ResultSerializer(serializers.ModelSerializer):
     
     def get_subject_name(self,obj):
         return obj.subject.name
+
+
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = '__all__'
+
+class ShoutOutSerializer(serializers.ModelSerializer):
+    sender = serializers.StringRelatedField()
+    class Meta:
+        model = ShoutOut
+        fields = '__all__'
+
+class DeliveredNotificationSerializer(serializers.ModelSerializer):
+    header = serializers.SerializerMethodField()
+    message = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DeliveredNotification
+        fields = '__all__'
+    
+    def get_message(self,obj):
+        content_type = obj.content_type
+        if content_type == 'Notification':
+            object = get_object_or_404(Notification, id=obj.object_id)
+            return object.message
+        
+        elif content_type == 'Announcement':
+            object = get_object_or_404(Announcement, id=obj.object_id)
+            return object.message
+        
+        elif content_type == 'ShoutOut':
+            object = get_object_or_404(ShoutOut, id=obj.object_id)
+            return object.message
+    
+    def get_header(self,obj):
+        content_type = obj.content_type
+        if content_type == 'Notification':
+            object = get_object_or_404(Notification, id=obj.object_id)
+            return object.title
+        
+        elif content_type == 'Announcement':
+            object = get_object_or_404(Announcement, id=obj.object_id)
+            return object.title
+        
+        elif content_type == 'ShoutOut':
+            object = get_object_or_404(ShoutOut, id=obj.object_id)
+            return object.title
+

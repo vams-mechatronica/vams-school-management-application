@@ -36,6 +36,10 @@ urlpatterns = [
     # Results 
     path('results/',StudentResultView.as_view()),
 
+    # Notifications
+    path('notifications/',NotificationListAPI.as_view()),
+    path('notification/mark-as-read/',NotificationMarkAsReadAPI.as_view()),
+
     # AcademicSession URLs
     path('academic-sessions/', AcademicSessionListCreateView.as_view(), name='academic-session-list-create'),
     path('academic-sessions/<int:pk>/', AcademicSessionRetrieveUpdateDestroyView.as_view(), name='academic-session-retrieve-update-destroy'),
