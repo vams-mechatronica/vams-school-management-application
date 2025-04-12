@@ -726,6 +726,7 @@ class StudentResultView(APIView):
                 all_results.append({
                     "student_id": student.id,
                     "student_name": student.get_fullname(),
+                    "roll_number":student.roll_number,
                     "student_class": student.current_class.name,
                     "academic_results": academic_results,
                     "overall": {
@@ -764,7 +765,7 @@ class NotificationListAPI(generics.ListAPIView):
     filterset_fields = ['mark_as_read']
 
     def get_queryset(self):
-        return DeliveredNotification.objects.filter(user=self.request.user)
+        return DeliveredNotification.objects.filter(user=self.request.user).order_by('-delivered_at')
 
 class NotificationMarkAsReadAPI(APIView):
     def post(self,request):
