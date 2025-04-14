@@ -13,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
-from .permissions import IsStaff, CanDeleteStudent, IsAdminOrStaff, IsInvoiceOwner, IsStudent, CanDeleteSchool
+from .permissions import *
 from rest_framework.authentication import BasicAuthentication,TokenAuthentication, SessionAuthentication
 from urllib.parse import urlencode
 # Driver API
@@ -75,19 +75,28 @@ class APKVersionAPI(APIView):
 class StudentAPI(generics.ListAPIView):
     serializer_class = StudentSerializer
     queryset = Student.objects.all()
-    permission_classes = (IsAdminOrStaff,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
     pagination_class = StandardResultsSetPagination
     ordering_fields = '__all__'
-    filterset_fields = ['current_class','date_of_admission','registration_number','firstname','gender']
-    search_fields = ['surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class__name','adharcard_number','parent_mobile_number','registration_number','user__id']
-    ordering = ['user_id']
+    filterset_fields = ['current_class','date_of_admission','registration_number','firstname','gender','user']
+    search_fields = ['surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class__name','adharcard_number','parent_mobile_number','registration_number','user']
+    ordering = ['user']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.groups.first().name == 'Staff' or self.request.user.groups.first().name == 'admin':
+            return queryset
+        elif self.request.user.groups.first().name == 'Student':
+            return queryset.filter(user=self.request.user)
+        
+    
 
 class StudentDetailAPI(generics.RetrieveAPIView):
     """API to get student details based on the authenticated user."""
     serializer_class = StudentSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
 
     def get_object(self):
@@ -99,7 +108,7 @@ class StudentDetailAPI(generics.RetrieveAPIView):
 class StudentCreateAPI(generics.CreateAPIView):
     serializer_class = StudentCreateSerializer
     queryset = Student.objects.all()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
 
     def get_registration_number(self):
@@ -183,7 +192,7 @@ class StudentUpdateAPI(generics.UpdateAPIView):
     """API to update an existing Student."""
     serializer_class = StudentSerializer
     queryset = Student.objects.all()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
 
 class StudentDeleteAPI(generics.DestroyAPIView):
@@ -225,14 +234,14 @@ class StudentAttendanceAPI(generics.ListCreateAPIView):
 class StaffBulkUploadAPI(generics.CreateAPIView):
     queryset = StaffBulkUpload.objects.all()
     serializer_class = StaffBulkCreateSerializer
-    permission_classes = (IsAdminOrStaff,)
+    permission_classes = (IsAdminOrStaff, CanCreateStaff)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
 
 
 class StaffListAPI(generics.ListAPIView):
     queryset = Staff.objects.all()
     serializer_class = StaffSerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminOrStaff,)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
     pagination_class = StandardResultsSetPagination
@@ -243,7 +252,7 @@ class StaffListAPI(generics.ListAPIView):
 class StaffCreateAPI(generics.CreateAPIView):
     serializer_class = StaffSerializer
     queryset = Staff.objects.all()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser,CanCreateStaff)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
 
     def create(self, request, *args, **kwargs):
@@ -331,13 +340,13 @@ class InvoiceListCreateView(generics.ListCreateAPIView):
 class InvoiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
-    permission_classes = (IsAuthenticated, IsAdminOrStaff | IsInvoiceOwner)
+    permission_classes = (IsAuthenticated, IsAdminOrStaff)
 
 # AcademicSession Views
-class AcademicSessionListCreateView(generics.ListCreateAPIView):
+class AcademicSessionListCreateView(generics.ListAPIView):
     queryset = AcademicSession.objects.all()
     serializer_class = AcademicSessionSerializer
-    permission_classes = (IsAdminOrStaff,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
 
 
@@ -349,10 +358,10 @@ class AcademicSessionRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPI
 
 
 # AcademicTerm Views
-class AcademicTermListCreateView(generics.ListCreateAPIView):
+class AcademicTermListCreateView(generics.ListAPIView):
     queryset = AcademicTerm.objects.all()
     serializer_class = AcademicTermSerializer
-    permission_classes = (IsAdminOrStaff,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
 
 
@@ -364,10 +373,10 @@ class AcademicTermRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
 
 
 # StudentClass Views
-class StudentClassListCreateView(generics.ListCreateAPIView):
+class StudentClassListCreateView(generics.ListAPIView):
     queryset = StudentClass.objects.all()
     serializer_class = StudentClassSerializer
-    permission_classes = (IsAdminOrStaff,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (BasicAuthentication,TokenAuthentication)
 
 class StudentClassRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -528,6 +537,7 @@ class StaffAttendanceView(APIView):
 
 class UserProfile(APIView):
     authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
+    permission_classes = (IsAdminOrStaff,)
     def get(self,request):
         user = self.request.user
 
@@ -552,17 +562,38 @@ class ErrorLogAPI(generics.ListCreateAPIView):
 
 from rest_framework import viewsets, status
 class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.filter(status=True).order_by('-updated_at')
     serializer_class = InvoiceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        group_name = user.groups.first().name if user.groups.exists() else None
+
+        if group_name in ['admin', 'Staff']:
+            return Invoice.objects.filter(status=True).order_by('-updated_at')
+        elif group_name == 'Student':
+            return Invoice.objects.filter(status=True, student__user=user).order_by('-updated_at')
+        return Invoice.objects.none()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, pk=self.kwargs["pk"])
+        return obj
 
     def retrieve(self, request, *args, **kwargs):
-        """ Fetch student invoice with previous balance and class fees """
+        """Fetch invoice (with class fees, prev balance if needed)"""
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
-        """ Create invoice and compute total_payable """
+        """Create invoice and compute total payable"""
+        user = request.user
+        group_name = user.groups.first().name if user.groups.exists() else None
+
+        if group_name not in ['admin', 'Staff']:
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -570,7 +601,13 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        """ Update invoice, allowing fee edits but keeping class_for unchanged """
+        """Update invoice with partial data (e.g. fees), keep class_for untouched"""
+        user = request.user
+        group_name = user.groups.first().name if user.groups.exists() else None
+
+        if group_name not in ['admin', 'Staff']:
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
@@ -578,7 +615,10 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class InvoiceDetailAPI(APIView):
+    permission_classes = (IsAdminOrStaff | IsInvoiceOwner,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication, SessionAuthentication)
     def get(self, request):
         invoice_id = request.GET.get('invoice_id', None)
         
@@ -616,6 +656,8 @@ class ClassSubjectRelationRetrieveUpdateDestroyView(generics.RetrieveUpdateDestr
 
 class UsersAPI(generics.ListAPIView):
     queryset = User.objects.all()
+    authentication_classes = (BasicAuthentication,TokenAuthentication)
+    permission_classes = (IsAdminOrStaff,)
     serializer_class = UsersSerializer
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend]
     filterset_fields = ['is_active','is_superuser']
@@ -645,10 +687,18 @@ class StudentResultView(APIView):
         else:
             grade = 'F'
         return grade
+    
+    def get_queryset(self, student_id):
+        user = self.request.user
+        if user.groups.first().name == 'Student':
+            return [get_object_or_404(Student, user=user)]
+        else:
+            return [get_object_or_404(Student, id=student_id)] if student_id else Student.objects.all()
+    
 
     def get(self, request):
         student_id = request.GET.get('student_id')
-        students = [get_object_or_404(Student, id=student_id)] if student_id else Student.objects.all()
+        students = self.get_queryset(student_id=student_id)
 
         session_name = request.query_params.get('session')
         term_name = request.query_params.get('term')

@@ -14,6 +14,9 @@ from .models import Student, StudentBulkUpload
 from apps.result.utils import PermissionRequiredMessageMixin
 import logging
 logger = logging.getLogger()
+from datetime import timezone
+from django.contrib.auth.models import User, Group
+from apps.corecode.models import SchoolDetail
 
 
 class StudentListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
@@ -59,23 +62,76 @@ class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMes
         context["payments"] = Invoice.objects.filter(student=self.object)
         return context
 
-class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
+class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Student
-    fields = ['current_status','registration_number','surname','firstname','other_name','father_name','mother_name','gender','date_of_birth','date_of_admission','current_class','parent_mobile_number','address','others','uses_transport','route','pickup_drop_location','pickup_time','drop_time','adharcard_number','adharcard']
+    fields = [
+        'current_status', 'registration_number', 'surname', 'firstname', 'other_name',
+        'father_name', 'mother_name', 'gender', 'date_of_birth', 'date_of_admission',
+        'current_class', 'parent_mobile_number', 'address', 'others',
+        'uses_transport', 'route', 'pickup_drop_location', 'pickup_time', 'drop_time',
+        'adharcard_number', 'adharcard'
+    ]
     success_message = "New student successfully added."
-    permission_required = 'students.add_student' 
+    permission_required = 'students.add_student'
 
     def get_form(self):
-        """add date picker in forms"""
-        form = super(StudentCreateView, self).get_form()
+        form = super().get_form()
         form.fields["date_of_birth"].widget = widgets.DateInput(attrs={"type": "date"})
         form.fields["date_of_admission"].widget = widgets.DateInput(attrs={"type": "date"})
-        form.fields["pickup_time"].widget = widgets.DateInput(attrs={"type": "time"})
-        form.fields["drop_time"].widget = widgets.DateInput(attrs={"type": "time"})
+        form.fields["pickup_time"].widget = widgets.TimeInput(attrs={"type": "time"})
+        form.fields["drop_time"].widget = widgets.TimeInput(attrs={"type": "time"})
         form.fields["address"].widget = widgets.Textarea(attrs={"rows": 2})
         form.fields["others"].widget = widgets.Textarea(attrs={"rows": 2})
         return form
 
+    def get_registration_number(self):
+        try:
+            last_student = Student.objects.latest('updated_at')
+            last_id = last_student.id
+        except Student.DoesNotExist:
+            import random
+            last_id = random.randint(0, 99999)
+
+        try:
+            school_short_name = SchoolDetail.objects.latest('updated_at').short_name
+        except SchoolDetail.DoesNotExist:
+            school_short_name = "VAMS"
+
+        timestamp = timezone.now().strftime('%d')
+        reg_number = f"{school_short_name}/{timezone.now().year}/{timezone.now().month}/{timestamp}/{last_id + 1}"
+        return reg_number
+
+    def form_valid(self, form):
+        student = form.instance
+
+        firstname = student.firstname.strip().lower()
+        lastname = student.surname.strip().lower()
+        username = f"{lastname}.{firstname}"
+
+        # Generate password
+        dob_part = student.date_of_birth.strftime("%d%m")
+        today_part = timezone.now().strftime("%d%m%Y")
+        password = f"{dob_part}{firstname}{lastname}{today_part}#"
+
+        # Create or get user
+        user, created = User.objects.get_or_create(username=username, defaults={
+            "first_name": student.firstname,
+            "last_name": student.surname,
+        })
+
+        if created:
+            user.set_password(password)
+            user.save()
+
+        # Assign to Student group
+        student_group, _ = Group.objects.get_or_create(name="Student")
+        user.groups.add(student_group)
+
+        # Assign user and registration number to student
+        student.user = user
+        student.registration_number = self.get_registration_number()
+
+        return super().form_valid(form)
 
 class StudentUpdateView(LoginRequiredMixin, SuccessMessageMixin,PermissionRequiredMessageMixin, UpdateView):
     model = Student
