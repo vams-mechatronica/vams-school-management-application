@@ -19,6 +19,12 @@ class CanDeleteStudent(permissions.BasePermission):
             return request.user.has_perm("students.delete_student")
         return True
 
+class CanCreateStaff(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return request.user.has_perm("staff.add_staff")
+        return True
+
 class IsAdminOrStaff(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_staff or request.user.is_superuser
