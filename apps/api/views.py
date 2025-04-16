@@ -535,9 +535,17 @@ class StaffAttendanceView(APIView):
             attendance = StaffAttendance.objects.create(staff=getStaff, date=today, time_in=current_time)
             return Response({"message": "Time in recorded", "data": StaffAttendanceSerializer(attendance).data})
 
+class UserProfileU(APIView):
+    authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
+    permission_classes = (IsAuthenticated,)
+    def get(self,request):
+        user = self.request.user
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
 class UserProfile(APIView):
     authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
-    permission_classes = (IsAdminOrStaff,)
+    permission_classes = (IsAuthenticated,)
     def get(self,request):
         user = self.request.user
 

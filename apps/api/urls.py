@@ -9,6 +9,7 @@ urlpatterns = [
     path('account/',include('dj_rest_auth.urls')),
     path('account/registration/', include('dj_rest_auth.registration.urls')),
     path('user/profile/',UserProfile.as_view()),
+    path('user/profile/auth/',UserProfileU.as_view()),
     path('student/get/',StudentAPI.as_view()),
     path('student/create/',StudentCreateAPI.as_view()),
     path('student/create/bulk/',StudentBulkUploadAPI.as_view()),
