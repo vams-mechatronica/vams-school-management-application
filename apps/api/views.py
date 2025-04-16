@@ -529,6 +529,7 @@ class StaffAttendanceView(APIView):
         try:
             attendance = StaffAttendance.objects.get(staff=getStaff, date=today)
             if not attendance.time_in:
+                attendance.status = 1
                 attendance.time_in = current_time
             else:
                 attendance.time_out = current_time
@@ -536,7 +537,7 @@ class StaffAttendanceView(APIView):
             return Response({"message": "Attendance recorded", "data": StaffAttendanceSerializer(attendance).data})
 
         except StaffAttendance.DoesNotExist:
-            attendance = StaffAttendance.objects.create(staff=getStaff, date=today, time_in=current_time)
+            attendance = StaffAttendance.objects.create(staff=getStaff, date=today, time_in=current_time,status=1)
             return Response({"message": "Time in recorded", "data": StaffAttendanceSerializer(attendance).data})
 
 class UserProfileU(APIView):
