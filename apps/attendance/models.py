@@ -34,6 +34,8 @@ class StaffAttendance(models.Model):
     time_in = models.TimeField(_("Time-In"),null=True,blank=True)
     time_out = models.TimeField(_("Time-Out"),null=True,blank=True)
     remarks = models.CharField(_("Remarks"), max_length=500,null=True,blank=True)
+    created_at = models.DateTimeField(_("Created_at"), auto_now=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated_at"), auto_now=True, auto_now_add=False)
 
     class Meta:
         verbose_name = _("StaffAttendance")
