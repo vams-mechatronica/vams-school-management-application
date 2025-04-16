@@ -10,6 +10,8 @@ from django.contrib.auth.models import User, Group
 from rest_framework import filters
 from collections import defaultdict
 from django.core.paginator import Paginator
+from django.utils.timezone import localtime
+
 from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
@@ -521,15 +523,23 @@ class StaffAttendanceView(APIView):
     def post(self, request):
         user = request.user
         today = now().date()
-        current_time = now().time()
+        current_time = localtime().time()
         getStaff = Staff.objects.get(user=user)
         
         try:
             attendance = StaffAttendance.objects.get(staff=getStaff, date=today)
-            if attendance:
+            if attendance.time_in:
                 attendance.time_out = current_time
                 attendance.save()
                 return Response({"message": "Time out recorded", "data": StaffAttendanceSerializer(attendance).data})
+            elif attendance.time_out:
+                attendance.time_out = current_time
+                attendance.save()
+                return Response({"message": "Time out recorded", "data": StaffAttendanceSerializer(attendance).data})
+            elif not attendance.time_in:
+                attendance.time_in = current_time
+                attendance.save()
+                return Response({"message": "Time in recorded", "data": StaffAttendanceSerializer(attendance).data})
 
         except StaffAttendance.DoesNotExist:
             attendance = StaffAttendance.objects.create(staff=getStaff, date=today, time_in=current_time)
