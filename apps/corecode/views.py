@@ -14,14 +14,14 @@ from .forms import (
     SiteConfigForm,
     StudentClassForm,
     SubjectForm,
-    SchoolDetailForm
+    SchoolDetailForm,HolidaysForm
 )
 from .models import (
     AcademicSession,
     AcademicTerm,
     SiteConfig,
     StudentClass,
-    Subject,SchoolDetail
+    Subject,SchoolDetail, Holiday
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -328,3 +328,17 @@ class CurrentSessionAndTermView(LoginRequiredMixin, View):
         return render(request, self.template_name, {"form": form})
 
 
+class HolidayListView(ListView):
+    model = Holiday
+    template_name = 'holidays/holiday_list.html'
+    context_object_name = 'holidays'
+    queryset = Holiday.objects.order_by('date')
+
+class HolidayCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
+    model = Holiday
+    form_class = HolidaysForm
+    permission_required = "corecode.add_holiday"
+
+    template_name = "corecode/mgt_form.html"
+    success_url = reverse_lazy("holidays-list")
+    success_message = "New holiday successfully added"

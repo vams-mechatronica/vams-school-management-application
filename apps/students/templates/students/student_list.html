@@ -17,12 +17,15 @@
       <thead class="thead-light">
         <tr>
           <th>S/N</th>
-          <th>Fullname</th>
           <th>Registration Number</th>
+          <th>Fullname</th>
+          <th>Father's Name</th>
           <th>Current Class</th>
           <th>Gender</th>
           <th>Mobile Number</th>
+          <th>Siblings</th>
           <th>Status</th>
+          <th>Date of Admission</th>
         </tr>
       </thead>
       <tbody>
@@ -30,14 +33,18 @@
         {% for student in students %}
           <tr class='clickable-row' data-href="{% url 'student-detail' student.id %}">
             <td>{{ forloop.counter}}</td>
-            <td>{{ student.surname}} {{student.firstname }} {{student.other_name }}</td>
             <td>{{ student.registration_number}}</td>
+            <td>{{ student.get_fullname}}</td>
+            <td>{{ student.father_name}}</td>
             <td>{{ student.current_class}}</td>
             <td>{{ student.get_gender_display}}</td>
             <td>{{ student.parent_mobile_number}}</td>
+            <td>{{ student.get_sibling_names}}</td>
             <td><span class="badge {% if student.get_current_status_display == 'Active' %}bg-success{% elif student.get_current_status_display == 'Inactive' %}bg-danger{% endif %}">
               {{ student.get_current_status_display}}
             </span></td>
+            <td>{{ student.date_of_admission}}</td>
+
           </tr>
         {% endfor %}
 

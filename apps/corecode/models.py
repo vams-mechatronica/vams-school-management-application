@@ -33,6 +33,7 @@ class SchoolDetail(models.Model):
     short_name = models.CharField(max_length=50, unique=True, verbose_name="School Short Name",default="VAMS")
     slogan = models.CharField(max_length=255, blank=True, null=True, verbose_name="School Slogan")
     address = models.TextField(verbose_name="School Address")
+    fee_collection = models.IntegerField(_("Fee Collection Type"),choices=[(0,'Monthly'),(1,'Quaterly'),(2,'Half Yearly'),(3,'Yearly')],default=0)
 
     # Image fields with validation
     logo_vertical = models.ImageField(
@@ -95,6 +96,10 @@ class AcademicSession(models.Model):
 
     name = models.CharField(max_length=200, unique=True)
     current = models.BooleanField(default=True)
+    start_date = models.DateField(_("Start Date"), auto_now=False, auto_now_add=False)
+    end_date = models.DateField(_("End Date"), auto_now=False, auto_now_add=False)
+    created_at = models.DateTimeField(_("Created at"), auto_now=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated at"), auto_now=True, auto_now_add=False)
 
     class Meta:
         ordering = ["-name"]
@@ -113,6 +118,10 @@ class AcademicTerm(models.Model):
 
     name = models.CharField(max_length=20, unique=True)
     current = models.BooleanField(default=True)
+    start_date = models.DateField(_("Start Date"), auto_now=False, auto_now_add=False)
+    end_date = models.DateField(_("End Date"), auto_now=False, auto_now_add=False)
+    created_at = models.DateTimeField(_("Created at"), auto_now=False, auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated at"), auto_now=True, auto_now_add=False)
 
     class Meta:
         ordering = ["name"]
@@ -144,11 +153,11 @@ class Subject(models.Model):
 
 class StudentClass(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    tuition_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
-    computer_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
-    admission_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
-    exam_fees = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
-    miscellaneous = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    tuition_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    computer_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    admission_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    exam_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    miscellaneous = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     class Meta:
         verbose_name = "Class"
@@ -205,3 +214,11 @@ class EmailMessageImageLink(models.Model):
     def __str__(self):
         return self.pk
 
+class Holiday(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.date}"

@@ -11,7 +11,7 @@ from rest_framework import filters
 from collections import defaultdict
 from django.core.paginator import Paginator
 from django.utils.timezone import localtime
-
+from datetime import datetime, date
 from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
@@ -840,3 +840,32 @@ class NotificationMarkAsReadAPI(APIView):
            noti.save()
            return Response({'message':'Notification marked as read'},status=status.HTTP_200_OK)
         return Response({'message':'Notification Id is mandatory'},status=status.HTTP_400_BAD_REQUEST)
+
+
+class PromoteStudentsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        new_class_id = request.data.get("new_class_id")
+        student_ids = request.data.get("student_ids", [])
+
+        if not new_class_id or not student_ids:
+            return Response({"error": "Missing required fields"}, status=400)
+
+        students = Student.objects.filter(id__in=student_ids)
+        for student in students:
+            student.current_class = new_class_id
+            student.save()
+
+            unpaid_invoices = Invoice.objects.filter(student=student, status=True)
+            for inv in unpaid_invoices:
+                Invoice.objects.create(
+                    student=student,
+                    month=inv.month,
+                    previous_balance = inv.balance(),
+                    total_payable = inv.balance(),
+                    due_date=date.today() + timedelta(days=15),
+                    status=True
+                )
+
+        return Response({"message": "Students promoted successfully."})

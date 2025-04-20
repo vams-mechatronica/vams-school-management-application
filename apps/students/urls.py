@@ -9,6 +9,7 @@ from .views import (
     StudentListView,
     StudentUpdateView,
     StudentDashboardView,
+    StudentPromotionView
 )
 
 urlpatterns = [
@@ -20,4 +21,5 @@ urlpatterns = [
     path("delete/<int:pk>/", StudentDeleteView.as_view(), name="student-delete"),
     path("upload/", StudentBulkUploadView.as_view(), name="student-upload"),
     path("download-csv/", DownloadCSVView.as_view(), name="download-csv"),
+    path('promote-students/', StudentPromotionView.as_view(), name='promote-students'),
 ]

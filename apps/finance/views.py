@@ -67,22 +67,6 @@ class InvoiceCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, Creat
                 formset.save()
         return super().form_valid(form)
 
-@has_permission('finance.add_invoice')
-@login_required
-def generate_monthly_invoices(request):
-    current_month = timezone.now().month
-    for student in Student.objects.all():
-        if not Invoice.objects.filter(student=student, month=str(current_month)).exists():
-            invoice = Invoice.objects.create(
-                student=student,
-                session=student.session,
-                term=student.term,
-                month=str(current_month),
-                class_for=student.student_class
-            )
-            invoice.add_monthly_tuition_fee()
-    return redirect('invoice-list')
-
 class InvoiceDetailView(LoginRequiredMixin, PermissionRequiredMessageMixin,DetailView):
     model = Invoice
     permission_required = "finance.view_invoice"

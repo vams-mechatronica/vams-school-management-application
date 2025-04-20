@@ -5,16 +5,17 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.forms import widgets
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView, View
+from django.views.generic import DetailView, ListView, View, FormView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-
+from django.contrib import messages
 from apps.finance.models import Invoice
-
+from .forms import PromotionForm
 from .models import Student, StudentBulkUpload
 from apps.result.utils import PermissionRequiredMessageMixin
 import logging
 logger = logging.getLogger()
-from datetime import timezone
+# from datetime import timezone, timedelta
+from django.utils import timezone
 from django.contrib.auth.models import User, Group
 from apps.corecode.models import SchoolDetail
 
@@ -65,11 +66,12 @@ class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMes
 class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Student
     fields = [
-        'current_status', 'registration_number', 'surname', 'firstname', 'other_name',
+        'current_status', 'registration_number',  'firstname', 'other_name','surname',
         'father_name', 'mother_name', 'gender', 'date_of_birth', 'date_of_admission',
-        'current_class', 'parent_mobile_number', 'address', 'others',
-        'uses_transport', 'route', 'pickup_drop_location', 'pickup_time', 'drop_time',
-        'adharcard_number', 'adharcard'
+        'current_class', 
+        'adharcard_number', 'adharcard','parent_mobile_number','email',
+        'number_of_siblings','select_siblings', 'address', 'others',
+        'uses_transport', 'route', 'pickup_drop_location', 'pickup_time', 'drop_time'
     ]
     success_message = "New student successfully added."
     permission_required = 'students.add_student'
@@ -135,7 +137,14 @@ class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
 class StudentUpdateView(LoginRequiredMixin, SuccessMessageMixin,PermissionRequiredMessageMixin, UpdateView):
     model = Student
-    fields = "__all__"
+    fields = [
+        'current_status', 'registration_number',  'firstname', 'other_name','surname',
+        'father_name', 'mother_name', 'gender', 'date_of_birth', 'date_of_admission',
+        'current_class', 
+        'adharcard_number', 'adharcard','parent_mobile_number','email',
+        'number_of_siblings','select_siblings', 'address', 'others',
+        'uses_transport', 'route', 'pickup_drop_location', 'pickup_time', 'drop_time'
+    ]
     success_message = "Record successfully updated."
     permission_required = 'students.update_student' 
 
@@ -210,3 +219,23 @@ class DownloadCSVView(LoginRequiredMixin, View):
         ])
 
         return response
+
+
+
+class StudentPromotionView(PermissionRequiredMixin, FormView):
+    template_name = 'students/promote_students.html'
+    form_class = PromotionForm
+    success_url = reverse_lazy('promote-students')
+    permission_required = 'yourapp.can_promote_students'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        class_id = self.request.GET.get('current_class')
+        if class_id:
+            kwargs['class_id'] = class_id
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['selected_class'] = self.request.GET.get('current_class', '')
+        return context

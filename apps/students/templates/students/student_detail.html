@@ -20,21 +20,27 @@
       <div class="col-sm-4">
         <div class="row mb-2">
 
-          {% if object.passport %}
+          {% if object.adharcard %}
             <img
-              src="{{ object.passport.url }}"
+              src="{{ object.adharcard.url }}"
               class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
           {% else %}
+            {% if object.gender == 'male' %}
             <img
               src="{% static 'dist/img/avatar.png' %}"
               class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+            {% else %}
+            <img
+              src="{% static 'dist/img/girl_student.png' %}"
+              class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+            {% endif %}
           {% endif %}
 
 
           <div class="float-right">
-            <h4>{{ object.surname }} </h4>
+            <h4>{% if object.surname %}{{ object.surname }}{% endif %} </h4>
             <h4>{{ object.firstname }} </h4>
-            <h4>{{ object.other_name }} </h4>
+            <h4>{% if object.othername %}{{ object.othername }}{% endif %}  </h4>
             <h4>{{ object.registration_number }} </h4>
           </div>
         </div>

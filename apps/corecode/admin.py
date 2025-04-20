@@ -27,7 +27,10 @@ class ClassSubjectRelationAdmin(admin.ModelAdmin):
     search_fields = ('class_id','subject')
     ordering = ('class_id','subject')
     
-
+@admin.register(Holiday)
+class HolidayAdmin(admin.ModelAdmin):
+    list_display = ('name', 'date', 'created_at', 'updated_at')
+    ordering = ('-date',)
 
     
 

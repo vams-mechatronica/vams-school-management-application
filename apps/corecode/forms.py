@@ -6,7 +6,7 @@ from .models import (
     AcademicTerm,
     SiteConfig,
     StudentClass,
-    Subject,SchoolDetail
+    Subject,SchoolDetail,Holiday
 )
 
 SiteConfigForm = modelformset_factory(
@@ -129,3 +129,12 @@ class CurrentSessionForm(forms.Form):
         queryset=AcademicTerm.objects.all(),
         help_text='Click <a href="/term/create/?next=current-session/">here</a> to add new term',
     )
+
+
+
+class HolidaysForm(ModelForm):
+    prefix = "Holiday"
+
+    class Meta:
+        model = Holiday
+        fields = '__all__'

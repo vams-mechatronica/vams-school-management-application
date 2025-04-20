@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Promote Students{% endblock title %}
+{% block content %}
+{% comment %} <form action="" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  {% include 'corecode/form_snippet.html' %}
+
+  {% if object %}
+    <input type="submit" class="btn btn-primary" value="Update Record">
+  {% else %}
+    <input type="submit" class="btn btn-primary" value="Save">
+  {% endif %}
+</form> {% endcomment %}
+<form method="get">
+  {{ form.current_class.label_tag }} {{ form.current_class }}
+  <button type="submit">Load Students</button>
+</form>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.new_class.label_tag }} {{ form.new_class }}
+  {{ form.students.label_tag }}
+  {{ form.students }}
+  <button type="submit">Promote</button>
+</form>
+
+
+{% endblock content %}

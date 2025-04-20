@@ -20,7 +20,7 @@ from .views import (
     TermDeleteView,
     TermListView,
     TermUpdateView,
-    SchoolDetailView
+    SchoolDetailView, HolidayListView, HolidayCreateView
 )
 from django_select2.views import AutoResponseView
 
@@ -65,4 +65,6 @@ urlpatterns = [
         SubjectDeleteView.as_view(),
         name="subject-delete",
     ),
+    path('holidays/', HolidayListView.as_view(), name='holidays-list'),
+    path('create/holiday/', HolidayCreateView.as_view(), name='holiday-create'),
 ]

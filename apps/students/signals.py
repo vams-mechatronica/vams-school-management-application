@@ -10,6 +10,7 @@ from datetime import datetime
 from apps.corecode.models import StudentClass
 from django.db import transaction
 from .models import Student, StudentBulkUpload
+from apps.corecode.models import SchoolDetail
 
 
 @receiver(post_save, sender=StudentBulkUpload)
@@ -24,6 +25,11 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
         last_id = Student.objects.latest('created_at').id
     except Student.DoesNotExist:
         last_id = 0
+    
+    try:
+        registration_prefix = SchoolDetail.objects.latest('updated_at').short_name
+    except SchoolDetail.DoesNotExist:
+        registration_prefix = "VAMS"
     
     with transaction.atomic():  # Ensures database integrity in case of failure
         if ext == ".csv":
@@ -50,7 +56,7 @@ def create_bulk_student(sender, instance, created, *args, **kwargs):
             counter += last_id
             normalized_row = {column_mapping.get(k.strip().lower().replace(" ", "_"), k.strip().lower().replace(" ", "_")): v for k, v in row.items()}
             
-            reg = normalized_row.get("registration_number") or f"SLN/{timezone.now().year}/{timezone.now().month}/{timestamp}/{counter}"
+            reg = normalized_row.get("registration_number") or f"{registration_prefix}/{timezone.now().year}/{timezone.now().month}/{timestamp}/{counter}"
             student_name = normalized_row.get("student_name", "")
             other_names = normalized_row.get("other_names", "")
             gender = str(normalized_row.get("gender", "")).lower()
