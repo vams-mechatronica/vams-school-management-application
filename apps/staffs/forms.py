@@ -3,7 +3,7 @@ from .models import Staff
 class StaffForm(forms.ModelForm):
     class Meta:
         model = Staff
-        exclude = ['user', ] 
+        exclude = ['user', 'current_status'] 
 
     def __init__(self, *args, **kwargs):
         super(StaffForm, self).__init__(*args, **kwargs)
@@ -11,3 +11,10 @@ class StaffForm(forms.ModelForm):
         self.fields["date_of_joining"].widget = forms.widgets.DateInput(attrs={"type": "date"})
         self.fields["address"].widget = forms.widgets.Textarea(attrs={"rows": 1})
         self.fields["others"].widget = forms.widgets.Textarea(attrs={"rows": 1})
+    
+
+class StaffDocumentUploadForm(forms.Form):
+    documents = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        label="Upload Documents"
+    )

@@ -1,15 +1,17 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.forms import widgets
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.contrib import messages
+
 import csv
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView,View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from apps.result.utils import PermissionRequiredMessageMixin
-from .models import Staff,StaffBulkUpload
-from .forms import StaffForm
+from .models import Staff,StaffBulkUpload, StaffDocument
+from .forms import StaffForm, StaffDocumentUploadForm
 
 
 class StaffListView(ListView,PermissionRequiredMessageMixin):
@@ -24,11 +26,25 @@ class StaffDetailView(DetailView,PermissionRequiredMessageMixin):
 
 
 
-class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin,CreateView):
+class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin, CreateView):
     model = Staff
     form_class = StaffForm
     permission_required = "staffs.add_staff"
     success_message = "New staff successfully added"
+
+    def form_valid(self, form):
+        response = super().form_valid(form)  # Save the Staff instance first
+
+        files = self.request.FILES.getlist('documents')  # 'documents' comes from <input name="documents">
+        for f in files:
+            StaffDocument.objects.create(
+                staff=self.object,    # the newly created staff
+                document=f,
+                title=f.name          # Optional: you can allow user to give custom title later
+            )
+
+        return response
+
 
 
 class StaffUpdateView(SuccessMessageMixin,PermissionRequiredMessageMixin, UpdateView):
@@ -85,3 +101,26 @@ class DownloadCSVViewdownloadcsv(LoginRequiredMixin, View):
         )
 
         return response
+
+class StaffDocumentUploadView(View):
+    def get(self, request, staff_id):
+        form = StaffDocumentUploadForm()
+        return render(request, 'upload_documents.html', {'form': form, 'staff_id': staff_id})
+
+    def post(self, request, staff_id):
+        form = StaffDocumentUploadForm(request.POST, request.FILES)
+        staff = Staff.objects.get(id=staff_id)
+
+        files = request.FILES.getlist('documents')  # get multiple files
+
+        if form.is_valid():
+            for f in files:
+                StaffDocument.objects.create(
+                    staff=staff,
+                    document=f,
+                    title=f.name  # use filename as title, or customize
+                )
+            messages.success(request, "Documents uploaded successfully.")
+            return redirect('staff_detail', staff_id=staff_id)  # redirect wherever you want
+
+        return render(request, 'upload_documents.html', {'form': form, 'staff_id': staff_id})

@@ -1,30 +1,95 @@
 {% extends 'base.html' %}
 
-
 {% block title %}
-
   {% if object %}
     Update {{ object }}
   {% else %}
     Add New Staff
   {% endif %}
-
 {% endblock title %}
-
 
 {% block content %}
 
-<form action="" method="POST">
+<form action="" method="POST" enctype="multipart/form-data">  {# ADD enctype here! #}
   {% csrf_token %}
 
   {% include 'corecode/form_snippet.html' %}
+
+  <h4>Upload Documents (Resume, Offer Letter, Certificates, etc)</h4>
+
+  <div id="dropzone" class="dropzone">
+      Drag & Drop files here or click to select files
+      <input type="file" id="fileInput" name="documents" multiple style="display: none;">
+      <div id="selectedFilesList" class="mt-2"></div>
+  </div>
+
+  <br>
 
   {% if object %}
     <input type="submit" class="btn btn-primary" value="Update Record">
   {% else %}
     <input type="submit" class="btn btn-primary" value="Save">
   {% endif %}
+
 </form>
+
+<style>
+.dropzone {
+    border: 2px dashed #007bff;
+    padding: 30px;
+    text-align: center;
+    color: #777;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+.dropzone.dragover {
+    background-color: #e3f2fd;
+}
+</style>
+
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+
+dropzone.addEventListener('click', () => fileInput.click());
+
+dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+});
+
+dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('dragover');
+});
+
+dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileInput.files = e.dataTransfer.files;
+    dropzone.classList.remove('dragover');
+});
+</script>
+
+<script>
+  document.getElementById("fileInput").addEventListener("change", function () {
+    const fileList = this.files;
+    const output = document.getElementById("selectedFilesList");
+    output.innerHTML = "";
+
+    if (fileList.length > 0) {
+      const ul = document.createElement("ul");
+      ul.classList.add("list-group");
+
+      for (let i = 0; i < fileList.length; i++) {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = fileList[i].name;
+        ul.appendChild(li);
+      }
+
+      output.appendChild(ul);
+    }
+  });
+</script>
 
 
 {% endblock content %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Staff, StaffBulkUpload
+from .models import Staff, StaffBulkUpload, StaffCategory, StaffDocument
 
 
 # Register your models here.
@@ -10,6 +10,19 @@ class StaffAdmin(admin.ModelAdmin):
 @admin.register(StaffBulkUpload)
 class StaffBulkUploadAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(StaffCategory)
+class StaffCategoryAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(StaffDocument)
+class StaffDocumentAdmin(admin.ModelAdmin):
+    pass
+    
+
+
+    
+
     
 
     
