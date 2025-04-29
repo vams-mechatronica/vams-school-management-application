@@ -38,7 +38,7 @@ class StudentAttendanceView(LoginRequiredMixin, PermissionRequiredMessageMixin, 
 
 class StudentAttendanceCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin,SuccessMessageMixin, CreateView):
     model = StudentAttendance
-    fields = ['status', 'remarks']  # These fields are used by default; we'll override save method
+    fields = ['status', 'remarks']
     success_url = reverse_lazy('students-attendance')
     success_message = "Attendance added successfully"
     permission_required = 'attendance.add_studentattendance'
@@ -161,8 +161,11 @@ def generate_attendance_report(class_id, year, month):
         row = {"Student": f"{student.firstname} {student.surname}"}
         for day in date_range:
             # Mark weekends (Saturday & Sunday in India)
-            if day.weekday() in [6] or day in indian_holidays:
-                row[day.strftime("%d-%b")] = "H"
+            if day.weekday() in [6]:
+                row[day.strftime("%d-%b")] = "Sunday"
+                continue
+            elif day in indian_holidays:
+                row[day.strftime("%d-%b")] = "Holiday"
                 continue
 
             # Get attendance record for the student on this date
@@ -252,21 +255,29 @@ def get_holidays():
     # Placeholder function to fetch holidays (this should be replaced with actual holiday fetching logic)
     return {datetime.now().date(): "Holiday"}  # Example: Dictionary with holiday dates
 
-class MonthlyAttendanceReportView(LoginRequiredMixin,PermissionRequiredMessageMixin,SuccessMessageMixin,View):
+import holidays
+from datetime import datetime, timedelta
+
+class MonthlyAttendanceReportView(LoginRequiredMixin, PermissionRequiredMessageMixin, SuccessMessageMixin, View):
     permission_required = "attendance.view_staffattendance"
+
     def get(self, request):
         try:
-            month = request.GET.get('month', datetime.now().strftime('%Y-%m'))  # Default to current month
+            month = request.GET.get('month', datetime.now().strftime('%Y-%m'))
             start_date = datetime.strptime(month, '%Y-%m').date().replace(day=1)
             end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
 
-            # Generate a list of formatted dates (to be used as table headers)
-            date_range = [(start_date + timedelta(days=i)).strftime('%d/%m') for i in range((end_date - start_date).days + 1)]
+            # Generate list of dates
+            date_list = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+            date_range = [date.strftime('%d/%m') for date in date_list]
+
+            # Get Indian holidays
+            india_holidays = holidays.India(years=start_date.year)
 
             # Get all staff members
             staff_list = Staff.objects.all()
 
-            # Fetch attendance data for the given month
+            # Fetch attendance data
             attendance_records = StaffAttendance.objects.filter(
                 date__range=[start_date, end_date],
                 status=1, time_in__isnull=False, time_out__isnull=False
@@ -279,7 +290,7 @@ class MonthlyAttendanceReportView(LoginRequiredMixin,PermissionRequiredMessageMi
                 total_hours=Sum('hours_spent')
             )
 
-            # Process attendance data into a dictionary {staff_id: {date: total_hours}}
+            # Process attendance data
             attendance_data = {}
             for record in attendance_records:
                 staff_id = record['staff__id']
@@ -292,15 +303,27 @@ class MonthlyAttendanceReportView(LoginRequiredMixin,PermissionRequiredMessageMi
                 if staff_id not in attendance_data:
                     attendance_data[staff_id] = {}
                 attendance_data[staff_id][date_str] = formatted_hours
+        
+            for staff in staff_list:
+                staff_id = staff.id
+                if staff_id not in attendance_data:
+                    attendance_data[staff_id] = {}
+                for date_str in date_range:
+                    if date_str not in attendance_data[staff_id]:
+                        day = datetime.strptime(f"{date_str}/{start_date.year}", "%d/%m/%Y").date() 
+                        if day.weekday() == 6:  # Sunday
+                            attendance_data[staff_id][date_str] = "Sunday"
+                        elif day in india_holidays:
+                            attendance_data[staff_id][date_str] = "Holiday"
+                        else:
+                            attendance_data[staff_id][date_str] = "-"
 
         except Exception as e:
-            # Handle unexpected errors gracefully
-            logger.error(f"Error generating report: {e}")
+            logger.exception(e)
             attendance_data = {}
             date_range = []
             staff_list = []
 
-        # If no attendance data is found, set a flag
         report_available = bool(attendance_data)
 
         return render(request, 'attendance/staff_attendance_report.html', {
@@ -308,8 +331,9 @@ class MonthlyAttendanceReportView(LoginRequiredMixin,PermissionRequiredMessageMi
             'date_range': date_range,
             'staff_list': staff_list,
             'attendance_data': attendance_data,
-            'report_available': report_available  # Flag to handle missing data in template
+            'report_available': report_available
         })
+
 
 def api_monthly_attendance_report(request):
     month = request.GET.get('month', datetime.now().strftime('%Y-%m'))
