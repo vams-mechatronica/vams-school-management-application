@@ -2,29 +2,56 @@
 {% load static %}
 {% block title %}Promote Students{% endblock title %}
 {% block content %}
-{% comment %} <form action="" method="POST" enctype="multipart/form-data">
-  {% csrf_token %}
 
-  {% include 'corecode/form_snippet.html' %}
+  {% comment %} <!-- Load Students Form -->
+  <form method="get">
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label class="form-label">{{ form.current_class.label }}</label>
+        {{ form.current_class }}
+        <button type="submit" class="btn btn-primary">Load Students</button>
+      </div>
+    </div>
+  </form> {% endcomment %}
 
-  {% if object %}
-    <input type="submit" class="btn btn-primary" value="Update Record">
-  {% else %}
-    <input type="submit" class="btn btn-primary" value="Save">
-  {% endif %}
-</form> {% endcomment %}
-<form method="get">
-  {{ form.current_class.label_tag }} {{ form.current_class }}
-  <button type="submit">Load Students</button>
-</form>
-
-<form method="post">
-  {% csrf_token %}
-  {{ form.new_class.label_tag }} {{ form.new_class }}
-  {{ form.students.label_tag }}
-  {{ form.students }}
-  <button type="submit">Promote</button>
-</form>
-
+  <!-- Promote Students Form -->
+  <form method="post">
+    {% csrf_token %}
+    {% include 'corecode/form_snippet.html' %}
+    <button type="submit" class="btn btn-success">Promote</button>
+  </div>
+  </form>
 
 {% endblock content %}
+{% block morejs %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const classSelect = document.getElementById("id_current_class");  // current class dropdown
+      const studentsSelect = document.getElementById("id_students");  // students dropdown
+  
+      // Trigger AJAX call when current_class dropdown is changed
+      classSelect.addEventListener("change", function() {
+          const classId = this.value;  // Get the selected class ID
+  
+          // Only trigger the request if a class is selected
+          if (classId) {
+              fetch(`/student/ajax/get-students/${classId}/`)
+                  .then(response => response.json())
+                  .then(data => {
+                      // Clear the students dropdown
+                      studentsSelect.innerHTML = "<option value='' disabled selected>Choose students</option>";
+                      
+                      // Add the new student options
+                      data.students.forEach(student => {
+                          const option = document.createElement("option");
+                          option.value = student.id;
+                          option.textContent = student.name;
+                          studentsSelect.appendChild(option);
+                      });
+                  });
+          }
+      });
+  });
+  </script>
+
+{% endblock morejs %}

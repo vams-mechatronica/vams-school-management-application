@@ -3,7 +3,7 @@ import csv
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.forms import widgets
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, View, FormView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -230,7 +230,13 @@ class StudentPromotionView(PermissionRequiredMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        class_id = self.request.GET.get('current_class')
+        if self.request.method == "POST":
+            # On POST, get the current_class from submitted data
+            class_id = self.request.POST.get('current_class')
+        else:
+            # On GET, get it from query params
+            class_id = self.request.GET.get('current_class')
+
         if class_id:
             kwargs['class_id'] = class_id
         return kwargs
@@ -239,3 +245,26 @@ class StudentPromotionView(PermissionRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['selected_class'] = self.request.GET.get('current_class', '')
         return context
+    
+    def form_valid(self, form):
+        new_class = form.cleaned_data.get('new_class')
+        students = form.cleaned_data.get('students')
+
+        if new_class and students:
+            # Promote each student
+            students.update(current_class=new_class)
+            messages.success(self.request, f"Students have been promoted to {new_class.name} successfully.")
+        else:
+            messages.warning(self.request, "No students were selected or new class was not specified.")
+
+        return super().form_valid(form)
+
+
+def get_students_by_class(request, class_id):
+    # Filter students based on the class_id
+    students = Student.objects.filter(current_class_id=class_id)
+    
+    # Prepare a response with the student data
+    student_data = [{"id": student.id, "name": "{} - ({})".format(student.get_fullname(),student.registration_number)} for student in students]
+    
+    return JsonResponse({"students": student_data})

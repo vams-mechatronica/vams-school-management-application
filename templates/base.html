@@ -165,6 +165,13 @@
                 </p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{% url 'promote-students' %}" class="nav-link">
+                <i class="nav-icon fas fa-level-up-alt"></i>
+                <p>Promote Students</p>
+              </a>
+              
+            </li>
             {% if request.user.is_staff %}
             <li class="nav-header">Announcements</li>
             <li class="nav-item">

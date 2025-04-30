@@ -9,7 +9,8 @@ from .views import (
     StudentListView,
     StudentUpdateView,
     StudentDashboardView,
-    StudentPromotionView
+    StudentPromotionView,
+    get_students_by_class
 )
 
 urlpatterns = [
@@ -22,4 +23,6 @@ urlpatterns = [
     path("upload/", StudentBulkUploadView.as_view(), name="student-upload"),
     path("download-csv/", DownloadCSVView.as_view(), name="download-csv"),
     path('promote-students/', StudentPromotionView.as_view(), name='promote-students'),
+    path('ajax/get-students/<int:class_id>/', get_students_by_class, name='ajax_get_students'),
 ]
+
