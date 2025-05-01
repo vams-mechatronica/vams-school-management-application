@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Assigments & Projects{% endblock title %}
+
+{% block breadcrumb %}
+{% if request.user.is_staff %}
+<a class="btn btn-primary" href="{% url 'create-assignment' %}"><i
+    class="fas fa-plus"></i> Upload New Assignment</a>
+{% endif %}
+{% endblock breadcrumb %}
+
+{% block content %}
+  <div class="table-responsive">
+    <table id="assignmentTable" class="table table-bordered table-hover" data-page-length='100'>
+      <thead class="thead-light">
+        <tr>
+          <th>S/N</th>
+          <th>Title</th>
+          <th>File</th>
+          <th>Class</th>
+          <th>Is For All</th>
+          <th>Students</th>
+          <th>User</th>
+          <th>Is Active</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for assignment in assignments %}
+          <tr class='clickable-row' data-href="3">
+            <td>{{ forloop.counter}}</td>
+            <td>{{ assignment.name}}</td>
+            <td>{{ assignment.file.url}}</td>
+            <td>{{ assignment.for_class}}</td>
+            <td>{{ assignment.is_assignment_for_all}}</td>
+            <td>{{ assignment.students}}</td>
+            <td>{{ assignment.user}}</td>
+            <td>{{ assignment.is_active}}</td>
+            <td>{{ assignment.created_at}}</td>
+            <td>{{ assignment.updated_at}}</td>
+
+          </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
+
+
+{% block morejs %}
+<script>
+  $('#assignmentTable').DataTable({
+  });
+</script>
+
+{% endblock morejs %}

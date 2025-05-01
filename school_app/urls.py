@@ -26,6 +26,7 @@ urlpatterns = [
     path("staff/", include("apps.staffs.urls")),
     path("result/", include("apps.result.urls")),
     path("student/", include("apps.students.urls")),
+    path("assignment/", include("apps.project_n_assignments.urls")),
     path("finance/", include("apps.finance.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("attendance/", include("apps.attendance.urls")),
