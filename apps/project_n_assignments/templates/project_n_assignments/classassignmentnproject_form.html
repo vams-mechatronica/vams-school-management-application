@@ -28,3 +28,31 @@
 
 
 {% endblock content %}
+{% block morejs %}
+<script>
+  $(function() {
+      $('#id_for_class').change(function() {
+          var classId = $(this).val();
+          $.ajax({
+              url: '{% url "ajax_load_students" %}',
+              data: {'class_id': classId},
+              success: function(data) {
+                  var $students = $('#id_students');
+                  $students.empty();
+                  $.each(data.students, function(index, student) {
+                      $students.append('<option value="' + student.id + '">' + student.name + '</option>');
+                  });
+              }
+          });
+      });
+
+      $('#id_is_assignment_for_all').change(function() {
+          if (this.checked) {
+              $('#id_students').closest('.form-group').hide();
+          } else {
+              $('#id_students').closest('.form-group').show();
+          }
+      }).trigger('change'); // trigger on page load
+  });
+</script>
+{% endblock morejs %}

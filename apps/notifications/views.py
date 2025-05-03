@@ -2,9 +2,11 @@ from django.views.generic.edit import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django import forms
-from .models import Notification, Announcement, ShoutOut
+from .models import Notification, Announcement, ShoutOut, DeliveredNotification
 from django.urls import reverse_lazy
-
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 class BaseNotificationForm(forms.ModelForm):
     class Meta:
@@ -74,3 +76,10 @@ class ShoutOutCreateView(LoginRequiredMixin, PermissionRequiredMixin, SuccessMes
         context['verbose_name'] = self.model._meta.verbose_name.title()
         return context
 
+
+
+@require_POST
+@login_required
+def mark_notifications_read(request):
+    DeliveredNotification.objects.filter(user=request.user, mark_as_read=False).update(mark_as_read=True)
+    return JsonResponse({'status': 'ok'})

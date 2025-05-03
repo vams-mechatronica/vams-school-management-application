@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 {% comment %} {% include 'django_select2/django_select2.html' %} {% endcomment %}
 
 <!DOCTYPE html>
@@ -51,14 +52,21 @@
         /* Additional styling if needed */
       }
     }
-    {% block morecss %}{% endblock morecss %}
+
+      {
+      % block morecss %
+    }
+
+      {
+      % endblock morecss %
+    }
   </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
   {% comment %} <div id="loader">
     <div class="spinner-border text-primary" role="status">
-        <span class="sr-only">Loading...</span>
+      <span class="sr-only">Loading...</span>
     </div>
   </div> {% endcomment %}
   <div class="wrapper">
@@ -85,6 +93,33 @@
       <!-- Right navbar links -->
       <ul class="navbar-nav ml-auto">
         <!-- Notifications Dropdown Menu -->
+        <!-- Notification Bell Icon in Navbar -->
+        <li class="nav-item dropdown">
+          <a class="nav-link" href="#" id="notificationDropdown" role="button" data-toggle="dropdown"
+            aria-expanded="false">
+            <i class="fa-solid fa-bell"></i>  <!-- Or use FontAwesome or any icon -->
+            {% if notifications_unread_count > 0 %}
+            <span class="badge bg-danger">{{ notifications_unread_count }}</span>
+            {% endif %}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right" aria-labelledby="notificationDropdown" style="width: 300px; max-height: 400px; overflow-y: auto;">
+            {% if notifications %}
+              {% for notification in notifications %}
+                <li class="mb-2">
+                  <div class="dropdown-item small">
+                    <strong>{{ notification.title }}</strong><br>
+                    {{ notification.message|truncatewords:10 }}<br>
+                    <small class="text-muted">{{ notification.created_at|naturaltime }}</small>
+                  </div>
+                </li>
+                <hr class="my-1">
+              {% endfor %}
+            {% else %}
+              <li class="dropdown-item text-muted">No notifications</li>
+            {% endif %}
+          </ul>
+        </li>
+
         <li class="nav-item dropdown">
           <a class="nav-link" data-toggle="dropdown" href="#">
             <i class="far fa-user"></i>
@@ -179,63 +214,63 @@
                 <i class="nav-icon fas fa-level-up-alt"></i>
                 <p>Promote Students</p>
               </a>
-              
+
             </li>
             {% if request.user.is_staff %}
             <li class="nav-header">Announcements</li>
             <li class="nav-item">
               <a href="{% url 'notification_create' %}" class="nav-link">
-                  <i class="nav-icon fas fa-bell"></i> 
-                  <p>Create Notifications</p>
+                <i class="nav-icon fas fa-bell"></i>
+                <p>Create Notifications</p>
               </a>
-          </li>
-          <li class="nav-item">
-              <a href="{% url 'announcement_create' %}" class="nav-link">
-                  <i class="nav-icon fas fa-bullhorn"></i> 
-                  <p>Create Announcements</p>
-              </a>
-          </li>
-          <li class="nav-item">
-              <a href="{% url 'shoutout_create' %}" class="nav-link">
-                  <i class="nav-icon fas fa-volume-up"></i> 
-                  <p>Create ShoutOut</p>
-              </a>
-          </li>
-          
-            <li class="nav-header">Attendance</li>
-            <li class="nav-item">
-                <a href="{% url 'students-attendance' %}" class="nav-link">
-                    <i class="nav-icon fas fa-user-graduate"></i> 
-                    <p>Student Attendance</p>
-                </a>
             </li>
             <li class="nav-item">
-                <a href="{% url 'attendance-report-view' %}" class="nav-link">
-                    <i class="nav-icon fas fa-file-alt"></i> 
-                    <p>Student Attendance Report</p>
-                </a>
+              <a href="{% url 'announcement_create' %}" class="nav-link">
+                <i class="nav-icon fas fa-bullhorn"></i>
+                <p>Create Announcements</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'shoutout_create' %}" class="nav-link">
+                <i class="nav-icon fas fa-volume-up"></i>
+                <p>Create ShoutOut</p>
+              </a>
+            </li>
+
+            <li class="nav-header">Attendance</li>
+            <li class="nav-item">
+              <a href="{% url 'students-attendance' %}" class="nav-link">
+                <i class="nav-icon fas fa-user-graduate"></i>
+                <p>Student Attendance</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'attendance-report-view' %}" class="nav-link">
+                <i class="nav-icon fas fa-file-alt"></i>
+                <p>Student Attendance Report</p>
+              </a>
             </li>
             <li class="nav-item">
               <a href="{% url 'staff-attendance' %}" class="nav-link">
-                  <i class="nav-icon fas fa-user-tie"></i> 
-                  <p>Staff Attendance</p>
+                <i class="nav-icon fas fa-user-tie"></i>
+                <p>Staff Attendance</p>
               </a>
-          </li>
+            </li>
             <li class="nav-item">
-                <a href="{% url 'staff-attendance-report' %}" class="nav-link">
-                    <i class="nav-icon fas fa-clipboard-list"></i> 
-                    <p>Staff Attendance Report</p>
-                </a>
+              <a href="{% url 'staff-attendance-report' %}" class="nav-link">
+                <i class="nav-icon fas fa-clipboard-list"></i>
+                <p>Staff Attendance Report</p>
+              </a>
             </li>
 
             <li class="nav-header">Time Table</li>
             <li class="nav-item">
-                <a href="{% url 'view-timetable' %}" class="nav-link">
-                    <i class="nav-icon fas fa-calendar-alt"></i>
-                    <p>View TimeTable</p>
-                </a>
+              <a href="{% url 'view-timetable' %}" class="nav-link">
+                <i class="nav-icon fas fa-calendar-alt"></i>
+                <p>View TimeTable</p>
+              </a>
             </li>
-          
+
 
             <li class="nav-header">Transport</li>
             <li class="nav-item">
@@ -489,15 +524,27 @@
       });
     });
   </script>
-  {% comment %} <script>
+  <script>
+    document.getElementById('notificationDropdown').addEventListener('click', function () {
+        fetch("{% url 'mark_notifications_read' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        });
+    });
+    </script>
+    
+  {% comment %}
+  <script>
     $(document).ready(function () {
-        $('#loader').fadeOut(); // Hide loader when page is fully loaded
+      $('#loader').fadeOut(); // Hide loader when page is fully loaded
     });
 
     $(document).on('click', 'a.nav-link', function () {
-        $('#loader').fadeIn(); // Show loader on navigation click
+      $('#loader').fadeIn(); // Show loader on navigation click
     });
-</script> {% endcomment %}
+  </script> {% endcomment %}
 
   {% block morejs %}
 
