@@ -219,21 +219,21 @@
             {% if request.user.is_staff %}
             <li class="nav-header">Announcements</li>
             <li class="nav-item">
-              <a href="{% url 'notification_create' %}" class="nav-link">
+              <a href="{% url 'notification_view' %}" class="nav-link">
                 <i class="nav-icon fas fa-bell"></i>
-                <p>Create Notifications</p>
+                <p>Notifications</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'announcement_create' %}" class="nav-link">
+              <a href="{% url 'announcement_view' %}" class="nav-link">
                 <i class="nav-icon fas fa-bullhorn"></i>
-                <p>Create Announcements</p>
+                <p>Announcements</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'shoutout_create' %}" class="nav-link">
+              <a href="{% url 'shoutout_view' %}" class="nav-link">
                 <i class="nav-icon fas fa-volume-up"></i>
-                <p>Create ShoutOut</p>
+                <p>ShoutOut</p>
               </a>
             </li>
 

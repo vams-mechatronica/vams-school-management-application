@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}ShoutOuts{% endblock title %}
+
+{% block breadcrumb %}
+{% if request.user.is_staff %}
+<a class="btn btn-primary" href="{% url 'shoutout_create' %}"><i
+    class="fas fa-plus"></i> Create New Alert</a>
+{% endif %}
+{% endblock breadcrumb %}
+
+{% block content %}
+  <div class="table-responsive">
+    <table id="notificationTable" class="table table-bordered table-hover" data-page-length='100'>
+      <thead class="thead-light">
+        <tr>
+          <th>S/N</th>
+          <th>Title</th>
+          <th>Message</th>
+          <th>Delivery Type</th>
+          <th>Recipients</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for shoutout in shoutouts %}
+          <tr class='clickable-row' data-href="3">
+            <td>{{ forloop.counter}}</td>
+            <td>{{ shoutout.title}}</td>
+            <td>{{ shoutout.message}}</td>
+            <td>{{ shoutout.delivery_type}}</td>
+            <td>
+              {% if shoutout.recipients.all %}
+                {{ shoutout.recipients.all|join:", " }}
+              {% else %}
+                None
+              {% endif %}
+            </td>
+            
+            <td>{{ shoutout.created_at}}</td>
+          </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
+
+
+{% block morejs %}
+<script>
+  $('#notificationTable').DataTable({
+  });
+</script>
+{% endblock morejs %}

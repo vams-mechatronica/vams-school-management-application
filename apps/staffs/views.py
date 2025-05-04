@@ -33,14 +33,14 @@ class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin, Creat
     success_message = "New staff successfully added"
 
     def form_valid(self, form):
-        response = super().form_valid(form)  # Save the Staff instance first
+        response = super().form_valid(form)
 
-        files = self.request.FILES.getlist('documents')  # 'documents' comes from <input name="documents">
+        files = self.request.FILES.getlist('documents')
         for f in files:
             StaffDocument.objects.create(
-                staff=self.object,    # the newly created staff
+                staff=self.object, 
                 document=f,
-                title=f.name          # Optional: you can allow user to give custom title later
+                title=f.name    
             )
 
         return response

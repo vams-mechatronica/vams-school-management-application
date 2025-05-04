@@ -222,11 +222,11 @@ class DownloadCSVView(LoginRequiredMixin, View):
 
 
 
-class StudentPromotionView(PermissionRequiredMixin, FormView):
+class StudentPromotionView(LoginRequiredMixin, PermissionRequiredMessageMixin, FormView):
     template_name = 'students/promote_students.html'
     form_class = PromotionForm
     success_url = reverse_lazy('promote-students')
-    permission_required = 'yourapp.can_promote_students'
+    permission_required = 'students.can_promote_students'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

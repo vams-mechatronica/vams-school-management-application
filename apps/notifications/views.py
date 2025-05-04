@@ -1,9 +1,12 @@
 from django.views.generic.edit import CreateView
+from django.views.generic import DetailView, ListView, View, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django import forms
 from .models import Notification, Announcement, ShoutOut, DeliveredNotification
 from django.urls import reverse_lazy
+from apps.result.utils import PermissionRequiredMessageMixin
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -83,3 +86,21 @@ class ShoutOutCreateView(LoginRequiredMixin, PermissionRequiredMixin, SuccessMes
 def mark_notifications_read(request):
     DeliveredNotification.objects.filter(user=request.user, mark_as_read=False).update(mark_as_read=True)
     return JsonResponse({'status': 'ok'})
+
+class NotificationListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
+    model = Notification
+    context_object_name = "notifications"
+    permission_required = 'notifications.view_notification' 
+    template_name = "notifications/notification_list.html"
+
+class AnnouncementListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
+    model = Announcement
+    context_object_name = "announcements"
+    permission_required = 'notifications.view_announcement' 
+    template_name = "notifications/announcement_list.html"
+
+class ShoutOutListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
+    model = ShoutOut
+    context_object_name = "shoutouts"
+    permission_required = 'notifications.view_shoutout' 
+    template_name = "notifications/shoutout_list.html"

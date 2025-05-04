@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications{% endblock title %}
+
+{% block breadcrumb %}
+{% if request.user.is_staff %}
+<a class="btn btn-primary" href="{% url 'notification_create' %}"><i
+    class="fas fa-plus"></i> Create New Alert</a>
+{% endif %}
+{% endblock breadcrumb %}
+
+{% block content %}
+  <div class="table-responsive">
+    <table id="notificationTable" class="table table-bordered table-hover" data-page-length='100'>
+      <thead class="thead-light">
+        <tr>
+          <th>S/N</th>
+          <th>Title</th>
+          <th>Message</th>
+          <th>Delivery Type</th>
+          <th>Recipients</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for notification in notifications %}
+          <tr class='clickable-row' data-href="3">
+            <td>{{ forloop.counter}}</td>
+            <td>{{ notification.title}}</td>
+            <td>{{ notification.message}}</td>
+            <td>{{ notification.delivery_type}}</td>
+            <td>
+              {% if notification.recipients.all %}
+                {{ notification.recipients.all|join:", " }}
+              {% else %}
+                None
+              {% endif %}
+            </td>
+            
+            <td>{{ notification.created_at}}</td>
+          </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
+
+
+{% block morejs %}
+<script>
+  $('#notificationTable').DataTable({
+  });
+</script>
+{% endblock morejs %}
