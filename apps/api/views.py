@@ -531,6 +531,7 @@ class StaffAttendanceView(APIView):
             if not attendance.time_in:
                 attendance.status = 1
                 attendance.time_in = current_time
+                attendance.time_out = current_time
             else:
                 attendance.time_out = current_time
             attendance.save()

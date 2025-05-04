@@ -316,7 +316,7 @@ class MonthlyAttendanceReportView(LoginRequiredMixin, PermissionRequiredMessageM
                         elif day in india_holidays:
                             attendance_data[staff_id][date_str] = "Holiday"
                         else:
-                            attendance_data[staff_id][date_str] = "-"
+                            attendance_data[staff_id][date_str] = "Absent"
 
         except Exception as e:
             logger.exception(e)

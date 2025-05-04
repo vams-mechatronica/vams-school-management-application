@@ -1,6 +1,64 @@
 {% extends "base.html" %}
 {% load custom_filters %}  {# Load the custom filter #}
 {% block title %}Monthly Attendance Report - {{ month }}{% endblock title %}
+{% block style %}
+<style>
+    @media print {
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+    
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+    
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            font-size: 10px;
+            overflow: visible;
+        }
+    
+        button, form, nav, .navbar, .btn {
+            display: none !important;
+        }
+    
+        .table-responsive {
+            overflow: visible !important;
+            max-height: none !important;
+        }
+    
+        table {
+            border-collapse: collapse;
+            width: auto !important;  /* Prevent shrinking */
+            table-layout: auto;
+        }
+    
+        th, td {
+            border: 1px solid #000;
+            padding: 4px;
+            white-space: nowrap;
+        }
+    
+        thead {
+            display: table-header-group;
+        }
+    
+        tbody, tr {
+            page-break-inside: avoid;
+        }
+    
+        .print-wrapper {
+            width: max-content;
+            height: max-content;
+        }
+    }
+    </style>
+    
+    
+    {% endblock style %}
 {% block content %}
 {% comment %} <h2>Monthly Attendance Report - {{ month }}</h2> {% endcomment %}
 
@@ -15,10 +73,13 @@
                 <button type="submit" class="btn btn-primary">Generate</button>
             </div>
         </div>
-    </form>    
+    </form>
+
 
 
     {% if report_available %}
+    <button class="btn btn-secondary mb-3" onclick="window.print()">Print Report</button>
+    <div class="print-wrapper">
     <div class="table-responsive" style="max-height: 500px; overflow-y: auto; overflow-x: auto;">
         <table class="table table-bordered table-striped">
             <thead class="thead-dark">
@@ -34,15 +95,15 @@
                 <tr>
                     <td>{{ staff.firstname }} {{ staff.surname }}</td>
                     {% for date in date_range %}
-                        <td>
-                            {% with attendance_data|get_item:staff.pk|get_item:date as record %}
-                                {% if record %}
-                                    {{ record }} 
-                                {% else %}
-                                    - 
-                                {% endif %}
-                            {% endwith %}
-                        </td>
+                        {% with attendance_data|get_item:staff.pk|get_item:date as record %}
+                        {% if record == "Absent" %}
+                            <td style="background-color: red; color: black; font-size: 10px;">{{ record }}</td>
+                        {% elif record and record != "Sunday" and record != "Holiday" %}
+                            <td style="background-color:rgb(8, 143, 39); color: black; font-size: 10px;">{{ record }}</td>
+                        {% else %}
+                            <td>{{ record|default:"-" }}</td>
+                        {% endif %}
+                        {% endwith %}
                     {% endfor %}
                 </tr>
                 {% endfor %}
@@ -52,6 +113,7 @@
 {% else %}
     <p class="text-danger">Attendance Not Available for this month.</p>
 {% endif %}
+</div>
 
     
 {% endblock %}
