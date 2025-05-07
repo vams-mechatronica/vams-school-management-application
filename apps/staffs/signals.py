@@ -38,7 +38,8 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
             "gender": "gender",
             "mobile_number": "mobile_number",
             "address": "address",
-            "adhar_card_number": "adhar_card_number"
+            "adhar_card_number": "adhar_card_number",
+            "pancard_number":"pancard_number"
         }
         
         for counter, row in enumerate(reading, start=1):
@@ -52,6 +53,7 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
             phone = normalized_row.get("mobile_number", "")
             address = normalized_row.get("address", "")
             adhar_card_number = normalized_row.get("adhar_card_number", "")
+            pan_card_number = pan_card_number.get("pancard_number", "")
 
             if not firstname:
                 firstname = surname
@@ -66,6 +68,7 @@ def create_bulk_staff(sender, instance, created, *args, **kwargs):
                     mobile_number=phone,
                     address=address,
                     adhar_card_number=adhar_card_number,
+                    pancard_number = pan_card_number,
                     current_status=1,
                 )
             )

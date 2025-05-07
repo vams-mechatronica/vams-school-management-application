@@ -171,9 +171,9 @@ def generate_attendance_report(class_id, year, month):
             # Get attendance record for the student on this date
             attendance = attendance_records.filter(student=student, date=day).first()
             row[day.strftime("%d-%b")] = (
-                "P" if attendance and attendance.status == "present" else
-                "A" if attendance and attendance.status == "absent" else
-                "L" if attendance and attendance.status == "on-leave" else
+                "P" if attendance and attendance.status == 1 else
+                "A" if attendance and attendance.status == 0 else
+                "L" if attendance and attendance.status == 2 else
                 "-"
             )
         

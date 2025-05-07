@@ -95,6 +95,7 @@ class DownloadCSVViewdownloadcsv(LoginRequiredMixin, View):
                 "date_of_birth",
                 "date_of_joining",
                 "adhar_card_number",
+                "pancard_number"
                 "address",
                 "mobile_number",
             ]
@@ -118,7 +119,7 @@ class StaffDocumentUploadView(View):
                 StaffDocument.objects.create(
                     staff=staff,
                     document=f,
-                    title=f.name  # use filename as title, or customize
+                    title=f.name
                 )
             messages.success(request, "Documents uploaded successfully.")
             return redirect('staff_detail', staff_id=staff_id)  # redirect wherever you want

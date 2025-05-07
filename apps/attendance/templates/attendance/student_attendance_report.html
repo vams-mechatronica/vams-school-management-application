@@ -57,10 +57,21 @@
                 <tr>
                     <td>{{ row.Student }}</td>
                     {% for date in headers|slice:"1:" %}
-                        <td>{{ row|get_item:date }}</td>
+                        {% with value=row|get_item:date %}
+                            <td style="background-color:
+                                {% if value == 'P' %}green
+                                {% elif value == 'A' %}red
+                                {% elif value == 'L' %}yellow
+                                {% elif value and value != "Sunday" and value != "Holiday" %}orange
+                                {% endif %}
+                            ;">
+                                {{ value }}
+                            </td>
+                        {% endwith %}
                     {% endfor %}
                 </tr>
                 {% endfor %}
+
             </tbody>
         </table>
     </div>
