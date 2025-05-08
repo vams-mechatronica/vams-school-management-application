@@ -66,10 +66,9 @@ class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMes
 class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Student
     fields = [
-        'current_status', 'registration_number',  'firstname', 'other_name','surname',
+        'current_status', 'registration_number','sr_number','pen_number', 'firstname', 'other_name','surname',
         'father_name', 'mother_name', 'gender', 'date_of_birth', 'date_of_admission',
-        'current_class', 
-        'adharcard_number', 'adharcard','parent_mobile_number','email',
+        'category','caste_category','current_class', 'adharcard_number', 'adharcard','parent_mobile_number','email',
         'number_of_siblings','select_siblings', 'address', 'others',
         'uses_transport', 'route', 'pickup_drop_location', 'pickup_time', 'drop_time'
     ]

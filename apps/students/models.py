@@ -9,22 +9,50 @@ from django.utils.translation import gettext_lazy as _
 import os
 from django.core.exceptions import ValidationError
 
+class Category(models.Model):
+    name = models.CharField(_("Category"), max_length=50)
 
+    class Meta:
+        verbose_name = _("Category")
+        verbose_name_plural = _("Categorys")
 
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("Category_detail", kwargs={"pk": self.pk})
+
+class CasteCategory(models.Model):
+    name = models.CharField(_("Caste"), max_length=500)
+    parent_category = models.ForeignKey(Category, verbose_name=_("Parent Category"), on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("CasteCategory")
+        verbose_name_plural = _("CasteCategorys")
+
+    def __str__(self):
+        return "c: {} pc: {}".format(self.name, self.parent_category)
+
+    def get_absolute_url(self):
+        return reverse("CasteCategory_detail", kwargs={"pk": self.pk})
 
 class Student(models.Model):
     STATUS_CHOICES = [(1, "Active"), (0, "Inactive")]
-
     GENDER_CHOICES = [("male", "Male"), ("female", "Female")]
+    # CATEGORY_CHOICES = [(0,"General"),(1,"Other Backward Classes (OBC)"),(2,"Scheduled Caste (SC)"),(3, "Scheduled Tribes (ST)"),(4,"Economically Weaker Sections (EWS)"),(5,"Persons with Benchmark Disabilities (PwBD)")]
 
     current_status = models.BooleanField(default=1, choices=STATUS_CHOICES)
     registration_number = models.CharField(max_length=200, unique=True,help_text=f"VAMS/{timezone.now().year}/{timezone.now().strftime('%m')}/{timezone.now().strftime('%d')}/{timezone.now().strftime('%S')}")
+    sr_number = models.CharField(_("SR Number"), max_length=100, null=True, blank=True, help_text="Please enter SR number")
+    pen_number = models.CharField(_("PEN Number"), max_length=100, null=True, blank=True, help_text="Please enter PEN number")
     surname = models.CharField(_("Last Name"),max_length=200, blank=True,null=True)
     firstname = models.CharField(_("First Name"),max_length=200)
     other_name = models.CharField(_("Middle Name"),max_length=200, blank=True)
     father_name = models.CharField(_("Father's Name"),max_length=500, blank=True,null=True)
     mother_name = models.CharField(_("Mother's Name"),max_length=500, blank=True,null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default="male")
+    category = models.ForeignKey(Category, verbose_name=_("Category"), on_delete=models.CASCADE, null=True, blank=True)
+    caste_category = models.ForeignKey(CasteCategory, verbose_name=_("Caste"), on_delete=models.CASCADE, null=True, blank=True)
     date_of_birth = models.DateField(default=timezone.now)
     date_of_admission = models.DateField(default=timezone.now)
     current_class = models.ForeignKey(

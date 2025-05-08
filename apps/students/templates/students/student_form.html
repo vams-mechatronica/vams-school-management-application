@@ -28,3 +28,23 @@
 
 
 {% endblock content %}
+{% block morejs %}
+<script>
+  $(function() {
+      $('#id_uses_transport').change(function() {
+          if (this.checked) {
+              $('#id_route').closest('.form-group').show();
+              $('#id_pickup_drop_location').closest('.form-group').show();
+              $('#id_pickup_time').closest('.form-group').show();
+              $('#id_drop_time').closest('.form-group').show();
+          } else {
+              $('#id_route').closest('.form-group').hide();
+              $('#id_pickup_drop_location').closest('.form-group').hide();
+              $('#id_pickup_time').closest('.form-group').hide();
+              $('#id_drop_time').closest('.form-group').hide();
+          }
+      }).trigger('change'); // trigger on page load
+  });
+</script>
+{% endblock morejs %}
+
