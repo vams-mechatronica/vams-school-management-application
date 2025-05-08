@@ -16,6 +16,18 @@ class StudentClassAdmin(admin.ModelAdmin):
 @admin.register(StudentBulkUpload)
 class StudentBulkUploadAdmin(admin.ModelAdmin):
     list_display = ('id','date_uploaded','csv_file')
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(CasteCategory)
+class CasteCategoryAdmin(admin.ModelAdmin):
+    pass
+    
+
+    
+
     
 
     
