@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect
-from .models import Student, StudentAttendance, Staff,StaffAttendance
+from .models import Student, StudentAttendance, Staff,StaffAttendance, StaffLeaveRequest
 from apps.corecode.models import StudentClass
 from django.utils import timezone
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, View
+from django.views.generic import ListView, CreateView, View, UpdateView
 from django.shortcuts import redirect
-from .forms import BulkAttendanceForm
+from .forms import BulkAttendanceForm, LeaveRequestForm
 import logging
 from apps.result.utils import PermissionRequiredMessageMixin
 from django.db.models import Sum, F, ExpressionWrapper, fields
@@ -361,3 +361,55 @@ def api_monthly_attendance_report(request):
         record['total_hours'] = f"{hours}h {minutes}m"
     
     return JsonResponse({'attendance_data': list(attendance_data), 'holidays': holidays})
+
+
+def calculate_leave_days(request):
+    start = request.GET.get('start_date')
+    end = request.GET.get('end_date')
+
+    try:
+        start_date = datetime.strptime(start, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end, '%Y-%m-%d').date()
+        delta = (end_date - start_date).days + 1  # +1 to include both days
+        if delta < 1:
+            return JsonResponse({'error': 'End date must be after start date'}, status=400)
+        return JsonResponse({'num_days': delta})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+
+class LeaveRequestCreateView(LoginRequiredMixin, CreateView):
+    model = StaffLeaveRequest
+    form_class = LeaveRequestForm
+    template_name = 'attendance/leave_form.html'
+    success_url = reverse_lazy('leave-list')
+
+    def form_valid(self, form):
+        form.instance.staff_user = self.request.user
+        form.instance.staff = Staff.objects.get(user=self.request.user)
+        return super().form_valid(form)
+
+class LeaveRequestListView(LoginRequiredMixin, ListView):
+    model = StaffLeaveRequest
+    template_name = 'attendance/leave_list.html'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return StaffLeaveRequest.objects.all()
+        return StaffLeaveRequest.objects.filter(staff_user=user)
+
+class LeaveApprovalView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = StaffLeaveRequest
+    fields = ['status']
+    template_name = 'attendance/leave_approve.html'
+    success_url = reverse_lazy('leave-list')
+
+    def form_valid(self, form):
+        form.instance.reviewed_by = self.request.user
+        form.instance.reviewed_at = timezone.now()
+        return super().form_valid(form)
+
+    def test_func(self):
+        return self.request.user.is_superuser

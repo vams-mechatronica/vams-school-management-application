@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}Approve Leave Request{% endblock title %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-white">Review Leave Request</h4>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item"><strong>Staff:</strong> {{ object.staff_user.username }}</li>
+                <li class="list-group-item"><strong>Start Date:</strong> {{ object.start_date }}</li>
+                <li class="list-group-item"><strong>End Date:</strong> {{ object.end_date }}</li>
+                <li class="list-group-item"><strong>Reason:</strong> {{ object.reason }}</li>
+                <li class="list-group-item"><strong>Submitted At:</strong> {{ object.submitted_at }}</li>
+            </ul>
+
+            <form method="post" class="mb-3">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_status" class="form-label"><strong>Change Status:</strong></label>
+                    {{ form.status|add_class:"form-select" }}
+                </div>
+                <button type="submit" class="btn btn-success">Submit Decision</button>
+                <a href="{% url 'leave-list' %}" class="btn btn-secondary ms-2">Back to Leave List</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

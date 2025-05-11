@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+
+  {% if object %}
+    Update {{ object }}
+  {% else %}
+    Request Absence
+  {% endif %}
+
+{% endblock title %}
+
+
+{% block content %}
+
+<form action="" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  {% include 'corecode/form_snippet.html' %}
+
+  {% if object %}
+    <input type="submit" class="btn btn-primary" value="Update Record">
+  {% else %}
+    <input type="submit" class="btn btn-primary" value="Save">
+  {% endif %}
+</form>
+
+
+{% endblock content %}
+{% block morejs %}
+<script>
+    function calculateDays() {
+        let start = $('#id_start_date').val();
+        let end = $('#id_end_date').val();
+
+        if (start && end) {
+            $.ajax({
+                url: "{% url 'calculate-leave-days' %}",
+                data: {
+                    'start_date': start,
+                    'end_date': end
+                },
+                success: function (data) {
+                    $('#id_num_days').val(data.num_days);
+                },
+                error: function (xhr) {
+                    $('#id_num_days').val('Invalid range');
+                }
+            });
+        }
+    }
+
+    $('#id_start_date, #id_end_date').on('change', calculateDays);
+    </script>
+{% endblock morejs %}

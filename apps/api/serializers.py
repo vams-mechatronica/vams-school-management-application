@@ -421,3 +421,12 @@ class DeliveredNotificationSerializer(serializers.ModelSerializer):
             object = get_object_or_404(ShoutOut, id=obj.object_id)
             return object.title
 
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+
+class CasteCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CasteCategory

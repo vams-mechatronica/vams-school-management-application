@@ -1,5 +1,5 @@
 from django import forms
-from .models import Staff, StaffAttendance
+from .models import Staff, StaffAttendance, StaffLeaveRequest
 from datetime import date
 
 class StaffAttendanceForm(forms.ModelForm):
@@ -29,3 +29,15 @@ class BulkAttendanceForm(forms.Form):
             self.fields[f'time_out_{staff.id}'] = forms.TimeField(
                 required=False, widget=forms.TimeInput(attrs={'type': 'time'})
             )
+
+
+class LeaveRequestForm(forms.ModelForm):
+    num_days = forms.IntegerField(label='Number of Days', required=False, disabled=True)
+    class Meta:
+        model = StaffLeaveRequest
+        fields = ['start_date', 'end_date', 'reason']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+            'reason': forms.Textarea(attrs={'rows': 3}),
+        }

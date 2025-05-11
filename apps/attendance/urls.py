@@ -10,4 +10,9 @@ urlpatterns = [
    path('attendance-report-view',attendance_report_view,name="attendance-report-view"),
    path('staff-attendance/', bulk_attendance_view, name='staff-attendance'),
    path('staff-attendance-report/', MonthlyAttendanceReportView.as_view(), name='staff-attendance-report'),
+   path('ajax/calculate-days/', calculate_leave_days, name='calculate-leave-days'),
+
+   path('leave-request/list/', LeaveRequestListView.as_view(), name='leave-list'),
+   path('leave-request/new/', LeaveRequestCreateView.as_view(), name='leave-create'),
+   path('leave-request/<int:pk>/approve/', LeaveApprovalView.as_view(), name='leave-approve'),
 ]

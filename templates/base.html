@@ -53,13 +53,7 @@
       }
     }
 
-      {
-      % block morecss %
-    }
-
-      {
-      % endblock morecss %
-    }
+    {% block morecss %}{% endblock morecss %}
   </style>
   {% block style %}{% endblock style %}
 </head>
@@ -98,25 +92,26 @@
         <li class="nav-item dropdown">
           <a class="nav-link" href="#" id="notificationDropdown" role="button" data-toggle="dropdown"
             aria-expanded="false">
-            <i class="fa-solid fa-bell"></i>  <!-- Or use FontAwesome or any icon -->
+            <i class="fa-solid fa-bell"></i> <!-- Or use FontAwesome or any icon -->
             {% if notifications_unread_count > 0 %}
             <span class="badge bg-danger">{{ notifications_unread_count }}</span>
             {% endif %}
           </a>
-          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right" aria-labelledby="notificationDropdown" style="width: 300px; max-height: 400px; overflow-y: auto;">
+          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right" aria-labelledby="notificationDropdown"
+            style="width: 300px; max-height: 400px; overflow-y: auto;">
             {% if notifications %}
-              {% for notification in notifications %}
-                <li class="mb-2">
-                  <div class="dropdown-item small">
-                    <strong>{{ notification.title }}</strong><br>
-                    {{ notification.message|truncatewords:10 }}<br>
-                    <small class="text-muted">{{ notification.created_at|naturaltime }}</small>
-                  </div>
-                </li>
-                <hr class="my-1">
-              {% endfor %}
+            {% for notification in notifications %}
+            <li class="mb-2">
+              <div class="dropdown-item small">
+                <strong>{{ notification.title }}</strong><br>
+                {{ notification.message|truncatewords:10 }}<br>
+                <small class="text-muted">{{ notification.created_at|naturaltime }}</small>
+              </div>
+            </li>
+            <hr class="my-1">
+            {% endfor %}
             {% else %}
-              <li class="dropdown-item text-muted">No notifications</li>
+            <li class="dropdown-item text-muted">No notifications</li>
             {% endif %}
           </ul>
         </li>
@@ -165,7 +160,15 @@
         <nav class="mt-2">
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li class="nav-item">
-              <a href="{% url 'student-list' %}" class="nav-link">
+              <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                  Dashboard
+                </p>
+              </a>
+            </li>            
+            <li class="nav-item">
+              <a href="{% url 'student-list' %}" class="nav-link {% if request.resolver_match.url_name == 'student-list' %}active{% endif %}">
                 <i class="nav-icon fas fa-graduation-cap"></i>
                 <p>
                   Students
@@ -174,7 +177,7 @@
             </li>
             {% if request.user.is_staff %}
             <li class="nav-item">
-              <a href="{% url 'staff-list' %}" class="nav-link">
+              <a href="{% url 'staff-list' %}" class="nav-link {% if request.resolver_match.url_name == 'staff-list' %}active{% endif %}">
                 <i class="nav-icon fas fa-users"></i>
                 <p>
                   Staff
@@ -183,130 +186,260 @@
             </li>
             {% endif %}
 
-            <li class="nav-header">Finance</li>
-            <li class="nav-item">
-              <a href="{% url 'invoice-list' %}" class="nav-link">
-                <i class="nav-icon fas fa-money-bill-alt"></i>
+            <!-- Finance -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name == 'invoice-list' %}menu-open{% endif %}">
+              <a href="#" class="nav-link {% if request.resolver_match.url_name == 'invoice-list' %}active{% endif %}">
+                <i class="nav-icon fas fa-file-invoice-dollar"></i>
                 <p>
-                  Invoices
+                  Finance
+                  <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'invoice-list' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'invoice-list' %}active{% endif %}">
+                    <i class="fas fa-file-invoice nav-icon"></i>
+                    <p>Invoices</p>
+                  </a>
+                </li>
+              </ul>
             </li>
-            <li class="nav-header">Projects & Assignments</li>
-            <li class="nav-item">
-              <a href="{% url 'view-assignments' %}" class="nav-link">
-                <i class="nav-icon fas fa-money-bill-alt"></i>
+
+            <!-- Projects & Assignments -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name == 'view-assignments' %}menu-open{% endif %}">
+              <a href="#"
+                class="nav-link {% if request.resolver_match.url_name == 'view-assignments' %}active{% endif %}">
+                <i class="nav-icon fas fa-tasks"></i>
                 <p>
-                  Assignment
+                  Projects & Assignments
+                  <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'view-assignments' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'view-assignments' %}active{% endif %}">
+                    <i class="fas fa-book nav-icon"></i>
+                    <p>Assignment</p>
+                  </a>
+                </li>
+              </ul>
             </li>
-            <li class="nav-header">Results</li>
-            <li class="nav-item">
-              <a href="{% url 'view-results' %}" class="nav-link">
-                <i class="nav-icon fas fa-list-alt"></i>
+
+            <!-- Results -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'view-results promote-students' %}menu-open{% endif %}">
+              <a href="#"
+                class="nav-link {% if request.resolver_match.url_name in 'view-results promote-students' %}active{% endif %}">
+                <i class="nav-icon fas fa-chart-bar"></i>
                 <p>
                   Results
+                  <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'view-results' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'view-results' %}active{% endif %}">
+                    <i class="fas fa-poll nav-icon"></i>
+                    <p>Results</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'promote-students' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'promote-students' %}active{% endif %}">
+                    <i class="fas fa-level-up-alt nav-icon"></i>
+                    <p>Promote Students</p>
+                  </a>
+                </li>
+              </ul>
             </li>
-            <li class="nav-item">
-              <a href="{% url 'promote-students' %}" class="nav-link">
-                <i class="nav-icon fas fa-level-up-alt"></i>
-                <p>Promote Students</p>
-              </a>
 
-            </li>
-            {% if request.user.is_staff %}
-            <li class="nav-header">Announcements</li>
-            <li class="nav-item">
-              <a href="{% url 'notification_view' %}" class="nav-link">
-                <i class="nav-icon fas fa-bell"></i>
-                <p>Notifications</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'announcement_view' %}" class="nav-link">
+            <!-- Announcements -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'notification_view announcement_view shoutout_view' %}menu-open{% endif %}">
+              <a href="#"
+                class="nav-link {% if request.resolver_match.url_name in 'notification_view announcement_view shoutout_view' %}active{% endif %}">
                 <i class="nav-icon fas fa-bullhorn"></i>
-                <p>Announcements</p>
+                <p>
+                  Announcements
+                  <i class="right fas fa-angle-left"></i>
+                </p>
               </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'shoutout_view' %}" class="nav-link">
-                <i class="nav-icon fas fa-volume-up"></i>
-                <p>ShoutOut</p>
-              </a>
-            </li>
-
-            <li class="nav-header">Attendance</li>
-            <li class="nav-item">
-              <a href="{% url 'students-attendance' %}" class="nav-link">
-                <i class="nav-icon fas fa-user-graduate"></i>
-                <p>Student Attendance</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'attendance-report-view' %}" class="nav-link">
-                <i class="nav-icon fas fa-file-alt"></i>
-                <p>Student Attendance Report</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'staff-attendance' %}" class="nav-link">
-                <i class="nav-icon fas fa-user-tie"></i>
-                <p>Staff Attendance</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'staff-attendance-report' %}" class="nav-link">
-                <i class="nav-icon fas fa-clipboard-list"></i>
-                <p>Staff Attendance Report</p>
-              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'notification_view' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'notification_view' %}active{% endif %}">
+                    <i class="fas fa-bell nav-icon"></i>
+                    <p>Notifications</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'announcement_view' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'announcement_view' %}active{% endif %}">
+                    <i class="fas fa-bullhorn nav-icon"></i>
+                    <p>Announcements</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'shoutout_view' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'shoutout_view' %}active{% endif %}">
+                    <i class="fas fa-volume-up nav-icon"></i>
+                    <p>ShoutOut</p>
+                  </a>
+                </li>
+              </ul>
             </li>
 
-            <li class="nav-header">Time Table</li>
-            <li class="nav-item">
-              <a href="{% url 'view-timetable' %}" class="nav-link">
+            <!-- Attendance -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'students-attendance staff-attendance staff-attendance-report attendance-report-view' %}menu-open{% endif %}">
+              <a href="#"
+                class="nav-link {% if request.resolver_match.url_name in 'students-attendance staff-attendance staff-attendance-report attendance-report-view' %}active{% endif %}">
+                <i class="nav-icon fas fa-calendar-check"></i>
+                <p>
+                  Attendance
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'students-attendance' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'students-attendance' %}active{% endif %}">
+                    <i class="fas fa-user-graduate nav-icon"></i>
+                    <p>Student Attendance</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'attendance-report-view' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'attendance-report-view' %}active{% endif %}">
+                    <i class="fas fa-file-alt nav-icon"></i>
+                    <p>Student Attendance Report</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'staff-attendance' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'staff-attendance' %}active{% endif %}">
+                    <i class="fas fa-user-tie nav-icon"></i>
+                    <p>Staff Attendance</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'staff-attendance-report' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'staff-attendance-report' %}active{% endif %}">
+                    <i class="fas fa-clipboard-list nav-icon"></i>
+                    <p>Staff Attendance Report</p>
+                  </a>
+                </li>
+
+                <!-- Leave -->
+                <li
+                  class="nav-item has-treeview {% if request.resolver_match.url_name in 'leave-list leave-create' %}menu-open{% endif %}">
+                  <a href="#"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name in 'leave-list leave-create' %}active{% endif %}">
+                    <i class="fas fa-calendar-times nav-icon"></i>
+                    <p>
+                      Leave / Absence
+                      <i class="right fas fa-angle-left"></i>
+                    </p>
+                  </a>
+                  <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                      <a href="{% url 'leave-list' %}"
+                        class="nav-link ml-4 {% if request.resolver_match.url_name == 'leave-list' %}active{% endif %}">
+                        <i class="fas fa-list nav-icon"></i>
+                        <p>Leave Requests</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{% url 'leave-create' %}"
+                        class="nav-link ml-4 {% if request.resolver_match.url_name == 'leave-create' %}active{% endif %}">
+                        <i class="fas fa-paper-plane nav-icon"></i>
+                        <p>Apply for Leave</p>
+                      </a>
+                    </li>
+                    {% comment %} <li class="nav-item">
+                      <a href="{% url 'staff-attendance-report' %}"
+                        class="nav-link {% if request.resolver_match.url_name == 'staff-attendance-report' %}active{% endif %}">
+                        <i class="fas fa-chart-line nav-icon"></i>
+                        <p>Leave Report</p>
+                      </a>
+                    </li> {% endcomment %}
+                  </ul>
+                </li>
+              </ul>
+            </li>
+
+            <!-- Transport -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'driver-list vehicle-list route-list trip-list' %}menu-open{% endif %}">
+              <a href="#"
+                class="nav-link {% if request.resolver_match.url_name in 'driver-list vehicle-list route-list trip-list' %}active{% endif %}">
+                <i class="nav-icon fas fa-shuttle-van"></i>
+                <p>
+                  Transport
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'driver-list' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'driver-list' %}active{% endif %}">
+                    <i class="fas fa-id-card nav-icon"></i>
+                    <p>Driver</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'vehicle-list' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'vehicle-list' %}active{% endif %}">
+                    <i class="fas fa-car-side nav-icon"></i>
+                    <p>Vehicle</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'route-list' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'route-list' %}active{% endif %}">
+                    <i class="fas fa-map-signs nav-icon"></i>
+                    <p>Routes</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'trip-list' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'trip-list' %}active{% endif %}">
+                    <i class="fas fa-road nav-icon"></i>
+                    <p>Trips</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <!-- Time Table -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name == 'view-timetable' %}menu-open{% endif %}">
+              <a href="#"
+                class="nav-link {% if request.resolver_match.url_name == 'view-timetable' %}active{% endif %}">
                 <i class="nav-icon fas fa-calendar-alt"></i>
-                <p>View TimeTable</p>
+                <p>
+                  Time Table
+                  <i class="right fas fa-angle-left"></i>
+                </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'view-timetable' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'view-timetable' %}active{% endif %}">
+                    <i class="far fa-clock nav-icon"></i>
+                    <p>View TimeTable</p>
+                  </a>
+                </li>
+              </ul>
             </li>
 
 
-            <li class="nav-header">Transport</li>
-            <li class="nav-item">
-              <a href="{% url 'driver-list' %}" class="nav-link">
-                <i class="nav-icon fas fa-user"></i>
-                <p>
-                  Driver
-                </p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'vehicle-list' %}" class="nav-link">
-                <i class="nav-icon fas fa-car"></i>
-                <p>
-                  Vehicle
-                </p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'route-list' %}" class="nav-link">
-                <i class="nav-icon fas fa-route"></i>
-                <p>
-                  Routes
-                </p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'trip-list' %}" class="nav-link">
-                <i class="nav-icon fas fa-play"></i>
-                <p>
-                  Trips
-                </p>
-              </a>
-            </li>
-
+            {% if request.user.is_superuser %}
             <li class="nav-header">Others</li>
             <li class="nav-item has-treeview">
               <a href="#" class="nav-link">
@@ -318,7 +451,7 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="{% url 'sessions' %}" class="nav-link">
+                  <a href="{% url 'sessions' %}" class="nav-link ml-3">
                     <i class="nav-icon fas fa-bars"></i>
                     <p>
                       Sessions
@@ -326,7 +459,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'terms' %}" class="nav-link">
+                  <a href="{% url 'terms' %}" class="nav-link ml-3">
                     <i class="nav-icon fas fa-bars"></i>
                     <p>
                       Terms
@@ -335,7 +468,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'subjects' %}" class="nav-link">
+                  <a href="{% url 'subjects' %}" class="nav-link ml-3">
                     <i class="nav-icon fas fa-bars"></i>
                     <p>
                       Subjects
@@ -343,7 +476,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'classes' %}" class="nav-link">
+                  <a href="{% url 'classes' %}" class="nav-link ml-3">
                     <i class="nav-icon fas fa-bars"></i>
                     <p>
                       Classes
@@ -351,7 +484,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'users-list' %}" class="nav-link">
+                  <a href="{% url 'users-list' %}" class="nav-link ml-3">
                     <i class="nav-icon fas fa-bars"></i>
                     <p>
                       Users
@@ -369,9 +502,6 @@
               </a>
             </li>
             {% endif %}
-
-
-          </ul>
         </nav>
         <!-- /.sidebar-menu -->
       </div>
@@ -527,15 +657,15 @@
   </script>
   <script>
     document.getElementById('notificationDropdown').addEventListener('click', function () {
-        fetch("{% url 'mark_notifications_read' %}", {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-        });
+      fetch("{% url 'mark_notifications_read' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+      });
     });
-    </script>
-    
+  </script>
+
   {% comment %}
   <script>
     $(document).ready(function () {

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import StaffAttendance, StudentAttendance
+from .models import StaffAttendance, StudentAttendance, StaffLeaveRequest
 
 
 # Register your models here.
@@ -10,6 +10,10 @@ class StudentAttendanceAdmin(admin.ModelAdmin):
 @admin.register(StaffAttendance)
 class StaffAttendanceAdmin(admin.ModelAdmin):
     pass
-    
+
+@admin.register(StaffLeaveRequest)
+class LeaveRequestAdmin(admin.ModelAdmin):
+    list_display = ('staff', 'start_date', 'end_date', 'status', 'submitted_at')
+    list_filter = ('status',)
 
     

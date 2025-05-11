@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Leave Requests{% endblock title %}
+{% block breadcrumb %}
+    {% if request.user.is_staff %}
+    <a class="btn btn-primary" href="{% url 'leave-create' %}"><i
+        class="fas fa-plus"></i> Submit a New Leave Request</a>
+    {% endif %}
+{% endblock breadcrumb %}
+        
+{% block content %}
+<div class="table-responsive">
+    <table id="studenttable" class="table table-bordered table-hover" data-page-length='100'>
+      <thead class="thead-light">
+            <tr>
+                <th>Staff</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Submitted At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for leave in object_list %}
+                <tr>
+                    <td>{{ leave.staff_user.username }}</td>
+                    <td>{{ leave.start_date }}</td>
+                    <td>{{ leave.end_date }}</td>
+                    <td>{{ leave.reason|truncatechars:20 }}</td>
+                    <td>
+                        <span 
+                            style="
+                                padding: 4px 8px; 
+                                border-radius: 4px; 
+                                color: white; 
+                                background-color:
+                                    {% if leave.status == 0 %}
+                                        orange
+                                    {% elif leave.status == 1 %}
+                                        green
+                                    {% elif leave.status == 2 %}
+                                        red
+                                    {% else %}
+                                        gray
+                                    {% endif %}
+                            ;">
+                            {{ leave.get_status_display }}
+                        </span>
+                    </td>
+                    
+                    <td>{{ leave.submitted_at }}</td>
+                    <td>
+                        {% if request.user.is_superuser %}
+                            <a href="{% url 'leave-approve' leave.pk %}">
+                                {% if leave.status == 0 %}
+                                    Review
+                                {% else %}
+                                    Edit Status
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">No leave requests found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

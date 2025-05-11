@@ -870,3 +870,19 @@ class PromoteStudentsAPIView(APIView):
                 )
 
         return Response({"message": "Students promoted successfully."})
+
+
+# Caste
+
+class CasteCategoryAPI(generics.ListAPIView):
+    queryset = CasteCategory.objects.all()
+    serializer_class = CasteCategorySerializer
+    permission_classes = (IsAdminOrStaff,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication)
+
+class CasteCategoryPostAPI(generics.CreateAPIView):
+    queryset = CasteCategory.objects.all()
+    serializer_class = CasteCategorySerializer
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication)
+

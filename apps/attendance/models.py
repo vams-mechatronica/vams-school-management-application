@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse,reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
 from apps.students.models import Student
 from apps.staffs.models import Staff
 from datetime import date
@@ -46,4 +47,31 @@ class StaffAttendance(models.Model):
 
     def get_absolute_url(self):
         return reverse("StaffAttendance_detail", kwargs={"pk": self.pk})
+
+class StaffLeaveRequest(models.Model):
+    LEAVE_STATUS = (
+        (0, 'Pending'),
+        (1, 'Approved'),
+        (2, 'Rejected'),
+    )
+
+    staff_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='leave_requests')
+    staff = models.ForeignKey(Staff, verbose_name=_("Staff Name"), on_delete=models.CASCADE, related_name="leave_request")
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.TextField()
+    status = models.IntegerField(max_length=10, choices=LEAVE_STATUS, default=0)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_leaves')
+
+    class Meta:
+        verbose_name = _("StaffLeaveRequest")
+        verbose_name_plural = _("StaffLeaveRequests")
+
+    def __str__(self):
+        return f"{self.staff_user.username} - {self.start_date} to {self.end_date} - {self.status}"
+
+    def get_absolute_url(self):
+        return reverse("StaffLeaveRequest_detail", kwargs={"pk": self.pk})
 
