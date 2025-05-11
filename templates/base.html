@@ -296,9 +296,9 @@
 
             <!-- Attendance -->
             <li
-              class="nav-item has-treeview {% if request.resolver_match.url_name in 'students-attendance staff-attendance staff-attendance-report attendance-report-view' %}menu-open{% endif %}">
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'students-attendance staff-attendance staff-attendance-report attendance-report-view leave-list leave-create' %}menu-open{% endif %}">
               <a href="#"
-                class="nav-link {% if request.resolver_match.url_name in 'students-attendance staff-attendance staff-attendance-report attendance-report-view' %}active{% endif %}">
+                class="nav-link {% if request.resolver_match.url_name in 'students-attendance staff-attendance staff-attendance-report attendance-report-view leave-list leave-create' %}active{% endif %}">
                 <i class="nav-icon fas fa-calendar-check"></i>
                 <p>
                   Attendance
