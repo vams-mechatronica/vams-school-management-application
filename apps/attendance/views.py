@@ -267,51 +267,60 @@ class MonthlyAttendanceReportView(LoginRequiredMixin, PermissionRequiredMessageM
             start_date = datetime.strptime(month, '%Y-%m').date().replace(day=1)
             end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
 
-            # Generate list of dates
             date_list = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
             date_range = [date.strftime('%d/%m') for date in date_list]
 
-            # Get Indian holidays
             india_holidays = holidays.India(years=start_date.year)
-
-            # Get all staff members
             staff_list = Staff.objects.all()
 
-            # Fetch attendance data
+            # Fetch all attendance records for the month
             attendance_records = StaffAttendance.objects.filter(
-                date__range=[start_date, end_date],
-                status=1, time_in__isnull=False, time_out__isnull=False
+                date__range=[start_date, end_date]
             ).annotate(
                 hours_spent=ExpressionWrapper(
                     F('time_out') - F('time_in'),
                     output_field=fields.DurationField()
                 )
-            ).values('staff__id', 'staff__firstname', 'staff__surname', 'date').annotate(
-                total_hours=Sum('hours_spent')
-            )
+            ).values('staff__id', 'staff__firstname', 'staff__surname', 'date', 'status', 'hours_spent')
 
-            # Process attendance data
+            # Process attendance records
             attendance_data = {}
             for record in attendance_records:
                 staff_id = record['staff__id']
                 date_str = record['date'].strftime('%d/%m')
-                total_seconds = record['total_hours'].total_seconds()
-                hours = int(total_seconds // 3600)
-                minutes = int((total_seconds % 3600) // 60)
-                formatted_hours = f"{hours}h {minutes}m"
+                status = record['status']
 
                 if staff_id not in attendance_data:
                     attendance_data[staff_id] = {}
-                attendance_data[staff_id][date_str] = formatted_hours
-        
+
+                if status == 1:  # Present
+                    total_seconds = record['hours_spent'].total_seconds() if record['hours_spent'] else 0
+                    hours = int(total_seconds // 3600)
+                    minutes = int((total_seconds % 3600) // 60)
+                    attendance_data[staff_id][date_str] = f"{hours}h {minutes}m"
+                elif status == 2:  # On-leave
+                    day = record['date']
+                    if day.weekday() == 6:
+                        attendance_data[staff_id][date_str] = "Sunday"
+                    elif day in india_holidays:
+                        attendance_data[staff_id][date_str] = "Holiday"
+                    else:
+                        attendance_data[staff_id][date_str] = "On Leave"
+
+                elif status == 3:  # Other
+                    attendance_data[staff_id][date_str] = "Other"
+                else:  # Explicitly marked Absent
+                    attendance_data[staff_id][date_str] = "Absent"
+
+            # Fill in missing days
             for staff in staff_list:
                 staff_id = staff.id
                 if staff_id not in attendance_data:
                     attendance_data[staff_id] = {}
                 for date_str in date_range:
                     if date_str not in attendance_data[staff_id]:
-                        day = datetime.strptime(f"{date_str}/{start_date.year}", "%d/%m/%Y").date() 
-                        if day.weekday() == 6:  # Sunday
+                        day = datetime.strptime(f"{date_str}/{start_date.year}", "%d/%m/%Y").date()
+                        if day.weekday() == 6:
                             attendance_data[staff_id][date_str] = "Sunday"
                         elif day in india_holidays:
                             attendance_data[staff_id][date_str] = "Holiday"
@@ -333,6 +342,7 @@ class MonthlyAttendanceReportView(LoginRequiredMixin, PermissionRequiredMessageM
             'attendance_data': attendance_data,
             'report_available': report_available
         })
+
 
 
 def api_monthly_attendance_report(request):
@@ -409,7 +419,26 @@ class LeaveApprovalView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def form_valid(self, form):
         form.instance.reviewed_by = self.request.user
         form.instance.reviewed_at = timezone.now()
-        return super().form_valid(form)
+        response = super().form_valid(form)
+
+        # If leave is approved, create attendance entries
+        if form.instance.status == 1:
+            leave_request = form.instance
+            staff_member = leave_request.staff
+            current_date = leave_request.start_date
+            while current_date <= leave_request.end_date:
+                StaffAttendance.objects.get_or_create(
+                    staff=staff_member,
+                    date=current_date,
+                    defaults={
+                        'status': 2,
+                        'remarks': 'Leave Approved',
+                    }
+                )
+                current_date += timedelta(days=1)
+
+        return response
+
 
     def test_func(self):
         return self.request.user.is_superuser

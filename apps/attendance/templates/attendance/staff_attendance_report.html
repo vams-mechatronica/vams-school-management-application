@@ -98,8 +98,10 @@
                         {% with attendance_data|get_item:staff.pk|get_item:date as record %}
                         {% if record == "Absent" %}
                             <td style="background-color: red; color: black; font-size: 10px;">{{ record }}</td>
-                        {% elif record and record != "Sunday" and record != "Holiday" %}
+                        {% elif record and record != "Sunday" and record != "Holiday" and record != "On Leave" %}
                             <td style="background-color:rgb(8, 143, 39); color: black; font-size: 10px;">{{ record }}</td>
+                        {% elif record and record == "On Leave" %}
+                            <td style="background-color:rgb(245, 146, 8); color: black; font-size: 10px;">{{ record }}</td>
                         {% else %}
                             <td>{{ record|default:"-" }}</td>
                         {% endif %}
