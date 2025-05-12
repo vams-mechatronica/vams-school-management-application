@@ -117,23 +117,41 @@
         </li>
 
         <li class="nav-item dropdown">
-          <a class="nav-link" data-toggle="dropdown" href="#">
-            <i class="far fa-user"></i>
+          <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#">
+            <div style="
+              width: 35px;
+              height: 35px;
+              background-color: #007bff;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: bold;
+              font-size: 14px;
+              text-transform: uppercase;
+            ">
+              {{ request.user.first_name|default:"U"|first }}{{ request.user.last_name|default:"S"|first }}
+            </div>
           </a>
           <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <span class="dropdown-header font-weight-bold text-center">
+              Hi {{ request.user.username }}!
+            </span>
+            <div class="dropdown-divider"></div>
             <a href="#" class="dropdown-item">
               <i class="fas fa-user mr-2"></i> Profile
             </a>
-            <a href="{% url "password_change" %}" class="dropdown-item">
+            <a href="{% url 'password_change' %}" class="dropdown-item">
               <i class="fas fa-key mr-2"></i> Change Password
             </a>
-
             <div class="dropdown-divider"></div>
             <a href="{% url 'logout' %}" class="dropdown-item" id="logout-link">
-              <i class="fas fa-sign-out"></i> Sign out
+              <i class="fas fa-sign-out-alt mr-2"></i> Sign out
             </a>
           </div>
         </li>
+        
         {% if request.user.is_superuser %}
         <li class="nav-item">
           <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button"><i
@@ -167,24 +185,74 @@
                 </p>
               </a>
             </li>            
-            <li class="nav-item">
-              <a href="{% url 'student-list' %}" class="nav-link {% if request.resolver_match.url_name == 'student-list' %}active{% endif %}">
+            <!-- Student -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'student-list student-create student-upload' %}menu-open{% endif %}">
+              <a href="#" class="nav-link {% if request.resolver_match.url_name in 'student-list student-create student-upload' %}active{% endif %}">
                 <i class="nav-icon fas fa-graduation-cap"></i>
                 <p>
                   Students
+                  <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'student-list' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'student-list' %}active{% endif %}">
+                    <i class="nav-icon fas fa-graduation-cap"></i>
+                    <p>Students List</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'student-create' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'student-create' %}active{% endif %}">
+                    <i class="nav-icon fas fa-plus"></i>
+                    <p>Add New Student</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'student-upload' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'student-upload' %}active{% endif %}">
+                    <i class="nav-icon fas fa-upload"></i>
+                    <p>Bulk Upload</p>
+                  </a>
+                </li>
+              </ul>
             </li>
-            {% if request.user.is_staff %}
-            <li class="nav-item">
-              <a href="{% url 'staff-list' %}" class="nav-link {% if request.resolver_match.url_name == 'staff-list' %}active{% endif %}">
+            <!-- Staff -->
+            <li
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'staff-list staff-create staff-upload' %}menu-open{% endif %}">
+              <a href="#" class="nav-link {% if request.resolver_match.url_name in 'staff-list staff-create staff-upload' %}active{% endif %}">
                 <i class="nav-icon fas fa-users"></i>
                 <p>
                   Staff
+                  <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'staff-list' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'staff-list' %}active{% endif %}">
+                    <i class="nav-icon fas fa-users"></i>
+                    <p>Staff List</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'staff-create' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'staff-create' %}active{% endif %}">
+                    <i class="nav-icon fas fa-plus"></i>
+                    <p>Add New Staff</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'staff-upload' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'staff-upload' %}active{% endif %}">
+                    <i class="nav-icon fas fa-upload"></i>
+                    <p>Bulk Upload</p>
+                  </a>
+                </li>
+              </ul>
             </li>
-            {% endif %}
 
             <!-- Finance -->
             <li
