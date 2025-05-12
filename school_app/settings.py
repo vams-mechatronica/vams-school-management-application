@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     "apps.transport",
     "apps.timetable",
     "apps.notifications",
+    "apps.project_n_assignments",
+    "apps.email_module",
     "django_select2",
     "rest_framework",
     'rest_framework.authtoken',
@@ -61,6 +63,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'django_filters',
+    'drf_yasg',
 ]
 
 
