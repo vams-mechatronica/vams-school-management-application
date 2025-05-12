@@ -18,6 +18,7 @@ logger = logging.getLogger()
 from django.utils import timezone
 from django.contrib.auth.models import User, Group
 from apps.corecode.models import SchoolDetail
+from apps.email_module.modules import send_html_email_async
 
 
 class StudentListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
@@ -94,7 +95,8 @@ class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             last_id = random.randint(0, 99999)
 
         try:
-            school_short_name = SchoolDetail.objects.latest('updated_at').short_name
+            self.school_details = SchoolDetail.objects.latest('updated_at')
+            school_short_name = self.school_details.short_name
         except SchoolDetail.DoesNotExist:
             school_short_name = "VAMS"
 
@@ -131,6 +133,19 @@ class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         # Assign user and registration number to student
         student.user = user
         student.registration_number = self.get_registration_number()
+
+        if student.email:
+            # send congratulation email
+            send_html_email_async(template_name="new_student_enrollment_congratulation",
+                                to_emails=[student.email],content_context={
+                "student_name": student.get_fullname(),
+                "registration_number":student.registration_number,
+                "class_name":student.current_class.name,
+                "current_year":timezone.now().year,
+                "sitename": self.school_details.name,
+                "username":student.user.username,
+                "password":password
+            })
 
         return super().form_valid(form)
 
