@@ -186,70 +186,75 @@ def generate_attendance_report(class_id, year, month):
 
 from datetime import datetime
 
+class AttendanceReport(PermissionRequiredMessageMixin,LoginRequiredMixin, SuccessMessageMixin, View):
+    permission_required = "attendance.view_staffattendance"
+    
+    def get(request):
+        selected_class = None
+        year = datetime.now().year
+        month = datetime.now().month
+        report_data = []
+        headers = []
 
-def attendance_report_view(request):
-    selected_class = None
-    year = datetime.now().year
-    month = datetime.now().month
-    report_data = []
-    headers = []
-
-    if request.method == "POST":
-        selected_class = request.POST.get("class_id")
-        year = int(request.POST.get("year"))
-        month = int(request.POST.get("month"))
-        # selected_class = StudentClass.objects.get(id=class_id)
-    if selected_class:
-        report_df = generate_attendance_report(selected_class, year, month)
-        report_data = report_df.to_dict(orient="records")
-        headers = report_df.columns.tolist()
-    else:
-        report_data = pd.DataFrame().to_dict(orient='records')
-    months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
-                                        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
-                                        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
-    classes = StudentClass.objects.all()
-    return render(request, "attendance/student_attendance_report.html", {
-        "classes": classes,
-        "report_data": report_data,
-        "headers": headers,
-        "selected_class": selected_class,
-        "year": year,
-        "month": month,
-        "select_month":months
-    })
+        if request.method == "POST":
+            selected_class = request.POST.get("class_id")
+            year = int(request.POST.get("year"))
+            month = int(request.POST.get("month"))
+            # selected_class = StudentClass.objects.get(id=class_id)
+        if selected_class:
+            report_df = generate_attendance_report(selected_class, year, month)
+            report_data = report_df.to_dict(orient="records")
+            headers = report_df.columns.tolist()
+        else:
+            report_data = pd.DataFrame().to_dict(orient='records')
+        months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+                                            (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+                                            (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
+        classes = StudentClass.objects.all()
+        return render(request, "attendance/student_attendance_report.html", {
+            "classes": classes,
+            "report_data": report_data,
+            "headers": headers,
+            "selected_class": selected_class,
+            "year": year,
+            "month": month,
+            "select_month":months
+        })
 
 
-def bulk_attendance_view(request):
-    staff_list = Staff.objects.all()  # Fetch all staff
-    attendance_records = {int(a.staff.id): a for a in StaffAttendance.objects.filter(date=datetime.now().date())}
+class StaffBulkAttendance(PermissionRequiredMessageMixin,LoginRequiredMixin, SuccessMessageMixin, View):
+    permission_required = "attendance.view_staffattendance"
 
-    if request.method == "POST":
-        form = BulkAttendanceForm(request.POST)
-        if form.is_valid():
-            attendance_date = form.cleaned_data['date']
+    def get(request):
+        staff_list = Staff.objects.all()  # Fetch all staff
+        attendance_records = {int(a.staff.id): a for a in StaffAttendance.objects.filter(date=datetime.now().date())}
 
-            for staff in staff_list:
-                status = request.POST.get(f'attendance_{staff.id}', '0')  # Default to Absent
-                time_in = request.POST.get(f'check_in_{staff.id}') or None
-                time_out = request.POST.get(f'check_out_{staff.id}') or None
+        if request.method == "POST":
+            form = BulkAttendanceForm(request.POST)
+            if form.is_valid():
+                attendance_date = form.cleaned_data['date']
 
-                StaffAttendance.objects.update_or_create(
-                    staff=staff,
-                    date=attendance_date,
-                    defaults={'status': status, 'time_in': time_in, 'time_out': time_out}
-                )
+                for staff in staff_list:
+                    status = request.POST.get(f'attendance_{staff.id}', '0')  # Default to Absent
+                    time_in = request.POST.get(f'check_in_{staff.id}') or None
+                    time_out = request.POST.get(f'check_out_{staff.id}') or None
 
-            return redirect('staff-attendance')
+                    StaffAttendance.objects.update_or_create(
+                        staff=staff,
+                        date=attendance_date,
+                        defaults={'status': status, 'time_in': time_in, 'time_out': time_out}
+                    )
 
-    else:
-        form = BulkAttendanceForm()
+                return redirect('staff-attendance')
 
-    return render(request, 'attendance/staff_attendance_bulk.html', {
-        'form': form,
-        'staff_list': staff_list,
-        'attendance_records': attendance_records  # Pass the dictionary correctly
-    })
+        else:
+            form = BulkAttendanceForm()
+
+        return render(request, 'attendance/staff_attendance_bulk.html', {
+            'form': form,
+            'staff_list': staff_list,
+            'attendance_records': attendance_records  # Pass the dictionary correctly
+        })
 
 def get_holidays():
     # Placeholder function to fetch holidays (this should be replaced with actual holiday fetching logic)
@@ -258,7 +263,7 @@ def get_holidays():
 import holidays
 from datetime import datetime, timedelta
 
-class MonthlyAttendanceReportView(LoginRequiredMixin, PermissionRequiredMessageMixin, SuccessMessageMixin, View):
+class MonthlyAttendanceReportView(PermissionRequiredMessageMixin,LoginRequiredMixin, SuccessMessageMixin, View):
     permission_required = "attendance.view_staffattendance"
 
     def get(self, request):
@@ -389,9 +394,10 @@ def calculate_leave_days(request):
 
 
 
-class LeaveRequestCreateView(LoginRequiredMixin, CreateView):
+class LeaveRequestCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, CreateView):
     model = StaffLeaveRequest
     form_class = LeaveRequestForm
+    permission_required = "attendance.staffleaverequest"
     template_name = 'attendance/leave_form.html'
     success_url = reverse_lazy('leave-list')
 
@@ -400,8 +406,9 @@ class LeaveRequestCreateView(LoginRequiredMixin, CreateView):
         form.instance.staff = Staff.objects.get(user=self.request.user)
         return super().form_valid(form)
 
-class LeaveRequestListView(LoginRequiredMixin, ListView):
+class LeaveRequestListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
     model = StaffLeaveRequest
+    permission_required = "attendance.staffleaverequest"
     template_name = 'attendance/leave_list.html'
 
     def get_queryset(self):
@@ -410,9 +417,10 @@ class LeaveRequestListView(LoginRequiredMixin, ListView):
             return StaffLeaveRequest.objects.all()
         return StaffLeaveRequest.objects.filter(staff_user=user)
 
-class LeaveApprovalView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class LeaveApprovalView(LoginRequiredMixin,PermissionRequiredMessageMixin, UserPassesTestMixin, UpdateView):
     model = StaffLeaveRequest
     fields = ['status']
+    permission_required = "attendance.staffleaverequest"
     template_name = 'attendance/leave_approve.html'
     success_url = reverse_lazy('leave-list')
 

@@ -1,11 +1,11 @@
 from django.urls import path
 from .views import StudentTimetableView,\
       StaffTimetableView, RequestModificationView,\
-        add_timetable,timetable_view,TimetableDeleteView,\
-            TimeTableUpdateView
+        add_timetable,TimetableDeleteView,\
+            TimeTableUpdateView,TimeTableView
 
 urlpatterns = [
-    path('view/', timetable_view, name='view-timetable'),
+    path('view/', TimeTableView.as_view(), name='view-timetable'),
     path('add/',add_timetable,name="add-timetable"),
     path('update/<int:pk>/',TimeTableUpdateView.as_view(),name="update-timetable"),
     path('delete/<int:pk>/',TimetableDeleteView.as_view(),name="delete-timetable"),

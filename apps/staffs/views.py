@@ -4,8 +4,11 @@ from django.forms import widgets
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
-
+from apps.email_module.modules import send_html_email_async
+from django.utils import timezone
+from apps.corecode.models import SchoolDetail
 import csv
+from django.contrib.auth.models import User, Group
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView,View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -14,26 +17,54 @@ from .models import Staff,StaffBulkUpload, StaffDocument
 from .forms import StaffForm, StaffDocumentUploadForm
 
 
-class StaffListView(ListView,PermissionRequiredMessageMixin):
+class StaffListView(PermissionRequiredMessageMixin,LoginRequiredMixin,ListView):
     model = Staff
     permission_required = 'staffs.view_staff'
 
 
-class StaffDetailView(DetailView,PermissionRequiredMessageMixin):
+class StaffDetailView(PermissionRequiredMessageMixin,LoginRequiredMixin,DetailView):
     model = Staff
     permission_required = 'staffs.view_staff'
     template_name = "staffs/staff_detail.html"
 
 
 
-class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin, CreateView):
+class StaffCreateView(PermissionRequiredMessageMixin,LoginRequiredMixin,SuccessMessageMixin, CreateView):
     model = Staff
     form_class = StaffForm
     permission_required = "staffs.add_staff"
     success_message = "New staff successfully added"
 
+    def __init__(self, **kwargs):
+        self.school_details = SchoolDetail.objects.latest('updated_at')
+
+    def get_registration_number(self):
+        try:
+            last_staff = Staff.objects.latest('updated_at')
+            last_id = last_staff.id
+        except Staff.DoesNotExist:
+            import random
+            last_id = random.randint(0, 99999)
+
+        try:
+            school_short_name = self.school_details.short_name
+        except SchoolDetail.DoesNotExist:
+            school_short_name = "VAMS"
+
+        timestamp = timezone.now().strftime('%d')
+        reg_number = f"{school_short_name}/Emp/{timezone.now().year}/{timezone.now().month}/{timestamp}/{last_id + 1}"
+        return reg_number
+    
+    def check_if_user_exists(self, username):
+        try:
+            user = User.objects.get(username=username)
+            return True
+        except User.DoesNotExist:
+            return False
+
     def form_valid(self, form):
         response = super().form_valid(form)
+        staff = form.instance
 
         files = self.request.FILES.getlist('documents')
         for f in files:
@@ -42,6 +73,57 @@ class StaffCreateView(SuccessMessageMixin, PermissionRequiredMessageMixin, Creat
                 document=f,
                 title=f.name    
             )
+        
+        if not staff.emp_code:
+            staff.emp_code = self.get_registration_number()
+
+        firstname = staff.firstname.strip().lower()
+        lastname = staff.surname.strip().lower()
+        # serial_number = student.registration_number.split('/')[-1]
+        username = f"{lastname}.{firstname}"
+        user_exists = self.check_if_user_exists(username=username)
+        if user_exists:
+            username = username + "".join(staff.emp_code.split('/')[-3:-1])
+
+        # Generate password
+        dob_part = staff.date_of_birth.strftime("%d%m")
+        today_part = timezone.now().strftime("%d%m%Y")
+        password = f"{dob_part}{firstname}{lastname}{today_part}#"
+
+        # Create or get user
+        if staff.email:
+            user, created = User.objects.get_or_create(username=username,email=staff.email, defaults={
+                "first_name": staff.firstname,
+                "last_name": staff.surname,
+            })
+        else:
+            user, created = User.objects.get_or_create(username=username, defaults={
+                "first_name": staff.firstname,
+                "last_name": staff.surname,
+            })
+
+        if created:
+            user.set_password(password)
+            user.save()
+        
+        # Assign to Student group
+        student_group, _ = Group.objects.get_or_create(name="Students")
+        user.groups.add(student_group)
+
+        # Assign user and registration number to student
+        staff.user = user
+        
+        if staff.email:
+            # send congratulation email
+            send_html_email_async(template_name="new_staff_enrollment_congratulation",
+                                to_emails=[staff.email],content_context={
+                "student_name": staff.get_fullname(),
+                "registration_number":staff.emp_code,
+                "current_year":timezone.now().year,
+                "sitename": self.school_details.name,
+                "username":staff.user.username,
+                "password":password
+            })
 
         return response
 

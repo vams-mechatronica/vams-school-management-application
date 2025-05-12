@@ -135,9 +135,10 @@
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-            <span class="dropdown-header font-weight-bold text-center">
+            <span class="dropdown-header font-weight-bold text-justify">
               Hi {{ request.user.username }}!
             </span>
+            {% comment %} <span class="text-justify font-weight-400 text-sm mx-1">{{request.user.email}}</span> {% endcomment %}
             <div class="dropdown-divider"></div>
             <a href="#" class="dropdown-item">
               <i class="fas fa-user mr-2"></i> Profile
@@ -507,7 +508,7 @@
             </li>
 
 
-            {% if request.user.is_superuser %}
+            {% comment %} {% if request.user.is_superuser %} {% endcomment %}
             <li class="nav-header">Others</li>
             <li class="nav-item has-treeview">
               <a href="#" class="nav-link">
@@ -569,7 +570,7 @@
                 </p>
               </a>
             </li>
-            {% endif %}
+            {% comment %} {% endif %} {% endcomment %}
         </nav>
         <!-- /.sidebar-menu -->
       </div>

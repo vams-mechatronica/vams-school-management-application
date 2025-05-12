@@ -69,11 +69,12 @@ class SiteConfigView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
         context = {"formset": formset, "title": "Configuration"}
         return render(request, self.template_name, context)
 
-class SchoolDetailView(LoginRequiredMixin, SuccessMessageMixin, View):
+class SchoolDetailView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, View):
     """Create or Update School Configuration"""
 
     template_name = "corecode/school_detail.html"
     success_message = "Configuration successfully updated"
+    permission_required = "corecode.view_schoolconfig"
 
     def get(self, request):
         school_detail = SchoolDetail.objects.first()

@@ -64,7 +64,9 @@ class StudentDashboardView(LoginRequiredMixin, DetailView ,PermissionRequiredMes
         context["payments"] = Invoice.objects.filter(student=self.object)
         return context
 
-class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin,SuccessMessageMixin, CreateView):
+    
+        
     model = Student
     fields = [
         'current_status', 'registration_number','sr_number','pen_number', 'firstname', 'other_name','surname',
@@ -75,6 +77,9 @@ class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     ]
     success_message = "New student successfully added."
     permission_required = 'students.add_student'
+
+    def __init__(self, **kwargs):
+        self.school_details = SchoolDetail.objects.latest('updated_at')
 
     def get_form(self):
         form = super().get_form()
@@ -95,7 +100,6 @@ class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             last_id = random.randint(0, 99999)
 
         try:
-            self.school_details = SchoolDetail.objects.latest('updated_at')
             school_short_name = self.school_details.short_name
         except SchoolDetail.DoesNotExist:
             school_short_name = "VAMS"
@@ -103,13 +107,26 @@ class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         timestamp = timezone.now().strftime('%d')
         reg_number = f"{school_short_name}/{timezone.now().year}/{timezone.now().month}/{timestamp}/{last_id + 1}"
         return reg_number
+    
+    def check_if_user_exists(self, username):
+        try:
+            user = User.objects.get(username=username)
+            return True
+        except User.DoesNotExist:
+            return False
 
     def form_valid(self, form):
         student = form.instance
+        if not student.registration_number:
+            student.registration_number = self.get_registration_number()
 
         firstname = student.firstname.strip().lower()
         lastname = student.surname.strip().lower()
+        # serial_number = student.registration_number.split('/')[-1]
         username = f"{lastname}.{firstname}"
+        user_exists = self.check_if_user_exists(username=username)
+        if user_exists:
+            username = username + "".join(student.registration_number.split('/')[-3:-1])
 
         # Generate password
         dob_part = student.date_of_birth.strftime("%d%m")
@@ -117,22 +134,28 @@ class StudentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         password = f"{dob_part}{firstname}{lastname}{today_part}#"
 
         # Create or get user
-        user, created = User.objects.get_or_create(username=username, defaults={
-            "first_name": student.firstname,
-            "last_name": student.surname,
-        })
+        if student.email:
+            user, created = User.objects.get_or_create(username=username,email=student.email, defaults={
+                "first_name": student.firstname,
+                "last_name": student.surname,
+            })
+        else:
+            user, created = User.objects.get_or_create(username=username, defaults={
+                "first_name": student.firstname,
+                "last_name": student.surname,
+            })
 
         if created:
             user.set_password(password)
             user.save()
-
+        
         # Assign to Student group
-        student_group, _ = Group.objects.get_or_create(name="Student")
+        student_group, _ = Group.objects.get_or_create(name="Students")
         user.groups.add(student_group)
 
         # Assign user and registration number to student
         student.user = user
-        student.registration_number = self.get_registration_number()
+        
 
         if student.email:
             # send congratulation email
