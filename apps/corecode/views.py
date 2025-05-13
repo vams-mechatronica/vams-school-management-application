@@ -41,9 +41,25 @@ class IndexView(LoginRequiredMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.groups.filter(name="Students").exists():
             pk = request.user.pk
-            student= Student.objects.get(user= pk)
+            student = Student.objects.get(user=pk)
             return redirect(reverse('student-dashboard', kwargs={'pk': student.pk}))
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add your custom context here
+        context["dashboard_cards"] = [
+            {'title': 'Total Students', 'id': 'total-students', 'bg': 'primary'},
+            {'title': "Today's Student Attendance", 'id': 'student-attendance', 'bg': 'success'},
+            {'title': 'Total Staff', 'id': 'total-staff', 'bg': 'info'},
+            {'title': "Today's Staff Attendance", 'id': 'staff-attendance', 'bg': 'warning'},
+            {'title': 'Total Fees Balance This Month', 'id': 'fees-balance', 'bg': 'danger'},
+            {'title': 'Total Fees Received This Month', 'id': 'fees-received', 'bg': 'success'}
+        ]
+
+        return context
+
 
 
 class SiteConfigView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):

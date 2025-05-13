@@ -443,52 +443,70 @@ class SchoolDeleteAPI(generics.DestroyAPIView):
 
 
 class DashboardDataAPIView(APIView):
-
     def get(self, request):
-        today = now().date()
-        # Get the current date and time (timezone-aware)
+        today = timezone.now().date()
         nows = timezone.now()
 
-        # Get the first day of the current month
         first_day_of_month = nows.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        next_month = (first_day_of_month + timedelta(days=31)).replace(day=1)
+        last_day_of_month = next_month - timedelta(days=1)
 
-        # Calculate the last day of the current month
-        next_month = (first_day_of_month + timezone.timedelta(days=31)).replace(day=1)
-        last_day_of_month = next_month - timezone.timedelta(days=1)
-
+        # Students
         total_students = Student.objects.count()
         present_students = StudentAttendance.objects.filter(date=today, status=1).count()
         absent_students = total_students - present_students
+
+        # Staff
         total_staff = Staff.objects.count()
         present_staff = StaffAttendance.objects.filter(date=today, status=1).count()
-        absent_staff = total_staff-present_staff
-        # Subquery to get the latest invoice for each student
-        latest_invoice = Invoice.objects.filter(student=OuterRef('student')).order_by('-created_at')
+        absent_staff = total_staff - present_staff
 
-        # Get the last created invoice for each student
+        # Latest invoice logic
+        latest_invoice = Invoice.objects.filter(student=OuterRef('student')).order_by('-created_at')
         invoices = Invoice.objects.annotate(
             latest_created_at=Subquery(latest_invoice.values('created_at')[:1])
         ).filter(created_at=F('latest_created_at'))
+
         fees_balance = sum(invoice.balance() for invoice in invoices if invoice.balance() > 0)
         fees_received = Receipt.objects.filter(
             date_paid__gte=first_day_of_month,
             date_paid__lte=last_day_of_month
-        ).aggregate(total_amount_paid=Sum('amount_paid'))['total_amount_paid']
+        ).aggregate(total_amount_paid=Sum('amount_paid'))['total_amount_paid'] or 0
 
-        attendance_graph = {
-            'labels': [],  # e.g., ['2023-01-01', '2023-01-02', ...]
-            'present': [],  # e.g., [10, 20, ...]
-            'absent': []    # e.g., [5, 3, ...]
+        # Attendance graph for students
+        past_week_dates = [today - timedelta(days=i) for i in reversed(range(7))]
+        student_attendance_graph = {
+            'labels': [],
+            'present': [],
+            'absent': [],
         }
 
-        # Assuming you have a method to get attendance data for the past week
-        past_week_dates = [today - timedelta(days=i) for i in range(7)]
         for date in past_week_dates:
-            present_students_date =StudentAttendance.objects.filter(date=date, status=1).count()
-            absent_students_date = total_students - StudentAttendance.objects.filter(date=date, status=1).count()
-            attendance_graph['labels'].append(date.strftime('%Y-%m-%d'))
-            attendance_graph['present'].append(present_students_date)
-            attendance_graph['absent'].append(absent_students_date)
+            present_count = StudentAttendance.objects.filter(date=date, status=1).count()
+            absent_count = total_students - present_count
+            student_attendance_graph['labels'].append(date.strftime('%Y-%m-%d'))
+            student_attendance_graph['present'].append(present_count)
+            student_attendance_graph['absent'].append(absent_count)
+
+        # Attendance graph for staff
+        staff_attendance_graph = {
+            'labels': [],
+            'present': [],
+            'absent': [],
+        }
+
+        for date in past_week_dates:
+            present_count = StaffAttendance.objects.filter(date=date, status=1).count()
+            absent_count = total_staff - present_count
+            staff_attendance_graph['labels'].append(date.strftime('%Y-%m-%d'))
+            staff_attendance_graph['present'].append(present_count)
+            staff_attendance_graph['absent'].append(absent_count)
+
+        # Fees recovery chart (for pie chart)
+        fee_recovery_chart = {
+            'paid': ceil(fees_received),
+            'balance': ceil(fees_balance),
+        }
 
         data = {
             'total_students': total_students,
@@ -497,12 +515,15 @@ class DashboardDataAPIView(APIView):
             'total_staff': total_staff,
             'present_staff': present_staff,
             'absent_staff': absent_staff,
-            'fees_balance': ceil(fees_balance) if fees_balance else 0,
-            'fees_received': ceil(fees_received) if fees_received else 0,
-            'attendance_graph': attendance_graph
+            'fees_balance': fee_recovery_chart['balance'],
+            'fees_received': fee_recovery_chart['paid'],
+            'attendance_graph': student_attendance_graph,
+            'staff_attendance_graph': staff_attendance_graph,
+            'fee_recovery_chart': fee_recovery_chart,
         }
 
         return Response(data, status=status.HTTP_200_OK)
+
 
 class StaffAttendenceAPI(generics.ListAPIView):
     queryset = StaffAttendance.objects.all()

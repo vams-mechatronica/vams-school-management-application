@@ -1,78 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
+    <h2 class="my-4">Dashboard Overview</h2>
+    
     <div class="row">
-        <!-- Total Students Card -->
-        <div class="col-md-4">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-header">Total Students</div>
+        <!-- Cards -->
+        {% for item in dashboard_cards %}
+        <div class="col-md-4 mb-3">
+            <div class="card text-white bg-{{ item.bg }} h-100">
+                <div class="card-header">{{ item.title }}</div>
                 <div class="card-body">
-                    <h5 class="card-title" id="total-students">0</h5>
+                    <h5 class="card-title text-center" id="{{ item.id }}">--</h5>
                 </div>
             </div>
         </div>
-        
-        <!-- Attendance Status Card -->
-        <div class="col-md-4">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-header">Student's Attendance Today</div>
+        {% endfor %}
+
+    </div>
+
+    <!-- Graphs -->
+    <div class="row">
+        <!-- Student Attendance Bar Graph -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header">Student Attendance (This Week)</div>
                 <div class="card-body">
-                    <h5 class="card-title" >Present: <span id="present-students">0</span></h5>
-                    <h5 class="card-title" style="padding-left: 10px;">Absent: <span id="absent-students">0</span></h5>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Total Staff Card -->
-        <div class="col-md-4">
-            <div class="card text-white bg-info mb-3">
-                <div class="card-header">Total Staff</div>
-                <div class="card-body">
-                    <h5 class="card-title" id="total-staff">0</h5>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Staff Attendance Card -->
-        <div class="col-md-4">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-header">Staff's Attendance Today</div>
-                <div class="card-body">
-                    <h5 class="card-title">Present: <span id="present-staff">0</span></h5>
-                    <h5 class="card-title" style="padding-left: 10px;">Absent: <span id="absent-staff">0</span></h5>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Fees Balance Card -->
-        <div class="col-md-4">
-            <div class="card text-white bg-danger mb-3">
-                <div class="card-header">Total Fees Balance This Month</div>
-                <div class="card-body">
-                    <h5 class="card-title" id="fees-balance">₹0</h5>
+                    <canvas id="student-attendance-graph"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Total Fees Received Card -->
-        <div class="col-md-4">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-header">Total Fees Received This Month</div>
+        <!-- Staff Attendance Bar Graph -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header">Staff Attendance (This Week)</div>
                 <div class="card-body">
-                    <h5 class="card-title" id="fees-received">₹0</h5>
+                    <canvas id="staff-attendance-graph"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="row">
-        <!-- Attendance Graph -->
-        <div class="col-md-12">
-            <div class="card mb-3">
-                <div class="card-header">Attendance Graph</div>
+
+        <!-- Fees Pie Chart -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header">Fees Recovery (This Month)</div>
                 <div class="card-body">
-                    <canvas id="attendance-graph"></canvas>
+                    <canvas id="fees-pie-chart" style="width:200px; height:200px;"></canvas>
                 </div>
             </div>
         </div>
@@ -83,49 +57,110 @@
 {% block morejs %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('/api/v1/dashboard-data/')
-            .then(response => response.json())
-            .then(data => {
-                // Update dashboard cards
-                document.getElementById('total-students').innerText = data.total_students;
-                document.getElementById('present-students').innerText = data.present_students;
-                document.getElementById('absent-students').innerText = data.absent_students;
-                document.getElementById('total-staff').innerText = data.total_staff;
-                document.getElementById('present-staff').innerText = data.present_staff;
-                document.getElementById('absent-staff').innerText = data.absent_staff;
-                document.getElementById('fees-balance').innerText = `₹${data.fees_balance}`;
-                document.getElementById('fees-received').innerText = `₹${data.fees_received}`;
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/v1/dashboard-data/')
+        .then(response => response.json())
+        .then(data => {
+            // Card data
+            document.getElementById('total-students').innerText = data.total_students;
+            document.getElementById('student-attendance').innerHTML = `Present: <b>${data.present_students}</b> | Absent: <b>${data.absent_students}</b>`;
+            document.getElementById('total-staff').innerText = data.total_staff;
+            document.getElementById('staff-attendance').innerHTML = `Present: <b>${data.present_staff}</b> | Absent: <b>${data.absent_staff}</b>`;
+            document.getElementById('fees-balance').innerText = `₹${data.fees_balance}`;
+            document.getElementById('fees-received').innerText = `₹${data.fees_received}`;
 
-                // Update attendance graph
-                const ctx = document.getElementById('attendance-graph').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.attendance_graph.labels,
-                        datasets: [{
-                            label: 'Present Students',
+            // Student Attendance Graph
+            const studentCtx = document.getElementById('student-attendance-graph').getContext('2d');
+            new Chart(studentCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.attendance_graph.labels,
+                    datasets: [
+                        {
+                            label: 'Present',
                             data: data.attendance_graph.present,
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }, {
-                            label: 'Absent Students',
+                            backgroundColor: '#28a745',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Absent',
                             data: data.attendance_graph.absent,
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        }]
+                            backgroundColor: '#dc3545',
+                            borderRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false }
                     },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
                         }
                     }
-                });
+                }
             });
-    });
+
+            // Staff Attendance Graph
+            const staffCtx = document.getElementById('staff-attendance-graph').getContext('2d');
+            new Chart(staffCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.staff_attendance_graph.labels,
+                    datasets: [
+                        {
+                            label: 'Present',
+                            data: data.staff_attendance_graph.present,
+                            backgroundColor: '#28a745',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Absent',
+                            data: data.staff_attendance_graph.absent,
+                            backgroundColor: '#dc3545',
+                            borderRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+
+            // Fees Pie Chart
+            const pieCtx = document.getElementById('fees-pie-chart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Received', 'Balance'],
+                    datasets: [{
+                        data: [data.fees_received, data.fees_balance],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        });
+});
 </script>
 {% endblock morejs %}
