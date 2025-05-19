@@ -73,5 +73,5 @@ class StaffLeaveRequest(models.Model):
         return f"{self.staff_user.username} - {self.start_date} to {self.end_date} - {self.status}"
 
     def get_absolute_url(self):
-        return reverse("StaffLeaveRequest_detail", kwargs={"pk": self.pk})
+        return reverse("staff-attendance-details", kwargs={"pk": self.pk})
 

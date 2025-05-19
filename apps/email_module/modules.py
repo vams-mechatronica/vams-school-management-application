@@ -4,6 +4,8 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.template import Template, Context
 from .models import EmailTemplate
+
+
 def send_html_email_async(template_name, to_emails,content_context):
     """
     Sends an HTML email using threading.

@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, View, UpdateView
+from django.views.generic import ListView, CreateView, View, UpdateView, DetailView
 from django.shortcuts import redirect
 from .forms import BulkAttendanceForm, LeaveRequestForm
 import logging
@@ -397,7 +397,7 @@ def calculate_leave_days(request):
 class LeaveRequestCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, CreateView):
     model = StaffLeaveRequest
     form_class = LeaveRequestForm
-    permission_required = "attendance.staffleaverequest"
+    permission_required = "attendance.add_staffleaverequest"
     template_name = 'attendance/leave_form.html'
     success_url = reverse_lazy('leave-list')
 
@@ -408,7 +408,7 @@ class LeaveRequestCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, 
 
 class LeaveRequestListView(LoginRequiredMixin,PermissionRequiredMessageMixin, ListView):
     model = StaffLeaveRequest
-    permission_required = "attendance.staffleaverequest"
+    permission_required = "attendance.view_staffleaverequest"
     template_name = 'attendance/leave_list.html'
 
     def get_queryset(self):
@@ -420,7 +420,7 @@ class LeaveRequestListView(LoginRequiredMixin,PermissionRequiredMessageMixin, Li
 class LeaveApprovalView(LoginRequiredMixin,PermissionRequiredMessageMixin, UserPassesTestMixin, UpdateView):
     model = StaffLeaveRequest
     fields = ['status']
-    permission_required = "attendance.staffleaverequest"
+    permission_required = "attendance.change_staffleaverequest"
     template_name = 'attendance/leave_approve.html'
     success_url = reverse_lazy('leave-list')
 
@@ -450,3 +450,8 @@ class LeaveApprovalView(LoginRequiredMixin,PermissionRequiredMessageMixin, UserP
 
     def test_func(self):
         return self.request.user.is_superuser
+
+class StaffLeaveRequestDetailView(LoginRequiredMixin, DetailView):
+    model = StaffLeaveRequest
+    template_name = 'attendance/leave_details.html'
+    context_object_name = 'leave_request'

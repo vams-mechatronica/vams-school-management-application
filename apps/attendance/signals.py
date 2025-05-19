@@ -31,8 +31,23 @@ def leave_request_notification(sender, instance, created, **kwargs):
 
         # Send email to approver
         send_html_email_async(
-            template_name="Leave Request Notification",
+            template_name="new_leave_request",
             to_emails=[admin.email for admin in superusers],
+            content_context={
+                "staff_name": staff_user.get_full_name(),
+                "leave_type": "General Leave",  # or derive if you have a field
+                "start_date": instance.start_date,
+                "end_date": instance.end_date,
+                "reason": instance.reason,
+                "sitename": sitename,
+                "leave_id": instance.pk
+            }
+        )
+
+        # send email to requester
+        send_html_email_async(
+            template_name="leave_request_submitted",
+            to_emails=[staff_user.email],
             content_context={
                 "staff_name": staff_user.get_full_name(),
                 "leave_type": "General Leave",  # or derive if you have a field

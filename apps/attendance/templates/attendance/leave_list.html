@@ -23,7 +23,7 @@
         </thead>
         <tbody>
             {% for leave in object_list %}
-                <tr>
+                <tr><a href="{% url "staff-attendance-details" leave.pk %}">
                     <td>{{ leave.staff_user.username }}</td>
                     <td>{{ leave.start_date }}</td>
                     <td>{{ leave.end_date }}</td>
@@ -64,6 +64,7 @@
                         {% endif %}
 
                     </td>
+                    </a>
                 </tr>
             {% empty %}
                 <tr>

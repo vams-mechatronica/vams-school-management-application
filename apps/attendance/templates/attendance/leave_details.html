@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Leave Request Details</h2>
+    <p><strong>Staff:</strong> {{ leave_request.staff }}</p>
+    <p><strong>Submitted by:</strong> {{ leave_request.staff_user.get_full_name }}</p>
+    <p><strong>Start Date:</strong> {{ leave_request.start_date }}</p>
+    <p><strong>End Date:</strong> {{ leave_request.end_date }}</p>
+    <p><strong>Reason:</strong> {{ leave_request.reason }}</p>
+    <p><strong>Status:</strong>
+        {% if leave_request.status == 0 %}
+            Pending
+        {% elif leave_request.status == 1 %}
+            Approved
+        {% else %}
+            Rejected
+        {% endif %}
+    </p>
+    {% if leave_request.reviewed_at %}
+        <p><strong>Reviewed At:</strong> {{ leave_request.reviewed_at }}</p>
+    {% endif %}
+    {% if leave_request.reviewed_by %}
+        <p><strong>Reviewed By:</strong> {{ leave_request.reviewed_by.get_full_name }}</p>
+    {% endif %}
+</div>
+{% endblock %}
