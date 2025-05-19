@@ -56,7 +56,7 @@ class Student(models.Model):
     date_of_birth = models.DateField(default=timezone.now)
     date_of_admission = models.DateField(default=timezone.now)
     current_class = models.ForeignKey(
-        StudentClass, on_delete=models.SET_NULL, blank=True, null=True
+        StudentClass, on_delete=models.CASCADE,
     )
 
     mobile_num_regex = RegexValidator(
@@ -79,7 +79,7 @@ class Student(models.Model):
     roll_number = models.IntegerField(_("Roll Number"),null=True,blank=True)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True, null=True)
 
-    uses_transport = models.BooleanField(default=False, help_text="Does the student use school transport?")
+    uses_transport = models.BooleanField(verbose_name=_("School Transport"),default=False, help_text="Does the student use school transport?")
     route = models.ForeignKey(Route, on_delete=models.SET_NULL, null=True, blank=True, related_name="students")
     pickup_drop_location = models.CharField(max_length=255, blank=True, help_text="Pickup/Drop location for transport")
     pickup_time = models.TimeField(null=True, blank=True, help_text="Pickup time for the student")

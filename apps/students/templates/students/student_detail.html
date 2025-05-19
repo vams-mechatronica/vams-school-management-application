@@ -2,121 +2,140 @@
 {% load static %}
 
 {% block content-header %}
-<div class="card-header">
-  <div class="card-tools">
-    <a href="#" class="btn btn-tool" onclick="printarea();">Print</a>
-    <a href="{% url 'student-update' object.id %}" class="btn btn-tool">
-      <i class="fas fa-edit"></i>
-    </a>
-    <a href="{% url 'student-delete' object.id %}" class="btn btn-tool">
-      <i class="fas fa-times"></i>
-    </a>
-  </div>
+<div class="d-flex justify-content-end align-items-center py-2">
+  <a href="#" class="btn btn-sm btn-outline-primary me-2" onclick="printarea();">Print</a>
+  <a href="{% url 'student-update' object.id %}" class="btn btn-sm btn-outline-secondary me-2">
+    <i class="fas fa-edit"></i>
+  </a>
+  <a href="{% url 'student-delete' object.id %}" class="btn btn-sm btn-outline-danger">
+    <i class="fas fa-trash-alt"></i>
+  </a>
 </div>
 {% endblock content-header %}
 
 {% block content %}
-    <div class="row mb-4">
-      <div class="col-sm-4">
-        <div class="row mb-2">
-
-          {% if object.adharcard %}
-            <img
-              src="{{ object.adharcard.url }}"
-              class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
-          {% else %}
-            {% if object.gender == 'male' %}
-            <img
-              src="{% static 'dist/img/avatar.png' %}"
-              class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="row">
+        <!-- Left Section -->
+        <div class="col-md-4 text-center">
+          <div class="mb-3">
+            {% if object.adharcard %}
+              <img src="{{ object.adharcard.url }}" class="img-thumbnail rounded-circle" style="width: 150px; height: 150px;">
             {% else %}
-            <img
-              src="{% static 'dist/img/girl_student.png' %}"
-              class="float-left rounded-circle mr-3" style="width: 120px; height: 120px;">
+              {% if object.gender == 'male' %}
+              <img
+                src="{% static 'dist/img/avatar.png' %}"
+                class="img-thumbnail rounded-circle" style="width: 150px; height: 150px;">
+              {% else %}
+              <img
+                src="{% static 'dist/img/girl_student.png' %}"
+                class="img-thumbnail rounded-circle" style="width: 150px; height: 150px;">
+              {% endif %}
+              {% comment %} <img src="{% static 'dist/img/{% if object.gender == male %}avatar.png{% else %}girl_student.png{% endif %}' %}" class="img-thumbnail rounded-circle" style="width: 120px; height: 120px;"> {% endcomment %}
             {% endif %}
-          {% endif %}
-
-
-          <div class="float-right">
-            <h4>{% if object.surname %}{{ object.surname }}{% endif %} </h4>
-            <h4>{{ object.firstname }} </h4>
-            <h4>{% if object.othername %}{{ object.othername }}{% endif %}  </h4>
-            <h4>{{ object.registration_number }} </h4>
           </div>
-        </div>
-        <h5>{{ object.current_class }} </h5>
-        <h5>{{ object.get_gender_display }} | {{ object.get_current_status_display }}</h5>
-
-      </div>
-      <div class="col-sm-8">
-        <div>
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Date of Birth
-            </label>
-            <div class="col">
-              {{ object.date_of_birth }}
-            </div>
-          </div>
-
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Parent Mobile Number
-            </label>
-            <div class="col">
-              {{ object.parent_mobile_number}}
-            </div>
-          </div>
-
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Address
-            </label>
-            <div class="col">
-              {{ object.address }}
-            </div>
-          </div>
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Comments
-            </label>
-            <div class="col">
-              {{ object.others }}
-            </div>
-          </div>
-
+          <h5 class="mb-1">{{ object.get_fullname }}</h5>
+          <p class="text-muted mb-2">
+            {% if object.registration_number %}Reg: {{ object.registration_number }}<br>{% endif %}
+            {% if object.pen_number %}PEN: {{ object.pen_number }}<br>{% endif %}
+            {% if object.sr_number %}SR No.: {{ object.sr_number }}<br>{% endif %}
+          </p>
+          <p>
+            {% if object.current_class %}<strong>Class:</strong> {{ object.current_class }}<br>{% endif %}
+            {{ object.get_gender_display }} | {{ object.get_current_status_display }}
+          </p>
         </div>
 
+        <!-- Right Section -->
+        <div class="col-md-8">
+          <h5 class="mb-3 border-bottom pb-2">Student Details</h5>
+
+          <dl class="row">
+            {% if object.father_name %}
+            <dt class="col-sm-4">Father's Name</dt>
+            <dd class="col-sm-8">{{ object.father_name }}</dd>
+            {% endif %}
+
+            {% if object.mother_name %}
+            <dt class="col-sm-4">Mother's Name</dt>
+            <dd class="col-sm-8">{{ object.mother_name }}</dd>
+            {% endif %}
+
+            {% if object.date_of_birth %}
+            <dt class="col-sm-4">Date of Birth</dt>
+            <dd class="col-sm-8">{{ object.date_of_birth }}</dd>
+            {% endif %}
+
+            {% if object.date_of_admission %}
+            <dt class="col-sm-4">Date of Admission</dt>
+            <dd class="col-sm-8">{{ object.date_of_admission }}</dd>
+            {% endif %}
+
+            {% if object.parent_mobile_number %}
+            <dt class="col-sm-4">Contact Number</dt>
+            <dd class="col-sm-8">{{ object.parent_mobile_number }}</dd>
+            {% endif %}
+
+            {% if object.email %}
+            <dt class="col-sm-4">Email</dt>
+            <dd class="col-sm-8">{{ object.email }}</dd>
+            {% endif %}
+
+            {% if object.adharcard %}
+            <dt class="col-sm-4">Adharcard Number</dt>
+            <dd class="col-sm-8">{{ object.adharcard }}</dd>
+            {% endif %}
+
+            {% if object.address %}
+            <dt class="col-sm-4">Address</dt>
+            <dd class="col-sm-8">{{ object.address }}</dd>
+            {% endif %}
+
+            {% if object.others %}
+            <dt class="col-sm-4">Comments</dt>
+            <dd class="col-sm-8">{{ object.others }}</dd>
+            {% endif %}
+          </dl>
+        </div>
       </div>
     </div>
+  </div>
 
-    <h4>Invoice/Payment History</h4>
-    {% if payments %}
-      <table class="table table-sm table-bordered table-hover">
-        <thead class="thead-light">
-          <tr>
-            <th>For</th>
-            <th>Amount Payable</th>
-            <th>Amount Paid</th>
-            <th>balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for payment in payments %}
-            <tr class='clickable-row' data-href="{% url 'invoice-detail' payment.id %}">
-              <td>{{payment.session}} - {{payment.term}}/{{payment.month}} - {{ payment.class_for}}</td>
-              <td>{{payment.total_amount_payable}}</td>
-              <td>{{payment.total_amount_paid}}</td>
-              <td>{{payment.balance}}</td>
+  <!-- Payment History -->
+  <div class="card shadow-sm mt-4">
+    <div class="card-header">
+      <h5 class="mb-0">Invoice / Payment History</h5>
+    </div>
+    <div class="card-body">
+      {% if payments %}
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>For</th>
+              <th>Amount Payable</th>
+              <th>Amount Paid</th>
+              <th>Balance</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-        <p>There are no payment history for {{object}}</p>
-    {% endif %}
-
-
-
-
+          </thead>
+          <tbody>
+            {% for payment in payments %}
+            <tr onclick="window.location.href='{% url 'invoice-detail' payment.id %}'" style="cursor: pointer;">
+              <td>{{ payment.session }} - {{ payment.term }}/{{ payment.month }} - {{ payment.class_for }}</td>
+              <td>{{ payment.total_amount_payable }}</td>
+              <td>{{ payment.total_amount_paid }}</td>
+              <td>{{ payment.balance }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted">There are no payment history for {{ object }}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock content %}

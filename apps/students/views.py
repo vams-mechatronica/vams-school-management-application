@@ -9,7 +9,7 @@ from django.views.generic import DetailView, ListView, View, FormView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.contrib import messages
 from apps.finance.models import Invoice
-from .forms import PromotionForm
+from .forms import PromotionForm, StudentForm
 from .models import Student, StudentBulkUpload
 from apps.result.utils import PermissionRequiredMessageMixin
 import logging
@@ -68,13 +68,7 @@ class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin,Succes
     
         
     model = Student
-    fields = [
-        'current_status', 'registration_number','sr_number','pen_number', 'firstname', 'other_name','surname',
-        'father_name', 'mother_name', 'gender', 'date_of_birth', 'date_of_admission',
-        'category','caste_category','current_class', 'adharcard_number', 'adharcard','parent_mobile_number','email',
-        'number_of_siblings','select_siblings', 'address', 'others',
-        'uses_transport', 'route', 'pickup_drop_location', 'pickup_time', 'drop_time'
-    ]
+    form_class = StudentForm
     success_message = "New student successfully added."
     permission_required = 'students.add_student'
 
@@ -85,8 +79,8 @@ class StudentCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin,Succes
         form = super().get_form()
         form.fields["date_of_birth"].widget = widgets.DateInput(attrs={"type": "date"})
         form.fields["date_of_admission"].widget = widgets.DateInput(attrs={"type": "date"})
-        form.fields["pickup_time"].widget = widgets.TimeInput(attrs={"type": "time"})
-        form.fields["drop_time"].widget = widgets.TimeInput(attrs={"type": "time"})
+        # form.fields["pickup_time"].widget = widgets.TimeInput(attrs={"type": "time"})
+        # form.fields["drop_time"].widget = widgets.TimeInput(attrs={"type": "time"})
         form.fields["address"].widget = widgets.Textarea(attrs={"rows": 2})
         form.fields["others"].widget = widgets.Textarea(attrs={"rows": 2})
         return form
