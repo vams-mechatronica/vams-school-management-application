@@ -138,3 +138,7 @@ class HolidaysForm(ModelForm):
     class Meta:
         model = Holiday
         fields = '__all__'
+    
+    def __init__(self, *args, **kwargs):
+        super(HolidaysForm, self).__init__(*args, **kwargs)
+        self.fields["date"].widget = forms.widgets.DateInput(attrs={"type": "date"})

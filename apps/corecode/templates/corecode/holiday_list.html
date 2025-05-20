@@ -8,25 +8,33 @@ Holidays
 
 
 {% block breadcrumb %}
-  <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#modal1">
+  <a class="btn btn-primary" href="{% url "holiday-create" %}">
     <i class="fa fa-plus"></i>
     Add
   </a>
 {% endblock breadcrumb %}
-  
+  q3
 
 {% block content %}
   <div class="row">
     <div class="col-sm-12">
 
         <table class="table table-bordered">
+          <thead class="thead-light">
+            <tr>
+              <th>Name</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
           <tbody>
             {% for object in object_list %}
             <tr>
-              <td>{{ object }}</td>
-              <td><a href="{% url 'subject-update' object.id %}"><i
+              <td>{{ object.name }}</td>
+              <td>{{ object.date }}</td>
+              <td><a href="{% url 'holiday-update' object.id %}"><i
                     class="fa fa-edit"></i></a> <a
-                  href="{% url 'subject-delete' object.id %}"><i
+                  href="{% url 'holiday-delete' object.id %}"><i
                     class="fa fa-trash-alt"></i></a></td>
             </tr>
             {% endfor %}

@@ -1,27 +1,6 @@
 from django.urls import path,include
 
-from .views import (
-    ClassCreateView,
-    ClassDeleteView,
-    ClassListView,
-    ClassUpdateView,
-    CurrentSessionAndTermView,
-    IndexView,
-    SessionCreateView,
-    SessionDeleteView,
-    SessionListView,
-    SessionUpdateView,
-    SiteConfigView,
-    SubjectCreateView,
-    SubjectDeleteView,
-    SubjectListView,
-    SubjectUpdateView,
-    TermCreateView,
-    TermDeleteView,
-    TermListView,
-    TermUpdateView,
-    SchoolDetailView, HolidayListView, HolidayCreateView
-)
+from .views import *
 from django_select2.views import AutoResponseView
 
 urlpatterns = [
@@ -67,4 +46,6 @@ urlpatterns = [
     ),
     path('holidays/', HolidayListView.as_view(), name='holidays-list'),
     path('create/holiday/', HolidayCreateView.as_view(), name='holiday-create'),
+    path('update/<int:pk>/holiday/',HolidayUpdateView.as_view(),name="holiday-update"),
+    path('delete/<int:pk>/holiday/',HolidayDeleteView.as_view(),name="holiday-delete"),
 ]

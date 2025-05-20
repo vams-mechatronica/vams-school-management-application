@@ -40,12 +40,12 @@ class Staff(models.Model):
     subject_expert = models.ManyToManyField(Subject, verbose_name=_("Subjects"),help_text="Select as many subjects which can be taught by this staff.")
     adhar_card_number = models.CharField(max_length=12, verbose_name=_("Adharcard Number"), blank=True, null=True, help_text="Enter 12digit adharcard number.")
     pancard_number = models.CharField(max_length=12, verbose_name=_("Pancard Number"), blank=True, null=True, help_text="Enter PAN Card number.")
-
+    staff_image = models.ImageField(_("Staff Image"), upload_to="staffs/profile_image/", null=True,blank=True)
     mobile_num_regex = RegexValidator(
         regex="^[0-9]{10,15}$", message="Entered mobile number isn't in a right format!"
     )
     mobile_number = models.CharField(
-        validators=[mobile_num_regex], max_length=13, blank=True
+        validators=[mobile_num_regex], max_length=13, blank=True, help_text="Enter the phone number without prefix. e.g. +91 or 0"
     )
     email = models.EmailField(_("Email Address"), max_length=254, null=True, blank=True)
     address = models.TextField(blank=True)

@@ -89,6 +89,18 @@ class Student(models.Model):
     number_of_siblings = models.IntegerField(_("Number of Siblings"),default=0,help_text="Number of siblings studying in this school (including this student)")
     select_siblings = models.ManyToManyField("self", verbose_name=_("Select Siblings"), null=True, blank=True,help_text="Press Hold down “Control”, or “Command” on a Mac, to select more than one.")
 
+    # ------ Previous school information
+    name_of_previous_school = models.CharField(_("Name of Previous School"), max_length=500, null=True, blank=True)
+    last_class_attended = models.ForeignKey(StudentClass, verbose_name=_("Last Class Attended"), on_delete=models.SET_NULL, null=True, blank=True, related_name="last_class")
+    medium_of_instruction = models.CharField(_("Medium"), max_length=50, choices=((0,'English'),(0,'Hindi')),default=0)
+    reason_of_leaving = models.TextField(_("Reason of Leaving"), null=True, blank=True)
+
+    # ------ Emergency contact
+    name = models.CharField(_("Name"), max_length=500, null=True, blank=True)
+    relation_with_student = models.CharField(_("Relation with student"), max_length=500, null=True, blank=True)
+    emergency_contact_number = models.CharField(_("Contact No."),
+        validators=[mobile_num_regex], max_length=13, blank=True, help_text="Enter emergency contact number"
+    )
 
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, auto_now_add=False)

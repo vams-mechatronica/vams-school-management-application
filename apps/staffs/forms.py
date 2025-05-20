@@ -1,9 +1,10 @@
 from django import forms
 from .models import Staff
+
 class StaffForm(forms.ModelForm):
     class Meta:
         model = Staff
-        exclude = ['user', 'current_status'] 
+        exclude = ['user', 'current_status','staff_image'] 
 
     def __init__(self, *args, **kwargs):
         super(StaffForm, self).__init__(*args, **kwargs)

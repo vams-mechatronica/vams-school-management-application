@@ -347,15 +347,49 @@ class CurrentSessionAndTermView(LoginRequiredMixin, View):
 
 class HolidayListView(ListView):
     model = Holiday
-    template_name = 'holidays/holiday_list.html'
+    title = "Holidays"
+    template_name = 'corecode/holiday_list.html'
     context_object_name = 'holidays'
     queryset = Holiday.objects.order_by('date')
 
-class HolidayCreateView(LoginRequiredMixin,PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
+
+class HolidayCreateView(LoginRequiredMixin, PermissionRequiredMessageMixin, SuccessMessageMixin, CreateView):
     model = Holiday
     form_class = HolidaysForm
+    title = "Add Holiday"
     permission_required = "corecode.add_holiday"
 
     template_name = "corecode/mgt_form.html"
     success_url = reverse_lazy("holidays-list")
     success_message = "New holiday successfully added"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = self.title  # Pass title to context
+        return context
+
+class HolidayUpdateView(LoginRequiredMixin, PermissionRequiredMessageMixin, SuccessMessageMixin, UpdateView):
+    model = Holiday
+    form_class = HolidaysForm
+    title = "Update Holiday"
+    permission_required = "corecode.update_holiday"
+    template = "corecode/mgt_form.html"
+    success_url = reverse_lazy("holidays-list")
+    success_message = "Holiday updated successfully"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = self.title  # Pass title to context
+        return context
+
+class HolidayDeleteView(LoginRequiredMixin,PermissionRequiredMessageMixin, DeleteView):
+    model = Holiday
+    permission_required = "corecode.delete_holidays"
+    success_url = reverse_lazy("holidays-list")
+    template_name = "corecode/core_confirm_delete.html"
+    success_message = "The holiday {} has been deleted with all its attached content"
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        messages.success(self.request, self.success_message.format(obj.name))
+        return super(ClassDeleteView, self).delete(request, *args, **kwargs)

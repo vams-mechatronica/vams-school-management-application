@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 
 {% block content-header %}
@@ -8,66 +9,98 @@
     <a href="{% url 'staff-update' object.id %}" class="btn btn-tool">
       <i class="fas fa-edit"></i>
     </a>
-    <a href="{% url 'staff-delete' object.id %}" class="btn btn-tool">
-      <i class="fas fa-times"></i>
+    <a href="{% url 'staff-delete' object.id %}" class="btn btn-tool" alt="delete">
+      <i class="fas fa-trash"></i>
     </a>
   </div>
 </div>
 {% endblock content-header %}
 
 {% block content %}
-    <div class="row">
-      <div class="col-sm-4">
-        <div>
-          <h3>{{ object }} </h3>
-          <h5>{{ object.current_class }} </h5>
-          <h5>{{ object.get_gender_display }} </h5>
-          <h5>{{ object.get_current_status_display }} </h5>
-        </div>
-      </div>
-      <div class="col-sm-8">
-        <div>
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Date of Birth
-            </label>
-            <div class="col">
-              {{ object.date_of_birth }}
-            </div>
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="row">
+        <!-- Left Section -->
+        <div class="col-md-4 text-center">
+          <div class="mb-3">
+            {% if object.staff_image %}
+              <img src="{{ object.staff_image.url }}" class="img-thumbnail rounded-circle" style="width: 150px; height: 150px;">
+            {% else %}
+              {% if object.gender == 'male' %}
+              <img
+                src="{% static 'dist/img/avatar.png' %}"
+                class="img-thumbnail rounded-circle" style="width: 150px; height: 150px;">
+              {% else %}
+              <img
+                src="{% static 'dist/img/girl_student.png' %}"
+                class="img-thumbnail rounded-circle" style="width: 150px; height: 150px;">
+              {% endif %}
+              {% comment %} <img src="{% static 'dist/img/{% if object.gender == male %}avatar.png{% else %}girl_student.png{% endif %}' %}" class="img-thumbnail rounded-circle" style="width: 120px; height: 120px;"> {% endcomment %}
+            {% endif %}
           </div>
-
-          <div class="form-group border-bottom row">
-            <label class="col">
-               Mobile Number
-            </label>
-            <div class="col">
-              {{ object.mobile_number}}
-            </div>
-          </div>
-
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Address
-            </label>
-            <div class="col">
-              {{ object.address }}
-            </div>
-          </div>
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Comments
-            </label>
-            <div class="col">
-              {{ object.others }}
-            </div>
-          </div>
-
+          <h5 class="mb-1">{{ object.get_fullname }}</h5>
+          <p class="text-muted mb-2">
+            {% if object.emp_code %}{{ object.emp_code }}<br>{% endif %}
+          </p>
+          <p>
+            {% if object.current_class %}<strong>Class:</strong> {{ object.current_class }}<br>{% endif %}
+            {{ object.get_gender_display }} | {{ object.get_current_status_display }}
+          </p>
         </div>
 
+        <!-- Right Section -->
+        <div class="col-md-8">
+          <h5 class="mb-3 border-bottom pb-2">Staff Details</h5>
+
+          <dl class="row">
+            {% if object.father_name %}
+            <dt class="col-sm-4">Father's Name</dt>
+            <dd class="col-sm-8">{{ object.father_name }}</dd>
+            {% endif %}
+
+            {% if object.mother_name %}
+            <dt class="col-sm-4">Mother's Name</dt>
+            <dd class="col-sm-8">{{ object.mother_name }}</dd>
+            {% endif %}
+
+            {% if object.date_of_birth %}
+            <dt class="col-sm-4">Date of Birth</dt>
+            <dd class="col-sm-8">{{ object.date_of_birth }}</dd>
+            {% endif %}
+
+            {% if object.date_of_admission %}
+            <dt class="col-sm-4">Date of Admission</dt>
+            <dd class="col-sm-8">{{ object.date_of_admission }}</dd>
+            {% endif %}
+
+            {% if object.mobile_number %}
+            <dt class="col-sm-4">Contact Number</dt>
+            <dd class="col-sm-8">{{ object.mobile_number }}</dd>
+            {% endif %}
+
+            {% if object.email %}
+            <dt class="col-sm-4">Email</dt>
+            <dd class="col-sm-8">{{ object.email }}</dd>
+            {% endif %}
+
+            {% if object.adharcard %}
+            <dt class="col-sm-4">Adharcard Number</dt>
+            <dd class="col-sm-8">{{ object.adharcard }}</dd>
+            {% endif %}
+
+            {% if object.address %}
+            <dt class="col-sm-4">Address</dt>
+            <dd class="col-sm-8">{{ object.address }}</dd>
+            {% endif %}
+
+            {% if object.others %}
+            <dt class="col-sm-4">Comments</dt>
+            <dd class="col-sm-8">{{ object.others }}</dd>
+            {% endif %}
+          </dl>
+        </div>
       </div>
     </div>
-
-
-
-
+  </div>
 {% endblock content %}

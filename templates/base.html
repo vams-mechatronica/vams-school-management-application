@@ -510,9 +510,9 @@
 
             {% comment %} {% if request.user.is_superuser %} {% endcomment %}
             <li class="nav-header">Others</li>
-            <li class="nav-item has-treeview">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-copy"></i>
+            <li class="nav-item has-treeview {% if request.resolver_match.url_name in 'users-list configs school-configs current-session sessions session-create session-update session-delete terms term-create term-update term-delete classes class-create class-update class-delete subjects subject-create subject-update subject-delete holidays-list holiday-create holiday-update holiday-delete' %}menu-open{% endif %}">
+              <a href="#" class="nav-link {% if request.resolver_match.url_name in 'users-list configs school-configs current-session sessions session-create session-update session-delete terms term-create term-update term-delete classes class-create class-update class-delete subjects subject-create subject-update subject-delete holidays-list holiday-create holiday-update holiday-delete' %}active{% endif %}">
+                <i class="nav-icon fas fa-tools"></i>
                 <p>
                   Management
                   <i class="fas fa-angle-left right"></i>
@@ -520,56 +520,50 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="{% url 'sessions' %}" class="nav-link ml-3">
-                    <i class="nav-icon fas fa-bars"></i>
-                    <p>
-                      Sessions
-                    </p>
+                  <a href="{% url 'holidays-list' %}" class="nav-link ml-3 {% if request.resolver_match.url_name in 'holidays-list holiday-create holiday-update holiday-delete' %}active{% endif %}">
+                    <i class="nav-icon fas fa-calendar-alt"></i>
+                    <p>Holidays</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'terms' %}" class="nav-link ml-3">
-                    <i class="nav-icon fas fa-bars"></i>
-                    <p>
-                      Terms
-                      <i class="right"></i>
-                    </p>
+                  <a href="{% url 'sessions' %}" class="nav-link ml-3 {% if request.resolver_match.url_name in 'sessions session-create session-update session-delete' %}active{% endif %}">
+                    <i class="nav-icon fas fa-clock"></i>
+                    <p>Sessions</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'subjects' %}" class="nav-link ml-3">
-                    <i class="nav-icon fas fa-bars"></i>
-                    <p>
-                      Subjects
-                    </p>
+                  <a href="{% url 'terms' %}" class="nav-link ml-3 {% if request.resolver_match.url_name in 'terms term-create term-update term-delete' %}active{% endif %}">
+                    <i class="nav-icon fas fa-hourglass-half"></i>
+                    <p>Terms</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'classes' %}" class="nav-link ml-3">
-                    <i class="nav-icon fas fa-bars"></i>
-                    <p>
-                      Classes
-                    </p>
+                  <a href="{% url 'subjects' %}" class="nav-link ml-3 {% if request.resolver_match.url_name in 'subjects subject-create subject-update subject-delete' %}active{% endif %}">
+                    <i class="nav-icon fas fa-book-open"></i>
+                    <p>Subjects</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'users-list' %}" class="nav-link ml-3">
-                    <i class="nav-icon fas fa-bars"></i>
-                    <p>
-                      Users
-                    </p>
+                  <a href="{% url 'classes' %}" class="nav-link ml-3 {% if request.resolver_match.url_name in 'classes class-create class-update class-delete' %}active{% endif %}">
+                    <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                    <p>Classes</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'users-list' %}" class="nav-link ml-3 {% if request.resolver_match.url_name == 'users-list' %}active{% endif %}">
+                    <i class="nav-icon fas fa-users-cog"></i>
+                    <p>Users</p>
                   </a>
                 </li>
               </ul>
             </li>
             <li class="nav-item">
               <a href="{% url 'school-configs' %}" class="nav-link">
-                <i class="nav-icon fas fa-cog"></i>
-                <p>
-                  Settings
-                </p>
+                <i class="nav-icon fas fa-cogs"></i>
+                <p>Settings</p>
               </a>
             </li>
+            
             {% comment %} {% endif %} {% endcomment %}
         </nav>
         <!-- /.sidebar-menu -->
