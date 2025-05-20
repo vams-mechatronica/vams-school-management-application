@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Student, StudentAttendance, Staff,StaffAttendance, StaffLeaveRequest
+from apps.corecode.models import Holiday
 from apps.corecode.models import StudentClass
 from django.utils import timezone
 from django.http import JsonResponse
@@ -263,7 +264,7 @@ def get_holidays():
 import holidays
 from datetime import datetime, timedelta
 
-class MonthlyAttendanceReportView(PermissionRequiredMessageMixin,LoginRequiredMixin, SuccessMessageMixin, View):
+class MonthlyAttendanceReportView(PermissionRequiredMessageMixin, LoginRequiredMixin, SuccessMessageMixin, View):
     permission_required = "attendance.view_staffattendance"
 
     def get(self, request):
@@ -273,12 +274,11 @@ class MonthlyAttendanceReportView(PermissionRequiredMessageMixin,LoginRequiredMi
             end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
 
             date_list = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
-            date_range = [date.strftime('%d/%m') for date in date_list]
+            date_range = [d.strftime('%d/%m') for d in date_list]
 
-            india_holidays = holidays.India(years=start_date.year)
+            india_holidays = set(Holiday.objects.filter(date__year=start_date.year).values_list('date', flat=True))
             staff_list = Staff.objects.all()
 
-            # Fetch all attendance records for the month
             attendance_records = StaffAttendance.objects.filter(
                 date__range=[start_date, end_date]
             ).annotate(
@@ -288,11 +288,11 @@ class MonthlyAttendanceReportView(PermissionRequiredMessageMixin,LoginRequiredMi
                 )
             ).values('staff__id', 'staff__firstname', 'staff__surname', 'date', 'status', 'hours_spent')
 
-            # Process attendance records
             attendance_data = {}
             for record in attendance_records:
                 staff_id = record['staff__id']
-                date_str = record['date'].strftime('%d/%m')
+                date_obj = record['date']
+                date_str = date_obj.strftime('%d/%m')
                 status = record['status']
 
                 if staff_id not in attendance_data:
@@ -303,49 +303,48 @@ class MonthlyAttendanceReportView(PermissionRequiredMessageMixin,LoginRequiredMi
                     hours = int(total_seconds // 3600)
                     minutes = int((total_seconds % 3600) // 60)
                     attendance_data[staff_id][date_str] = f"{hours}h {minutes}m"
+
                 elif status == 2:  # On-leave
-                    day = record['date']
-                    if day.weekday() == 6:
+                    if date_obj.weekday() == 6:
                         attendance_data[staff_id][date_str] = "Sunday"
-                    elif day in india_holidays:
+                    elif date_obj in india_holidays:
                         attendance_data[staff_id][date_str] = "Holiday"
                     else:
                         attendance_data[staff_id][date_str] = "On Leave"
 
                 elif status == 3:  # Other
                     attendance_data[staff_id][date_str] = "Other"
+
                 else:  # Explicitly marked Absent
                     attendance_data[staff_id][date_str] = "Absent"
 
-            # Fill in missing days
             for staff in staff_list:
                 staff_id = staff.id
                 if staff_id not in attendance_data:
                     attendance_data[staff_id] = {}
-                for date_str in date_range:
+
+                for date_obj in date_list:
+                    date_str = date_obj.strftime('%d/%m')
                     if date_str not in attendance_data[staff_id]:
-                        day = datetime.strptime(f"{date_str}/{start_date.year}", "%d/%m/%Y").date()
-                        if day.weekday() == 6:
+                        if date_obj.weekday() == 6:
                             attendance_data[staff_id][date_str] = "Sunday"
-                        elif day in india_holidays:
+                        elif date_obj in india_holidays:
                             attendance_data[staff_id][date_str] = "Holiday"
                         else:
                             attendance_data[staff_id][date_str] = "Absent"
 
         except Exception as e:
-            logger.exception(e)
+            logger.exception("Failed to generate attendance report: %s", e)
             attendance_data = {}
             date_range = []
             staff_list = []
-
-        report_available = bool(attendance_data)
 
         return render(request, 'attendance/staff_attendance_report.html', {
             'month': month,
             'date_range': date_range,
             'staff_list': staff_list,
             'attendance_data': attendance_data,
-            'report_available': report_available
+            'report_available': bool(attendance_data)
         })
 
 
