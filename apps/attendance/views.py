@@ -138,59 +138,63 @@ def generate_attendance_report(class_id, year, month):
     try:
         class_obj = StudentClass.objects.get(id=class_id)
     except StudentClass.DoesNotExist:
+        return pd.DataFrame()  # Return empty DataFrame if class doesn't exist
 
-        pass
     # Fetch students in the selected class
     students = Student.objects.filter(current_class=class_obj)
 
-    # Get all dates in the month
+    # Get all dates in the specified month
     first_day = date(year, month, 1)
     last_day = date(year, month, calendar.monthrange(year, month)[1])
     date_range = [first_day + timedelta(days=i) for i in range((last_day - first_day).days + 1)]
-    
-    # Fetch attendance records for the given class and month
-    attendance_records = StudentAttendance.objects.filter(
-        student__in=students, date__range=(first_day, last_day)
+
+    # Fetch all attendance records in one query
+    attendance_qs = StudentAttendance.objects.filter(
+        student__in=students,
+        date__range=(first_day, last_day)
     )
 
-    # Fetch Indian holidays
-    indian_holidays = holidays.India(years=year)
+    # Convert attendance records to a lookup dictionary
+    attendance_dict = {
+        (record.student_id, record.date): record.status
+        for record in attendance_qs
+    }
 
-    # Prepare report dictionary
+    # Indian holidays set for quick lookup
+    indian_holidays = set(holidays.India(years=year))
+
+    # Build the report
     report_data = []
     for student in students:
         row = {"Student": f"{student.firstname} {student.surname}"}
         for day in date_range:
-            # Mark weekends (Saturday & Sunday in India)
-            if day.weekday() in [6]:
-                row[day.strftime("%d-%b")] = "Sunday"
-                continue
+            date_str = day.strftime("%d-%b")
+
+            if day.weekday() == 6:
+                row[date_str] = "Sunday"
             elif day in indian_holidays:
-                row[day.strftime("%d-%b")] = "Holiday"
-                continue
-
-            # Get attendance record for the student on this date
-            attendance = attendance_records.filter(student=student, date=day).first()
-            row[day.strftime("%d-%b")] = (
-                "P" if attendance and attendance.status == 1 else
-                "A" if attendance and attendance.status == 0 else
-                "L" if attendance and attendance.status == 2 else
-                "-"
-            )
-        
+                row[date_str] = "Holiday"
+            else:
+                status = attendance_dict.get((student.id, day))
+                if status == 1:
+                    row[date_str] = "P"  # Present
+                elif status == 0:
+                    row[date_str] = "A"  # Absent
+                elif status == 2:
+                    row[date_str] = "L"  # Leave
+                else:
+                    row[date_str] = "-"  # No data
         report_data.append(row)
-    
-    # Convert to Pandas DataFrame for tabular display
-    df = pd.DataFrame(report_data)
-    return df
 
+    # Convert to DataFrame
+    return pd.DataFrame(report_data)
 
 from datetime import datetime
 
 class AttendanceReport(PermissionRequiredMessageMixin,LoginRequiredMixin, SuccessMessageMixin, View):
     permission_required = "attendance.view_staffattendance"
     
-    def get(request):
+    def post(self, request):
         selected_class = None
         year = datetime.now().year
         month = datetime.now().month
