@@ -3,8 +3,10 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.template import Template, Context
-from .models import EmailTemplate
-
+from .models import EmailTemplate, EmailSentLogs
+from datetime import datetime,timezone
+import logging
+logger = logging.getLogger(__name__)
 
 def send_html_email_async(template_name, to_emails,content_context):
     """
@@ -26,9 +28,12 @@ def send_html_email_async(template_name, to_emails,content_context):
             msg = EmailMultiAlternatives(subject, '', settings.DEFAULT_FROM_EMAIL, to_emails)
             msg.attach_alternative(html_content, "text/html")
             msg.send()
+
+            # save log 
+            sent_log = EmailSentLogs.objects.create(to_emails = to_emails, template_name=template_name, sent_at=datetime.now())
         except Exception as e:
             # Log or handle exception
-            print(f"Email sending failed: {e}")
+            logger.error(f"Email sending failed: {e}")
 
     thread = threading.Thread(target=send_email)
     thread.start()
