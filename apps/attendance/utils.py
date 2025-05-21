@@ -3,7 +3,7 @@
 from django.utils import timezone
 from apps.email_module.modules import send_html_email_async
 from django.conf import settings
-from .models import StaffAttendance  # or StudentAttendance if it's for students
+from .models import StaffAttendance
 
 def send_signout_reminder():
     now = timezone.now()
