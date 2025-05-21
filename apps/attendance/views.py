@@ -230,36 +230,37 @@ class AttendanceReport(PermissionRequiredMessageMixin,LoginRequiredMixin, Succes
 class StaffBulkAttendance(PermissionRequiredMessageMixin,LoginRequiredMixin, SuccessMessageMixin, View):
     permission_required = "attendance.view_staffattendance"
 
-    def get(request):
+    def get(self,request):
         staff_list = Staff.objects.all()  # Fetch all staff
         attendance_records = {int(a.staff.id): a for a in StaffAttendance.objects.filter(date=datetime.now().date())}
-
-        if request.method == "POST":
-            form = BulkAttendanceForm(request.POST)
-            if form.is_valid():
-                attendance_date = form.cleaned_data['date']
-
-                for staff in staff_list:
-                    status = request.POST.get(f'attendance_{staff.id}', '0')  # Default to Absent
-                    time_in = request.POST.get(f'check_in_{staff.id}') or None
-                    time_out = request.POST.get(f'check_out_{staff.id}') or None
-
-                    StaffAttendance.objects.update_or_create(
-                        staff=staff,
-                        date=attendance_date,
-                        defaults={'status': status, 'time_in': time_in, 'time_out': time_out}
-                    )
-
-                return redirect('staff-attendance')
-
-        else:
-            form = BulkAttendanceForm()
+    
+        form = BulkAttendanceForm()
 
         return render(request, 'attendance/staff_attendance_bulk.html', {
             'form': form,
             'staff_list': staff_list,
             'attendance_records': attendance_records  # Pass the dictionary correctly
         })
+    
+    def post(self,request):
+        form = BulkAttendanceForm(request.POST)
+        staff_list = Staff.objects.all()  # Fetch all staff
+
+        if form.is_valid():
+            attendance_date = form.cleaned_data['date']
+
+            for staff in staff_list:
+                status = request.POST.get(f'attendance_{staff.id}', '0')  # Default to Absent
+                time_in = request.POST.get(f'check_in_{staff.id}') or None
+                time_out = request.POST.get(f'check_out_{staff.id}') or None
+
+                StaffAttendance.objects.update_or_create(
+                    staff=staff,
+                    date=attendance_date,
+                    defaults={'status': status, 'time_in': time_in, 'time_out': time_out}
+                )
+
+            return redirect('staff-attendance')
 
 def get_holidays():
     # Placeholder function to fetch holidays (this should be replaced with actual holiday fetching logic)
