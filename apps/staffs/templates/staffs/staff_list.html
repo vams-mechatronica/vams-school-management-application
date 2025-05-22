@@ -17,6 +17,7 @@
       <th>Fullname</th>
       <th>Gender</th>
       <th>Mobile No.</th>
+      <th>Joining Date</th>
       <th>Status</th>
     </tr>
   </thead>
@@ -28,6 +29,7 @@
       <td>{{ staff.surname}} {{staff.firstname }} {{staff.other_name }}</td>
       <td>{{ staff.get_gender_display}}</td>
       <td>{{ staff.mobile_number}}</td>
+      <td>{{ staff.date_of_joining}}</td>
       <td><span class="badge {% if staff.get_current_status_display == 'Active' %}bg-success{% elif staff.get_current_status_display == 'Inactive' %}bg-danger{% endif %}">
         {{ staff.get_current_status_display}}
       </span></td>
