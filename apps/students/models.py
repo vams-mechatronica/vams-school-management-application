@@ -112,7 +112,7 @@ class Student(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.surname if self.surname else '-'} {self.firstname} - F: {self.father_name} ({self.registration_number})"
+        return f"{self.surname if self.surname else '-'} {self.firstname} - F: {self.father_name} (Class: {self.current_class.name} - Reg: {self.registration_number })"
 
     def get_absolute_url(self):
         return reverse("student-detail", kwargs={"pk": self.pk})

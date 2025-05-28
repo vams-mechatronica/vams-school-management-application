@@ -26,19 +26,17 @@ class AssignmentListView(LoginRequiredMixin,PermissionRequiredMessageMixin, List
     template_name = "project_n_assignments/assignment_list.html"
 
 
+
 class AssignmentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = ClassAssignmentNProject
-    fields = ['name','file','for_class','is_assignment_for_all','students']
-    success_message = "New student successfully added."
-    permission_required = 'students.add_student'
+    form_class = ClassAssignmentNProjectForm
+    success_message = "Assignment successfully added."
     success_url = reverse_lazy('view-assignments')
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        if form.cleaned_data.get('is_assignment_for_all'):
-            form.instance.save()
-            form.instance.students.set([])  # Clear students if it's for all
         return super().form_valid(form)
+
 
 class AssignmentUpdateView(LoginRequiredMixin, PermissionRequiredMessageMixin, UpdateView):
     model = ClassAssignmentNProject

@@ -28,7 +28,7 @@ class EmailSentLogs(models.Model):
     
     class Meta:
         verbose_name = _("EmailSentLogs")
-        verbose_name_plural = _("EmailSentLogss")
+        verbose_name_plural = _("EmailSentLogs")
 
     def __str__(self):
         return "template_name: {} sent to (nos): {}".format(self.template_name, len(self.to_emails.split(',')))

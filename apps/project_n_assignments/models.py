@@ -14,6 +14,7 @@ class ClassAssignmentNProject(models.Model):
     is_assignment_for_all = models.BooleanField(_("All Students"), default=True, help_text="If assignment/project is for all students of selected class.")
     students = models.ManyToManyField(Student, verbose_name=_("Students"), null=True)
     user = models.ForeignKey(User, verbose_name=_("User"), on_delete=models.CASCADE)
+    due_date = models.DateField(_("Due Date"), auto_now=True, auto_now_add=False)
     is_active = models.BooleanField(_("Is Active"),default=True)
     created_at = models.DateTimeField(_("Created at"), auto_now=False, auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True, auto_now_add=False)
@@ -27,3 +28,18 @@ class ClassAssignmentNProject(models.Model):
 
     def get_absolute_url(self):
         return reverse("ClassAssignmentNProject_detail", kwargs={"pk": self.pk})
+
+class StudentAssignmentStatus(models.Model):
+    assignment = models.ForeignKey('ClassAssignmentNProject', on_delete=models.CASCADE, related_name='student_assignments')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    is_submitted = models.BooleanField(default=False)
+    submitted_file = models.FileField(upload_to='assignments/submissions/', null=True, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('assignment', 'student')
+        verbose_name = _("Student Assignment Status")
+        verbose_name_plural = _("Student Assignment Statuses")
+
+    def __str__(self):
+        return f"{self.student} - {self.assignment.name}"

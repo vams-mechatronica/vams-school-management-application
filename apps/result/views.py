@@ -144,7 +144,7 @@ class ResultListView(LoginRequiredMixin, PermissionRequiredMessageMixin, View):
         if user.is_superuser or user.is_staff:
             return self.model.objects.all()
 
-        if user.groups.filter(name='Students').exists():
+        if user.groups.filter(name='student').exists():
             student = Student.objects.get(user=user)
             return self.model.objects.filter(student=student)
         

@@ -107,7 +107,7 @@ class StaffCreateView(PermissionRequiredMessageMixin,LoginRequiredMixin,SuccessM
             user.save()
         
         # Assign to Student group
-        student_group, _ = Group.objects.get_or_create(name="Students")
+        student_group, _ = Group.objects.get_or_create(name="staff")
         user.groups.add(student_group)
 
         # Assign user and registration number to student

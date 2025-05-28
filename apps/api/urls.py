@@ -84,4 +84,8 @@ urlpatterns = [
     # Trip URLs
     path('trips/', TripListCreateView.as_view(), name='trip-list-create'),
     path('trips/<int:pk>/', TripRetrieveUpdateDestroyView.as_view(), name='trip-detail'),
+
+    # assignments
+    path('assignments/student/',StudentAssignmentAPI.as_view(),name="student-assignment-api"),
+    path('assignments/student/<int:pk>',StudentAssignmentUpdateAPI.as_view(),name="student-assignment-update-api"),
 ]

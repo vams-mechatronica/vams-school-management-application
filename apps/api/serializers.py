@@ -7,6 +7,7 @@ from apps.user.models import *
 from apps.students.models import *
 from apps.transport.models import *
 from apps.notifications.models import *
+from apps.project_n_assignments.models import *
 from .models import APKVersion, ErrorLog
 from rest_framework import serializers
 from django.contrib.auth.models import User,Permission
@@ -218,7 +219,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         # Add additional fields for GET request
         data["session_name"] = instance.session.name
         data["term_name"] = instance.term.name
-        data["student_name"] = instance.student.firstname + " "+ instance.student.surname
+        data["student_name"] = instance.student.get_fullname()
         data["registration_number"] = instance.student.registration_number
         data["class_name"] = instance.class_for.name
         data["total_payable"] = str(instance.balance())
@@ -430,3 +431,33 @@ class CategorySerializer(serializers.ModelSerializer):
 class CasteCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = CasteCategory
+
+
+class StudentAssignmentSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()
+    assigned_by = serializers.SerializerMethodField()
+    due_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = StudentAssignmentStatus
+        fields = '__all__'
+        read_only_fields = ['assignment', 'student']
+
+    def update(self, instance, validated_data):
+        instance.submitted_file = validated_data.get('submitted_file', instance.submitted_file)
+        instance.is_submitted = True
+        instance.save()
+        return instance
+    
+    def get_name(self,obj):
+        return obj.assignment.name
+
+    def get_file(self,obj):
+        return obj.assignment.file.url
+    
+    def get_assigned_by(self,obj):
+        return obj.assignment.user.get_full_name()
+    
+    def get_due_date(self,obj):
+        return obj.assignment.due_date
