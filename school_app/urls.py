@@ -36,7 +36,7 @@ schema_view = get_schema_view(
    public=True,
    permission_classes=(permissions.AllowAny,),
 )
-
+from apps.api.views import test_abha_api
 admin.site.site_header = "VAMSConnect"
 admin.site.index_title = "VAMSConnect"
 admin.site.site_title = "VAMSConnect"
@@ -59,7 +59,7 @@ urlpatterns = [
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
+    path('api/v3/hip/token/on-generate-token',test_abha_api)
 
 ]
 

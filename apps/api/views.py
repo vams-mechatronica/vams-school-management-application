@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render,get_object_or_404
 from .models import *
 from math import ceil
@@ -18,6 +19,9 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthentic
 from .permissions import *
 from rest_framework.authentication import BasicAuthentication,TokenAuthentication, SessionAuthentication
 from urllib.parse import urlencode
+
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import viewsets, mixins, status
 # Driver API
 class DriverListCreateView(generics.ListCreateAPIView):
     queryset = Driver.objects.all()
@@ -907,3 +911,98 @@ class CasteCategoryPostAPI(generics.CreateAPIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = (BasicAuthentication, TokenAuthentication)
 
+class StudentAssignmentAPI(generics.ListCreateAPIView):
+    queryset = StudentAssignmentStatus.objects.all()
+    serializer_class = StudentAssignmentSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication)
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        group = user.groups.first()
+
+        if group and group.name.lower() == 'student':
+            student = Student.objects.filter(user=user).first()
+            if student:
+                queryset = queryset.filter(student=student)
+            else:
+                queryset = queryset.none()
+
+        return queryset
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            assignment_status_id = kwargs.get('pk')
+            instance = StudentAssignmentStatus.objects.get(pk=assignment_status_id)
+
+            # Only allow update if user is the owner (student)
+            if instance.student.user != request.user:
+                return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+            file = request.FILES.get('submitted_file')
+            if not file:
+                return Response({'detail': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            instance.submitted_file = file
+            instance.is_submitted = True
+            instance.save()
+
+            return Response(StudentAssignmentSerializer(instance).data, status=status.HTTP_200_OK)
+        except StudentAssignmentStatus.DoesNotExist:
+            return Response({'detail': 'Assignment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+class StudentAssignmentUpdateAPI(generics.RetrieveUpdateDestroyAPIView):
+    queryset = StudentAssignmentStatus.objects.all()
+    serializer_class = StudentAssignmentSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication)
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        group = user.groups.first()
+
+        if group and group.name.lower() == 'student':
+            student = Student.objects.filter(user=user).first()
+            if student:
+                queryset = queryset.filter(student=student)
+            else:
+                queryset = queryset.none()
+
+        return queryset
+    
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.submitted_at = timezone.now()
+        instance.is_submitted = True
+        instance.save()
+        return super().patch(request, *args, **kwargs)
+import json
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt  # Optional: use only if you're not using authentication
+def test_abha_api(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))  # For function-based view
+            address = data.get('abhaAddress')
+            token = data.get('linkToken')
+            response = data.get('response')
+            response_json = json.dumps(response)
+
+            TestAbhaResponse.objects.create(
+                abha_address=address,
+                link_token=token,
+                response=response_json
+            )
+            return JsonResponse({'status': 'Success'}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'status': 'Error', 'message': str(e)}, status=400)
+
+    elif request.method == "GET":
+        data = list(TestAbhaResponse.objects.values())  # Convert queryset to list of dicts
+        return JsonResponse(data, safe=False)

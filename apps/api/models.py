@@ -1,5 +1,8 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
+
 
 # Create your models here.
 class APKVersion(models.Model):
@@ -30,3 +33,20 @@ class ErrorLog(models.Model):
 
     def __str__(self):
         return f"{self.level} - {self.error}"
+
+class TestAbhaResponse(models.Model):
+    abha_address = models.CharField(max_length=500)
+    link_token = models.TextField()
+    response = models.TextField(_("Response"))
+    created_at = models.DateTimeField(_("Created at"), auto_now=False, auto_now_add=True)
+    
+
+    class Meta:
+        verbose_name = _("TEstAbhaResponse")
+        verbose_name_plural = _("TEstAbhaResponses")
+
+    def __str__(self):
+        return self.abha_address
+
+    def get_absolute_url(self):
+        return reverse("TEstAbhaResponse_detail", kwargs={"pk": self.pk})
