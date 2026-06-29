@@ -55,6 +55,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("corecode", "0001_initial"),
+        ("auth", "0005_alter_user_last_login_null"),
     ]
 
     operations = [

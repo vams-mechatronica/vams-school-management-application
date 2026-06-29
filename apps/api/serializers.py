@@ -12,6 +12,8 @@ from .models import APKVersion, ErrorLog
 from rest_framework import serializers
 from django.contrib.auth.models import User,Permission
 from django.shortcuts import get_object_or_404
+from decimal import Decimal
+from django.utils import timezone
 
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
@@ -223,12 +225,14 @@ class InvoiceSerializer(serializers.ModelSerializer):
         data["registration_number"] = instance.student.registration_number
         data["class_name"] = instance.class_for.name
         data["total_payable"] = str(instance.balance())
+        data["defaulter_flag"] = instance.defaulter_flag()
 
         return data
 
     def validate(self, data):
         previous_balance = data.get("previous_balance", 0)
         class_for = data.get("class_for")
+        student = data.get("student")
 
         # Get class fees
         tuition_fees = data.get("tuition_fees", class_for.tuition_fees)
@@ -237,6 +241,13 @@ class InvoiceSerializer(serializers.ModelSerializer):
         exam_fees = data.get("exam_fees", class_for.exam_fees)
         miscellaneous = data.get("miscellaneous", class_for.miscellaneous)
 
+        # RTE students are never charged tuition, regardless of class default
+        # or any value supplied in the request.
+        if student and student.fee_category and student.fee_category.is_rte:
+            tuition_fees = Decimal("0.00")
+
+        data["tuition_fees"] = tuition_fees
+
         # Compute total payable
         total_payable = (
             previous_balance +
@@ -244,6 +255,18 @@ class InvoiceSerializer(serializers.ModelSerializer):
             admission_fees + exam_fees +
             miscellaneous
         )
+
+        # Apply any verified, currently-active concessions for the student.
+        if student:
+            today = timezone.now().date()
+            concession_discount = sum(
+                (concession.discount_amount(total_payable)
+                 for concession in student.concessions.all()
+                 if concession.is_active_on(today)),
+                Decimal("0.00"),
+            )
+            total_payable = max(total_payable - concession_discount, Decimal("0.00"))
+
         data["total_payable"] = total_payable
         data['previous_balance'] = total_payable
         return data

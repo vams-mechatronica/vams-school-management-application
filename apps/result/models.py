@@ -8,9 +8,6 @@ from apps.corecode.models import (
 )
 from apps.students.models import Student
 
-from .utils import score_grade
-
-
 # Create your models here.
 class Result(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -31,7 +28,7 @@ class Result(models.Model):
         return self.test_score + self.exam_score
 
     def grade(self):
-        return score_grade(self.total_score())
+        return self.calc_grade()
     
     def calc_grade(self):
         t_max = self.subject.test_max_marks + self.subject.exam_max_marks

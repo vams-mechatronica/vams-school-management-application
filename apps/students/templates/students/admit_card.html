@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admit Card{% endblock title %}
+
+{% block style %}
+<style>
+  .admit-card {
+    width: 100%;
+    max-width: 8.27in;
+    margin: 0 auto 24px auto;
+    border: 1px solid #333;
+    padding: 16px;
+    box-sizing: border-box;
+    page-break-after: always;
+  }
+  .admit-card-header { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 12px; }
+  .admit-card-header img.logo { height: 50px; }
+  .admit-card-header .school-name { font-weight: bold; font-size: 18px; }
+  .admit-card-title { text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 12px; }
+  .admit-card-body { display: flex; gap: 16px; }
+  .admit-card-photo img { width: 100px; height: 120px; object-fit: cover; border: 1px solid #ccc; }
+  .admit-card-details dt { font-weight: bold; float: left; clear: left; width: 140px; }
+  .admit-card-details dd { margin-left: 144px; margin-bottom: 4px; }
+  .admit-card table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  .admit-card table, .admit-card th, .admit-card td { border: 1px solid #333; }
+  .admit-card th, .admit-card td { padding: 6px; text-align: left; }
+  .admit-card-signatures { display: flex; justify-content: space-between; margin-top: 40px; }
+  .admit-card-signatures div { text-align: center; width: 200px; border-top: 1px solid #333; padding-top: 4px; }
+  .admit-card-blank-row { height: 30px; border: 1px dashed #999; margin-top: 12px; }
+
+  @media print {
+    .no-print { display: none !important; }
+  }
+</style>
+{% endblock style %}
+
+{% block content-header %}
+<div class="card-header no-print">
+  <div class="card-tools">
+    <a href="#" class="btn btn-tool" onclick="window.print();">Print</a>
+  </div>
+</div>
+{% endblock content-header %}
+
+{% block content %}
+<div class="print-area">
+  {% for student in students %}
+  <div class="admit-card">
+    <div class="admit-card-header">
+      {% if school.logo_horizontal %}
+        <img src="{{ school.logo_horizontal.url }}" class="logo">
+      {% endif %}
+      <div>
+        <div class="school-name">{{ school.name|default:"School Name" }}</div>
+        <div>{{ school.address|default:"" }}</div>
+      </div>
+    </div>
+
+    <div class="admit-card-title">EXAMINATION ADMIT CARD &mdash; {{ session.name|default:"" }} {{ term.name|default:"" }}</div>
+
+    <div class="admit-card-body">
+      <div class="admit-card-photo">
+        {% if student.student_image %}
+          <img src="{{ student.student_image.url }}">
+        {% else %}
+          <img src="{% static 'dist/img/avatar.png' %}">
+        {% endif %}
+      </div>
+      <dl class="admit-card-details">
+        <dt>Name</dt><dd>{{ student.get_fullname }}</dd>
+        <dt>Class</dt><dd>{{ student.current_class }}</dd>
+        <dt>Registration No.</dt><dd>{{ student.registration_number }}</dd>
+        <dt>Roll No.</dt><dd>{{ student.roll_number|default:"-" }}</dd>
+        <dt>Date of Birth</dt><dd>{{ student.date_of_birth }}</dd>
+      </dl>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Max Marks (Test)</th>
+          <th>Max Marks (Exam)</th>
+          <th>Exam Date / Room (to be filled)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for relation in student.current_class.classsubjectrelation_set.all %}
+        <tr>
+          <td>{{ relation.subject.name }}</td>
+          <td>{{ relation.subject.test_max_marks }}</td>
+          <td>{{ relation.subject.exam_max_marks }}</td>
+          <td></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No subjects assigned to this class yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="admit-card-blank-row no-print-note"></div>
+
+    <div class="admit-card-signatures">
+      <div>Invigilator's Signature</div>
+      <div>Principal's Signature</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}

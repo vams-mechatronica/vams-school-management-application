@@ -16,6 +16,7 @@ from datetime import datetime, date
 from django.db.models import F, Case, When, Value, Sum, OuterRef, Subquery, Max
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.exceptions import PermissionDenied
 from .permissions import *
 from rest_framework.authentication import BasicAuthentication,TokenAuthentication, SessionAuthentication
 from urllib.parse import urlencode
@@ -340,8 +341,9 @@ class InvoiceListCreateView(generics.ListCreateAPIView):
         return Invoice.objects.filter(student__user=self.request.user)
 
     def perform_create(self, serializer):
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            serializer.save()
+        if not (self.request.user.is_staff or self.request.user.is_superuser):
+            raise PermissionDenied("Only staff or admin users can create invoices.")
+        serializer.save()
 
 class InvoiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Invoice.objects.all()

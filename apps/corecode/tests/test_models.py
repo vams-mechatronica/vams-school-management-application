@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.corecode.models import (
     AcademicSession,
@@ -16,13 +19,23 @@ class SiteConfigTest(TestCase):
 
 class AcademicSessionTest(TestCase):
     def test_academicsession(self):
-        session = AcademicSession.objects.create(name="test session", current=True)
+        session = AcademicSession.objects.create(
+            name="test session",
+            current=True,
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date() + timedelta(days=365),
+        )
         self.assertEqual(str(session), "test session")
 
 
 class AcademicTermTest(TestCase):
     def test_academicterm(self):
-        term = AcademicTerm.objects.create(name="test Term", current=True)
+        term = AcademicTerm.objects.create(
+            name="test Term",
+            current=True,
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date() + timedelta(days=90),
+        )
         self.assertEqual(str(term), "test Term")
 
 

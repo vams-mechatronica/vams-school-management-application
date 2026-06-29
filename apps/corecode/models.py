@@ -151,6 +151,27 @@ class Subject(models.Model):
         return self.name
 
 
+class FeeCategory(models.Model):
+    """Fee-purpose category for a student (General/OBC/SC/ST/EWS/RTE/Staff
+    Ward/Scholarship Holder/Minority/Differently Abled). Distinct from the
+    caste-based Category/CasteCategory models in apps.students - this drives
+    fee billing rules (e.g. RTE => zero tuition), not caste reservation."""
+
+    name = models.CharField(max_length=100, unique=True)
+    is_rte = models.BooleanField(
+        _("RTE (Right to Education)"), default=False,
+        help_text="Students in this category are never charged tuition fees."
+    )
+    description = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = _("FeeCategory")
+        verbose_name_plural = _("FeeCategories")
+
+    def __str__(self):
+        return self.name
+
+
 class StudentClass(models.Model):
     name = models.CharField(max_length=200, unique=True)
     tuition_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)

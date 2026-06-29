@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student ID Card{% endblock title %}
+
+{% block style %}
+<style>
+  .id-card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .id-card {
+    width: 3.375in;
+    height: 2.125in;
+    border: 1px solid #999;
+    border-radius: 8px;
+    padding: 8px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    page-break-inside: avoid;
+  }
+  .id-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+  .id-card-header img.logo { height: 28px; }
+  .id-card-header .school-name { font-weight: bold; font-size: 12px; }
+  .id-card-body { display: flex; gap: 8px; flex: 1; }
+  .id-card-photo img { width: 70px; height: 80px; object-fit: cover; border: 1px solid #ccc; }
+  .id-card-details dt { font-weight: bold; float: left; clear: left; width: 60px; }
+  .id-card-details dd { margin-left: 64px; margin-bottom: 2px; }
+
+  @media print {
+    .no-print { display: none !important; }
+    .id-card { border: 1px solid #000; }
+  }
+</style>
+{% endblock style %}
+
+{% block content-header %}
+<div class="card-header no-print">
+  <div class="card-tools">
+    <a href="#" class="btn btn-tool" onclick="window.print();">Print</a>
+  </div>
+</div>
+{% endblock content-header %}
+
+{% block content %}
+<div class="print-area id-card-grid">
+  {% for student in students %}
+  <div class="id-card">
+    <div class="id-card-header">
+      {% if school.logo_horizontal %}
+        <img src="{{ school.logo_horizontal.url }}" class="logo">
+      {% endif %}
+      <div>
+        <div class="school-name">{{ school.name|default:"School Name" }}</div>
+        <div>{{ school.address|default:"" }}</div>
+      </div>
+    </div>
+    <div class="id-card-body">
+      <div class="id-card-photo">
+        {% if student.student_image %}
+          <img src="{{ student.student_image.url }}">
+        {% else %}
+          <img src="{% static 'dist/img/avatar.png' %}">
+        {% endif %}
+      </div>
+      <dl class="id-card-details">
+        <dt>Name</dt><dd>{{ student.get_fullname }}</dd>
+        <dt>Class</dt><dd>{{ student.current_class }}</dd>
+        <dt>Reg. No</dt><dd>{{ student.registration_number }}</dd>
+        <dt>DOB</dt><dd>{{ student.date_of_birth }}</dd>
+        <dt>Contact</dt><dd>{{ student.parent_mobile_number }}</dd>
+      </dl>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}

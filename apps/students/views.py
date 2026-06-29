@@ -17,7 +17,7 @@ logger = logging.getLogger()
 # from datetime import timezone, timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User, Group
-from apps.corecode.models import SchoolDetail
+from apps.corecode.models import AcademicSession, AcademicTerm, ClassSubjectRelation, SchoolDetail, StudentClass
 from apps.email_module.modules import send_html_email_async
 
 
@@ -294,8 +294,83 @@ class StudentPromotionView(LoginRequiredMixin, PermissionRequiredMessageMixin, F
 def get_students_by_class(request, class_id):
     # Filter students based on the class_id
     students = Student.objects.filter(current_class_id=class_id)
-    
+
     # Prepare a response with the student data
     student_data = [{"id": student.id, "name": "{} - ({})".format(student.get_fullname(),student.registration_number)} for student in students]
-    
+
     return JsonResponse({"students": student_data})
+
+
+def _current_school_detail():
+    return SchoolDetail.objects.order_by("-updated_at").first()
+
+
+class ClassCardSelectView(LoginRequiredMixin, PermissionRequiredMessageMixin, ListView):
+    """Lets staff pick a class before printing ID/admit cards for the whole class."""
+    model = StudentClass
+    template_name = "students/class_card_select.html"
+    context_object_name = "classes"
+    permission_required = 'students.view_student'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["card_type"] = self.kwargs.get("card_type")
+        return context
+
+
+class StudentIDCardView(LoginRequiredMixin, PermissionRequiredMessageMixin, DetailView):
+    model = Student
+    template_name = "students/id_card.html"
+    permission_required = 'students.view_student'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["students"] = [self.object]
+        context["school"] = _current_school_detail()
+        return context
+
+
+class StudentIDCardBulkView(LoginRequiredMixin, PermissionRequiredMessageMixin, ListView):
+    model = Student
+    template_name = "students/id_card.html"
+    permission_required = 'students.view_student'
+    context_object_name = "students"
+
+    def get_queryset(self):
+        return Student.objects.filter(current_class_id=self.kwargs["class_id"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["school"] = _current_school_detail()
+        return context
+
+
+class StudentAdmitCardView(LoginRequiredMixin, PermissionRequiredMessageMixin, DetailView):
+    model = Student
+    template_name = "students/admit_card.html"
+    permission_required = 'students.view_student'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["students"] = [self.object]
+        context["school"] = _current_school_detail()
+        context["session"] = AcademicSession.objects.filter(current=True).first()
+        context["term"] = AcademicTerm.objects.filter(current=True).first()
+        return context
+
+
+class StudentAdmitCardBulkView(LoginRequiredMixin, PermissionRequiredMessageMixin, ListView):
+    model = Student
+    template_name = "students/admit_card.html"
+    permission_required = 'students.view_student'
+    context_object_name = "students"
+
+    def get_queryset(self):
+        return Student.objects.filter(current_class_id=self.kwargs["class_id"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["school"] = _current_school_detail()
+        context["session"] = AcademicSession.objects.filter(current=True).first()
+        context["term"] = AcademicTerm.objects.filter(current=True).first()
+        return context

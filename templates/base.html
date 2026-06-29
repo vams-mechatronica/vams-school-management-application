@@ -188,8 +188,8 @@
             </li>            
             <!-- Student -->
             <li
-              class="nav-item has-treeview {% if request.resolver_match.url_name in 'student-list student-create student-upload' %}menu-open{% endif %}">
-              <a href="#" class="nav-link {% if request.resolver_match.url_name in 'student-list student-create student-upload' %}active{% endif %}">
+              class="nav-item has-treeview {% if request.resolver_match.url_name in 'student-list student-create student-upload id-card-select-class admit-card-select-class' %}menu-open{% endif %}">
+              <a href="#" class="nav-link {% if request.resolver_match.url_name in 'student-list student-create student-upload id-card-select-class admit-card-select-class' %}active{% endif %}">
                 <i class="nav-icon fas fa-graduation-cap"></i>
                 <p>
                   Students
@@ -216,6 +216,20 @@
                     class="nav-link ml-3 {% if request.resolver_match.url_name == 'student-upload' %}active{% endif %}">
                     <i class="nav-icon fas fa-upload"></i>
                     <p>Bulk Upload</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'id-card-select-class' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'id-card-select-class' %}active{% endif %}">
+                    <i class="nav-icon fas fa-id-card"></i>
+                    <p>Print ID Cards</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'admit-card-select-class' %}"
+                    class="nav-link ml-3 {% if request.resolver_match.url_name == 'admit-card-select-class' %}active{% endif %}">
+                    <i class="nav-icon fas fa-file-alt"></i>
+                    <p>Print Admit Cards</p>
                   </a>
                 </li>
               </ul>

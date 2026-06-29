@@ -8,7 +8,7 @@ class StudentForm(forms.ModelForm):
         fields = [
             'registration_number','sr_number','pen_number', 'firstname', 'other_name','surname',
             'father_name', 'mother_name', 'gender', 'date_of_birth', 'date_of_admission',
-            'category','caste_category','current_class', 'adharcard_number', 'adharcard','parent_mobile_number','email',
+            'category','caste_category','current_class', 'student_image', 'adharcard_number', 'adharcard','parent_mobile_number','email',
             'number_of_siblings','select_siblings', 'address', 'others'
         ]
 

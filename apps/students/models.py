@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
-from apps.corecode.models import StudentClass
+from apps.corecode.models import FeeCategory, StudentClass
 from apps.transport.models import Route
 from django.utils.translation import gettext_lazy as _
 import os
@@ -53,6 +53,7 @@ class Student(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default="male")
     category = models.ForeignKey(Category, verbose_name=_("Category"), on_delete=models.CASCADE, null=True, blank=True)
     caste_category = models.ForeignKey(CasteCategory, verbose_name=_("Caste"), on_delete=models.CASCADE, null=True, blank=True)
+    fee_category = models.ForeignKey(FeeCategory, verbose_name=_("Fee Category"), on_delete=models.SET_NULL, null=True, blank=True)
     date_of_birth = models.DateField(default=timezone.now)
     date_of_admission = models.DateField(default=timezone.now)
     current_class = models.ForeignKey(

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if card_type == 'admit-card' %}Print Admit Cards by Class{% else %}Print ID Cards by Class{% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+  <p>Select a class to print {% if card_type == 'admit-card' %}admit cards{% else %}ID cards{% endif %} for all its students.</p>
+  <ul class="list-group">
+    {% for klass in classes %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {{ klass.name }}
+      {% if card_type == 'admit-card' %}
+        <a class="btn btn-primary btn-sm" href="{% url 'student-admit-card-bulk' klass.id %}">Print Admit Cards</a>
+      {% else %}
+        <a class="btn btn-primary btn-sm" href="{% url 'student-id-card-bulk' klass.id %}">Print ID Cards</a>
+      {% endif %}
+    </li>
+    {% empty %}
+    <li class="list-group-item">No classes found.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock content %}

@@ -1,6 +1,11 @@
 from django import forms
 from .models import Staff
 
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
 class StaffForm(forms.ModelForm):
     class Meta:
         model = Staff
@@ -16,6 +21,6 @@ class StaffForm(forms.ModelForm):
 
 class StaffDocumentUploadForm(forms.Form):
     documents = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        widget=MultipleFileInput(attrs={'multiple': True}),
         label="Upload Documents"
     )

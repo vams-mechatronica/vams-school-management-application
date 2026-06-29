@@ -1,5 +1,8 @@
 # Updated models.py
 
+from decimal import Decimal
+
+from django.conf import settings
 from django.db import models
 from django.db.models import Sum
 from django.urls import reverse
@@ -69,6 +72,28 @@ class Invoice(models.Model):
             self.is_editable = False
             self.save(update_fields=['is_editable'])
 
+    def defaulter_flag(self):
+        """
+        Yellow/orange/red/critical escalation flag based on days overdue past
+        `due_date`, computed on demand rather than stored - mirrors the
+        existing disable_editing() pattern of deriving state from due_date/
+        balance() rather than persisting a separate status field.
+        Returns None if there's no due date, or the invoice isn't overdue
+        (fully paid, or due date hasn't passed).
+        """
+        if not self.due_date or self.balance() <= 0:
+            return None
+        days_overdue = (timezone.now().date() - self.due_date).days
+        if days_overdue > 90:
+            return "critical"
+        if days_overdue > 60:
+            return "red"
+        if days_overdue > 30:
+            return "orange"
+        if days_overdue > 7:
+            return "yellow"
+        return None
+
     def save(self, *args, **kwargs):
         """
         - Update `total_payable` before saving.
@@ -110,3 +135,53 @@ class Receipt(models.Model):
 class InvoiceBulkUpload(models.Model):
     date_uploaded = models.DateTimeField(auto_now=True)
     csv_file = models.FileField(upload_to="invoice/bulkupload/")
+
+
+class Concession(models.Model):
+    """A fee concession/scholarship granted to a student for a date range.
+    Exactly one of `percentage` or `fixed_amount` must be set (validated in
+    clean()). Only `verified` concessions active on a given date are applied
+    when an invoice is created - see InvoiceSerializer."""
+
+    CONCESSION_TYPES = (
+        ("rte", "RTE"),
+        ("sibling", "Sibling"),
+        ("staff_ward", "Staff Ward"),
+        ("merit", "Merit Scholarship"),
+        ("govt_scholarship", "Govt. Scholarship"),
+        ("ews", "EWS"),
+        ("differently_abled", "Differently Abled"),
+        ("discretionary", "Management Discretionary"),
+    )
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="concessions")
+    concession_type = models.CharField(max_length=30, choices=CONCESSION_TYPES)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    fixed_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    valid_from = models.DateField()
+    valid_to = models.DateField()
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    approval_date = models.DateField(null=True, blank=True)
+    verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_concession_type_display()} - {self.student}"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if bool(self.percentage) == bool(self.fixed_amount):
+            raise ValidationError(
+                "Exactly one of percentage or fixed_amount must be set."
+            )
+
+    def is_active_on(self, date):
+        return self.verified and self.valid_from <= date <= self.valid_to
+
+    def discount_amount(self, base_amount):
+        base_amount = Decimal(base_amount)
+        if self.percentage:
+            return (base_amount * self.percentage) / Decimal("100")
+        return self.fixed_amount or Decimal("0.00")

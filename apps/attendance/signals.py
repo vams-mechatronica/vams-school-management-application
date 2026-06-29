@@ -11,6 +11,23 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
+def notify(recipient, title, message, link=None):
+    """Create a Notification for a single recipient.
+
+    Notification (via BaseNotification) has no `user` or `link` field -
+    only `delivery_type` and a `recipients` M2M - so the recipient is set
+    via `recipients.add()` and the link is folded into the message text.
+    """
+    notification = Notification.objects.create(
+        title=title,
+        message=f"{message} {link}" if link else message,
+        delivery_type="custom",
+    )
+    notification.recipients.add(recipient)
+    return notification
+
+
 @receiver(post_save, sender=StaffLeaveRequest)
 def leave_request_notification(sender, instance, created, **kwargs):
     staff_user = instance.staff_user
@@ -22,11 +39,11 @@ def leave_request_notification(sender, instance, created, **kwargs):
         # Notify admin or approver
         superusers = User.objects.filter(is_superuser=True)
         for admin in superusers:
-            Notification.objects.create(
-                user=admin,
+            notify(
+                admin,
                 title="New Leave Request Submitted",
                 message=f"{staff_user.get_full_name()} submitted a leave request from {instance.start_date} to {instance.end_date}.",
-                link=instance.get_absolute_url()
+                link=instance.get_absolute_url(),
             )
 
         # Send email to approver
@@ -62,11 +79,11 @@ def leave_request_notification(sender, instance, created, **kwargs):
     # Leave Reviewed (Approved or Rejected)
     else:
         if status == 1:  # Approved
-            Notification.objects.create(
-                user=staff_user,
+            notify(
+                staff_user,
                 title="Leave Request Approved",
                 message=f"Your leave request from {instance.start_date} to {instance.end_date} has been approved.",
-                link=instance.get_absolute_url()
+                link=instance.get_absolute_url(),
             )
 
             send_html_email_async(
@@ -84,11 +101,11 @@ def leave_request_notification(sender, instance, created, **kwargs):
                 }
             )
         elif status == 2:  # Rejected
-            Notification.objects.create(
-                user=staff_user,
+            notify(
+                staff_user,
                 title="Leave Request Rejected",
                 message=f"Your leave request from {instance.start_date} to {instance.end_date} has been rejected.",
-                link=instance.get_absolute_url()
+                link=instance.get_absolute_url(),
             )
 
             send_html_email_async(
