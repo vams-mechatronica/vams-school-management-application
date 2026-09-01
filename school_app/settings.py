@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "__$1ud47e&nyso5h5o3fwnqu4+hfqcply9h$k*h2s34)hn5@nc"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -78,7 +78,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.corecode.middleware.SiteWideConfigs",
-    # "allauth.account.middleware.AccountMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -138,12 +138,12 @@ WSGI_APPLICATION = "school_app.wsgi.application"
 
 DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'ashekhar$vams-sms',
-            'USER': 'ashekhar',
-            'PASSWORD': '1@V@MSots1#',
-            'HOST': 'ashekhar.mysql.pythonanywhere-services.com',
-            # 'PORT': '3306',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'vams-sms',
+            'USER': 'postgres',
+            'PASSWORD': 'Shekhar123#',
+            'HOST': 'localhost',
+            'PORT': '5432',
     }
 }
 

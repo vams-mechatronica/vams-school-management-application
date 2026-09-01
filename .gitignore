@@ -136,7 +136,5 @@ cython_debug/
 # python
 school_app/settings.py
 staticfiles/
-media/
-**/migrations/
 .log
 debug.log.*

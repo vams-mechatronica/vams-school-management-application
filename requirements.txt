@@ -46,3 +46,5 @@ typing_extensions
 tzdata
 urllib3
 drf_yasg
+psycopg2-binary
+whitenoise
